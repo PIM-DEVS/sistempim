@@ -11,15 +11,10 @@
       <div class="user-card card-shadow">
         <div class="avatar-container">
           <img
-            [src]="
-              dadosUsuario?.foto ||
-              (dadosUsuario?.genero === 'masculino'
-                ? 'assets/images/masculino.jpg'
-                : 'assets/images/feminino.jpg')
-            "
+            [src]="dadosUsuario?.foto || (dadosUsuario?.genero === 'masculino' ? 'assets/images/masculino.jpg' : 'assets/images/feminino.jpg')"
             class="avatar-img"
           />
-          <button class="edit-badge" *ngIf="isEditing" title="Alterar Foto via URL abaixo">
+          <button class="edit-badge" *ngIf="isEditing" title="Alterar Foto">
             <i class="bx bx-camera"></i>
           </button>
         </div>
@@ -31,60 +26,60 @@
 
         <div class="stats-grid">
           <div class="stat">
-            <strong>{{ dadosUsuario.stats?.cursos || 0 }}</strong
-            ><span>Cursos</span>
+            <strong>{{ dadosUsuario.seguidores?.length || 0 }}</strong>
+            <span>Seguidores</span>
           </div>
           <div class="stat">
-            <strong>{{ dadosUsuario.stats?.horas || 0 }}h</strong><span>Horas</span>
+            <strong>{{ dadosUsuario.seguindo?.length || 0 }}</strong>
+            <span>Seguindo</span>
           </div>
           <div class="stat">
-            <strong>{{ dadosUsuario.stats?.diplomas || 0 }}</strong
-            ><span>Diplomas</span>
+            <strong>{{ dadosUsuario.posts || 0 }}</strong>
+            <span>Posts</span>
           </div>
         </div>
 
-        <button
-          class="btn-edit"
-          (click)="toggleEdit()"
-          *ngIf="isMeuPerfil"
-          [ngClass]="{ 'cancel-mode': isEditing }"
-        >
-          {{ isEditing ? 'Cancelar Edição' : 'Editar Perfil' }}
-        </button>
+        <div class="actions-area">
+          
+          <button
+            class="btn-action btn-edit"
+            (click)="toggleEdit()"
+            *ngIf="isMeuPerfil"
+            [ngClass]="{ 'cancel-mode': isEditing }"
+          >
+            {{ isEditing ? 'Cancelar' : 'Editar Perfil' }}
+          </button>
+
+          <div *ngIf="!isMeuPerfil" class="social-buttons">
+            <button 
+              class="btn-action" 
+              [ngClass]="isFollowing ? 'btn-unfollow' : 'btn-follow'"
+              (click)="toggleFollow()"
+            >
+              <i class="bx" [ngClass]="isFollowing ? 'bx-user-check' : 'bx-user-plus'"></i>
+              {{ isFollowing ? 'Seguindo' : 'Seguir' }}
+            </button>
+
+            <button *ngIf="isFollowing" class="btn-action btn-msg" (click)="irParaChat()">
+              <i class="bx bx-message-rounded-dots"></i> Mensagem
+            </button>
+          </div>
+        </div>
       </div>
 
       <div class="skills-card card-shadow mt-20">
         <h3><i class="bx bx-code-alt"></i> Competências</h3>
-
         <div class="add-skill-area" *ngIf="isEditing">
-          <input
-            type="text"
-            [(ngModel)]="novaCompetencia"
-            placeholder="Nova competência..."
-            (keyup.enter)="adicionarCompetencia()"
-          />
-          <button (click)="adicionarCompetencia()"><i class="bx bx-plus"></i></button>
+             <input type="text" [(ngModel)]="novaCompetencia" (keyup.enter)="adicionarCompetencia()" placeholder="Add skill...">
+             <button (click)="adicionarCompetencia()"><i class="bx bx-plus"></i></button>
         </div>
-
         <div class="tags">
-          <span
-            class="tag"
-            *ngFor="
-              let skill of isEditing ? editForm.competencias : dadosUsuario.competencias;
-              let i = index
-            "
-          >
+          <span class="tag" *ngFor="let skill of isEditing ? editForm.competencias : dadosUsuario.competencias; let i = index">
             {{ skill }}
             <i *ngIf="isEditing" class="bx bx-x remove-tag" (click)="removerCompetencia(i)"></i>
           </span>
-
-          <span
-            *ngIf="
-              !isEditing && (!dadosUsuario.competencias || dadosUsuario.competencias.length === 0)
-            "
-            class="no-skills"
-          >
-            Nenhuma competência adicionada.
+           <span *ngIf="!isEditing && (!dadosUsuario.competencias || dadosUsuario.competencias.length === 0)" class="no-skills">
+            Nenhuma competência.
           </span>
         </div>
       </div>
@@ -102,143 +97,31 @@
 
         <div *ngIf="isEditing" class="edit-form">
           <div class="form-row">
-            <div class="form-group">
-              <label>Nome Completo</label>
-              <input type="text" [(ngModel)]="editForm.nome" />
-            </div>
-            <div class="form-group">
-              <label>Cargo/Título</label>
-              <input
-                type="text"
-                [(ngModel)]="editForm.cargo"
-                placeholder="Ex: Desenvolvedor Fullstack"
-              />
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label>Biografia</label>
-            <textarea rows="4" [(ngModel)]="editForm.bio"></textarea>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label>URL da Foto (Link)</label>
-              <input type="text" [(ngModel)]="editForm.foto" placeholder="https://..." />
-            </div>
-            <div class="form-group">
-              <label>URL do Banner (Link)</label>
-              <input type="text" [(ngModel)]="editForm.banner" placeholder="https://..." />
-            </div>
-          </div>
-
-          <button class="btn-save" (click)="salvarPerfil()">
-            <i class="bx bx-save"></i> Salvar Alterações
-          </button>
+            <div class="form-group"><label>Nome</label><input [(ngModel)]="editForm.nome"></div>
+            <div class="form-group"><label>Cargo</label><input [(ngModel)]="editForm.cargo"></div>
+           </div>
+           <div class="form-group"><label>Bio</label><textarea rows="3" [(ngModel)]="editForm.bio"></textarea></div>
+           <button class="btn-save" (click)="salvarPerfil()">Salvar</button>
         </div>
       </div>
-
+      
       <div class="details-card card-shadow mt-20" *ngIf="!isEditing">
-        <div class="card-header">
-          <h3>Informações Pessoais</h3>
-        </div>
+        <div class="card-header"><h3>Informações</h3></div>
         <div class="info-grid">
-          <div class="info-item">
-            <label>E-mail Acadêmico</label>
-            <div class="fake-input">
-              <i class="bx bx-envelope"></i> {{ dadosUsuario.email }}
-              <i class="bx bx-lock-alt lock"></i>
-            </div>
-          </div>
-          <div class="info-item">
+           <div class="info-item">
+            <label>Email</label>
+            <div class="fake-input"><i class="bx bx-envelope"></i> {{dadosUsuario.email}}</div>
+           </div>
+           <div class="info-item">
             <label>Entrou em</label>
-            <div class="fake-input">
-              <i class="bx bx-calendar"></i> {{ getMemberSince(dadosUsuario.createdAt) }}
-            </div>
-          </div>
+            <div class="fake-input"><i class="bx bx-calendar"></i> {{ getMemberSince(dadosUsuario.createdAt) }}</div>
+           </div>
         </div>
       </div>
+
     </div>
   </div>
 </div>
 
 <ng-template #loading>
-  <div class="profile-page skeleton-mode">
-    <div class="profile-background sk-banner animate-pulse"></div>
-
-    <div class="profile-content">
-      <div class="left-column">
-        <div class="user-card card-shadow sk-card">
-          <div class="avatar-container">
-            <div class="sk-avatar animate-pulse"></div>
-          </div>
-          <div class="user-main-info sk-text-center">
-            <div class="sk-line title animate-pulse"></div>
-            <div class="sk-line subtitle animate-pulse"></div>
-          </div>
-          <div class="stats-grid sk-stats">
-            <div class="sk-stat animate-pulse"></div>
-            <div class="sk-stat animate-pulse"></div>
-            <div class="sk-stat animate-pulse"></div>
-          </div>
-          <div class="sk-btn animate-pulse"></div>
-        </div>
-
-        <div class="skills-card card-shadow mt-20 sk-card">
-          <h3>
-            <div class="sk-line title-sm animate-pulse" style="width: 120px"></div>
-          </h3>
-          <div class="tags sk-tags">
-            <div class="sk-tag animate-pulse"></div>
-            <div class="sk-tag animate-pulse"></div>
-            <div class="sk-tag animate-pulse"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="right-column">
-        <div class="details-card card-shadow sk-card">
-          <div class="card-header">
-            <h3>
-              <div class="sk-line title-sm animate-pulse" style="width: 100px"></div>
-            </h3>
-          </div>
-          <div class="sk-body">
-            <div class="sk-line full animate-pulse"></div>
-            <div class="sk-line full animate-pulse"></div>
-            <div class="sk-line half animate-pulse"></div>
-          </div>
-        </div>
-
-        <div class="details-card card-shadow mt-20 sk-card">
-          <div class="card-header">
-            <h3>
-              <div class="sk-line title-sm animate-pulse" style="width: 150px"></div>
-            </h3>
-          </div>
-          <div class="info-grid sk-info-grid">
-            <div class="info-item">
-              <div class="sk-line label animate-pulse"></div>
-              <div class="sk-input-fake animate-pulse"></div>
-            </div>
-            <div class="info-item">
-              <div class="sk-line label animate-pulse"></div>
-              <div class="sk-input-fake animate-pulse"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</ng-template>
-
-<div class="toast-container" *ngIf="notificacao.tipo" [ngClass]="notificacao.tipo">
-  <div class="toast-content">
-    <i
-      class="bx"
-      [ngClass]="notificacao.tipo === 'sucesso' ? 'bx-check-circle' : 'bx-error-circle'"
-    ></i>
-    <span>{{ notificacao.mensagem }}</span>
-  </div>
-  <div class="progress-bar"></div>
-</div>
+  </ng-template>

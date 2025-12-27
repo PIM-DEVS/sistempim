@@ -213,9 +213,64 @@
   font-weight: 600;
 }
 
-/* ... Mantenha o CSS que você já tinha ... */
+/* ... Mantenha seu CSS anterior ... */
 
-/* Estilos para o botão Cancelar (Fica vermelho ou cinza) */
+/* Botões de Ação Social */
+.social-buttons {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  margin-top: 15px;
+}
+
+.btn-action {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+/* Botão Seguir */
+.btn-follow {
+  background-color: #00ce71;
+  color: white;
+}
+.btn-follow:hover {
+  background-color: #00b060;
+  transform: translateY(-2px);
+}
+
+/* Botão Deixar de Seguir */
+.btn-unfollow {
+  background-color: #e2e8f0;
+  color: #64748b;
+  border: 1px solid #cbd5e1;
+}
+.btn-unfollow:hover {
+  background-color: #ff5b5b;
+  color: white;
+  border-color: #ff5b5b;
+  content: 'Deixar de seguir'; /* Truque visual avançado se quiser */
+}
+
+/* Botão Mensagem */
+.btn-msg {
+  background-color: #f0fdf4; /* Verde bem clarinho */
+  color: #00ce71;
+  border: 1px solid #00ce71;
+}
+.btn-msg:hover {
+  background-color: #00ce71;
+  color: white;
+}
+
 .btn-edit.cancel-mode {
   background-color: #f8d7da;
   color: #721c24;

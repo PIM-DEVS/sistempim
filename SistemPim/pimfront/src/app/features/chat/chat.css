@@ -1,0 +1,174 @@
+.chat-container {
+  display: flex;
+  height: calc(100vh - 80px); /* Desconta a altura da Topbar */
+  background: #fff;
+  overflow: hidden;
+}
+
+/* --- SIDEBAR --- */
+.chat-sidebar {
+  width: 350px;
+  background: #fff;
+  border-right: 1px solid #f0f0f0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-header {
+  padding: 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.sidebar-header h2 {
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.search-box {
+  position: relative;
+  background: #f5f6fa;
+  border-radius: 12px;
+  padding: 0 15px;
+  display: flex;
+  align-items: center;
+  height: 45px;
+}
+
+.search-box i { color: #888; font-size: 1.2rem; margin-right: 10px; }
+.search-box input {
+  border: none; background: transparent; width: 100%; outline: none; color: #333;
+}
+
+.contacts-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.contact-item {
+  display: flex;
+  padding: 15px 20px;
+  cursor: pointer;
+  transition: background 0.2s;
+  border-bottom: 1px solid #f9f9f9;
+}
+
+.contact-item:hover { background: #f8f9fa; }
+.contact-item.active { background: #e0f2f1; border-left: 4px solid #00ce71; }
+
+.contact-avatar {
+  position: relative; margin-right: 15px;
+}
+.contact-avatar img {
+  width: 50px; height: 50px; border-radius: 50%; object-fit: cover;
+}
+.status-dot {
+  width: 12px; height: 12px; background: #ccc; border: 2px solid #fff; border-radius: 50%;
+  position: absolute; bottom: 0; right: 0;
+}
+.status-dot.online { background: #00ce71; }
+
+.contact-info { flex: 1; overflow: hidden; }
+.ci-top { display: flex; justify-content: space-between; margin-bottom: 5px; }
+.name { font-weight: 600; color: #333; }
+.time { font-size: 0.75rem; color: #999; }
+.last-msg { color: #666; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0; }
+
+/* --- MAIN CHAT --- */
+.chat-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #fbfbfb;
+}
+
+.chat-header {
+  padding: 15px 25px;
+  background: #fff;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.user-info { display: flex; align-items: center; gap: 15px; }
+.header-avatar { width: 45px; height: 45px; border-radius: 50%; }
+.user-info h3 { margin: 0; font-size: 1.1rem; }
+.status-text { color: #00ce71; font-size: 0.8rem; font-weight: 500; }
+
+.header-actions i {
+  font-size: 1.4rem; color: #00ce71; margin-left: 20px; cursor: pointer;
+}
+
+.messages-area {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Balões de Mensagem */
+.msg-bubble {
+  max-width: 60%;
+  padding: 12px 16px;
+  border-radius: 16px;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  position: relative;
+}
+
+.msg-bubble p { margin: 0; }
+.msg-time { display: block; font-size: 0.7rem; margin-top: 5px; text-align: right; opacity: 0.7; }
+
+.received {
+  align-self: flex-start;
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 16px 16px 16px 0;
+  color: #333;
+}
+
+.sent {
+  align-self: flex-end;
+  background: #00ce71;
+  color: #fff;
+  border-radius: 16px 16px 0 16px;
+  box-shadow: 0 4px 10px rgba(0, 206, 113, 0.2);
+}
+
+/* Área de Input */
+.chat-input-area {
+  padding: 20px;
+  background: #fff;
+  border-top: 1px solid #f0f0f0;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.chat-input-area input {
+  flex: 1;
+  background: #f5f6fa;
+  border: none;
+  padding: 15px;
+  border-radius: 30px;
+  outline: none;
+}
+
+.btn-attach, .btn-send {
+  background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #888;
+  display: flex; align-items: center; justify-content: center;
+}
+.btn-send {
+  background: #00ce71; color: white; width: 45px; height: 45px; border-radius: 50%;
+  transition: transform 0.2s;
+}
+.btn-send:hover { transform: scale(1.1); }
+
+/* Empty State */
+.empty-chat {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #999;
+}
+.empty-icon { font-size: 4rem; color: #ddd; margin-bottom: 20px; }

@@ -8,17 +8,17 @@ import {
   OnDestroy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router'; // Adicionado Router
-import { FormsModule } from '@angular/forms'; // Adicionado para o input
+import { RouterModule, Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService, Notificacao } from '../../../core/services/notification.service';
-import { Subscription, Subject } from 'rxjs'; // Adicionado Subject
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators'; // Adicionado operadores
+import { Subscription, Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
   selector: 'app-topbar',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule], // Adicionado FormsModule
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './topbar.component.html',
   styleUrls: ['./topbar.component.css'],
 })
@@ -47,26 +47,28 @@ export class TopbarComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    // 1. Lógica de Usuário e Notificações
+    // 1. Lógica de Usuário
     const subUser = this.authService.user$.subscribe(async (user) => {
       if (user) {
         this.dadosUsuario = await this.authService.getDadosUsuario(user.uid);
         this.carregarNotificacoes(user.uid);
-        this.cdr.detectChanges();
+        this.cdr.detectChanges(); // Garante atualização na carga inicial
       }
     });
     this.subscricoes.add(subUser);
 
-    // 2. Lógica da Busca em Tempo Real
+    // 2. Lógica da Busca
     const subSearch = this.searchSubject
       .pipe(debounceTime(400), distinctUntilChanged())
       .subscribe(async (term) => {
         if (term.length >= 2) {
           this.buscando = true;
-          this.cdr.detectChanges();
+          this.cdr.detectChanges(); // Atualiza ícone de loading
+          
           this.resultadosBusca = await this.authService.buscarUsuariosPorNome(term);
+          
           this.buscando = false;
-          this.cdr.detectChanges();
+          this.cdr.detectChanges(); // Mostra resultados
         } else {
           this.resultadosBusca = [];
           this.cdr.detectChanges();
@@ -88,9 +90,10 @@ export class TopbarComponent implements OnInit, OnDestroy {
     this.resultadosBusca = [];
     this.searchTerm = '';
     this.router.navigate(['/profile', uid]);
+    this.cdr.detectChanges();
   }
 
-  // --- Restante das Funções (Notificações, Logout, etc) ---
+  // --- Funções Auxiliares ---
   carregarNotificacoes(uid: string) {
     const sub = this.notifService.getNotificacoes(uid).subscribe((res) => {
       this.notificacoes = res;
@@ -108,40 +111,65 @@ export class TopbarComponent implements OnInit, OnDestroy {
     return timestamp.toDate().toLocaleDateString();
   }
 
+  // --- Toggles com Detecção de Mudança Forçada (FIX DO BUG) ---
   togglePerfil() {
     this.menuPerfilAberto = !this.menuPerfilAberto;
+    
     if (this.menuPerfilAberto) {
       this.menuNotificacoesAberto = false;
-      this.resultadosBusca = []; // Fecha busca ao abrir perfil
+      this.resultadosBusca = []; 
     }
+    
+    // Força o Angular a renderizar o *ngIf
+    this.cdr.detectChanges(); 
   }
 
   toggleNotificacoes() {
     this.menuNotificacoesAberto = !this.menuNotificacoesAberto;
+    
     if (this.menuNotificacoesAberto) {
       this.menuPerfilAberto = false;
-      this.resultadosBusca = []; // Fecha busca ao abrir notif
+      this.resultadosBusca = [];
     }
+
+    // Força o Angular a renderizar o *ngIf
+    this.cdr.detectChanges();
   }
 
   marcarComoLida(id: string | undefined) {
-    if (id) this.notifService.marcarComoLida(id);
+    if (id) {
+      this.notifService.marcarComoLida(id);
+      // O subscribe das notificações deve atualizar a lista automaticamente, 
+      // mas se não atualizar a cor na hora:
+      this.cdr.detectChanges();
+    }
   }
 
   marcarTodasComoLidas() {
-    if (this.dadosUsuario?.uid) this.notifService.marcarTodasLidas(this.dadosUsuario.uid);
+    if (this.dadosUsuario?.uid) {
+      this.notifService.marcarTodasLidas(this.dadosUsuario.uid);
+    }
   }
 
   async logout() {
     await this.authService.logout();
   }
 
+  // --- Listener Global para fechar ao clicar fora ---
   @HostListener('document:click', ['$event'])
   clickout(event: any) {
-    if (!this.eRef.nativeElement.contains(event.target)) {
-      this.menuPerfilAberto = false;
-      this.menuNotificacoesAberto = false;
-      this.resultadosBusca = []; // Fecha busca ao clicar fora
+    // Só executa lógica se tiver algum menu aberto (Performance)
+    if (this.menuPerfilAberto || this.menuNotificacoesAberto || this.resultadosBusca.length > 0) {
+      
+      // Verifica se o clique foi fora do componente
+      if (!this.eRef.nativeElement.contains(event.target)) {
+        this.menuPerfilAberto = false;
+        this.menuNotificacoesAberto = false;
+        this.resultadosBusca = []; // Opcional: fecha busca também
+        
+        // Garante que o fechamento visual ocorra
+        this.cdr.detectChanges();
+      }
     }
   }
 }

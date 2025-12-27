@@ -1,0 +1,88 @@
+<div class="chat-container">
+  
+  <div class="chat-sidebar">
+    <div class="sidebar-header">
+      <h2>Mensagens</h2>
+      <div class="search-box">
+        <i class="bx bx-search"></i>
+        <input type="text" placeholder="Buscar conversas..." />
+      </div>
+    </div>
+
+    <div class="contacts-list">
+      <div 
+        class="contact-item" 
+        *ngFor="let contato of contatos" 
+        [class.active]="contato.uid === chatAtivo?.uid"
+        (click)="selecionarChat(contato)"
+      >
+        <div class="contact-avatar">
+          <img [src]="contato.foto || 'assets/images/masculino.jpg'" alt="">
+          <span class="status-dot online"></span>
+        </div>
+        <div class="contact-info">
+          <div class="ci-top">
+            <span class="name">{{ contato.nome }}</span>
+            <span class="time">10:42</span>
+          </div>
+          <p class="last-msg">Vamos estudar Angular hoje?</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chat-main" *ngIf="chatAtivo; else emptyState">
+    
+    <div class="chat-header">
+      <div class="user-info">
+        <img [src]="chatAtivo.foto || 'assets/images/masculino.jpg'" class="header-avatar">
+        <div>
+          <h3>{{ chatAtivo.nome }}</h3>
+          <span class="status-text">Online agora</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <i class="bx bx-phone"></i>
+        <i class="bx bx-video"></i>
+        <i class="bx bx-dots-vertical-rounded"></i>
+      </div>
+    </div>
+
+    <div class="messages-area">
+      <div class="msg-bubble received">
+        <p>Oi! Vi que você começou o curso de Frontend.</p>
+        <span class="msg-time">10:30</span>
+      </div>
+
+      <div class="msg-bubble sent">
+        <p>Sim! Estou gostando muito da plataforma PIM.</p>
+        <span class="msg-time">10:31</span>
+      </div>
+      
+      <div class="msg-bubble received">
+        <p>Show! Se precisar de ajuda, só chamar.</p>
+        <span class="msg-time">10:32</span>
+      </div>
+    </div>
+
+    <div class="chat-input-area">
+      <button class="btn-attach"><i class="bx bx-paperclip"></i></button>
+      <input type="text" placeholder="Digite sua mensagem..." [(ngModel)]="mensagemAtual" (keyup.enter)="enviarMensagem()">
+      <button class="btn-send" (click)="enviarMensagem()">
+        <i class="bx bx-send"></i>
+      </button>
+    </div>
+
+  </div>
+
+  <ng-template #emptyState>
+    <div class="empty-chat">
+      <div class="empty-icon">
+        <i class="bx bx-message-square-dots"></i>
+      </div>
+      <h2>Suas Mensagens</h2>
+      <p>Selecione um contato da lista para começar a conversar.</p>
+    </div>
+  </ng-template>
+
+</div>

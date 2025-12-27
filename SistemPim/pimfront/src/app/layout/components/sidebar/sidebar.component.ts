@@ -27,6 +27,7 @@ export class SidebarComponent implements OnInit {
     { name: 'Dashboard', icon: 'bx bx-grid-alt', route: '/dashboard' },
     { name: 'Exercise', icon: 'bx bx-book', route: '/exercise' },
     { name: 'Turmas', icon: 'bx bx-chalkboard', route: '/turmas' },
+    { name: 'Chat', icon: 'bx bx-message-square-dots', route: '/chat' },
   ];
 
   ngOnInit() {

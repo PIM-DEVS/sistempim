@@ -6,6 +6,7 @@ import { Routes } from '@angular/router';
 import { LoginComponent } from './features/auth/login/login.component';
 import { MainLayoutComponent } from './layout/main-layout/main-layout.component';
 import { ProfileComponent } from './features/profile/profile.component';
+import { ChatComponent } from './features/chat/chat';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -58,6 +59,7 @@ export const routes: Routes = [
 
       { path: 'profile', component: ProfileComponent },
       { path: 'profile/:id', component: ProfileComponent },
+      { path: 'chat', component: ChatComponent },
     ],
   },
 ];

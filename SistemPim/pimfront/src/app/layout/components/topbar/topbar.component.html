@@ -1,10 +1,11 @@
 <div class="topbar-container">
-  <div class="search-wrapper" (click)="$event.stopPropagation()">
+  
+  <div class="search-wrapper">
     <div class="search-box">
       <i class="bx bx-search" *ngIf="!buscando"></i>
       <i class="bx bx-loader-alt bx-spin" *ngIf="buscando" style="color: var(--pim-green)"></i>
       <input type="text" [(ngModel)]="searchTerm" (input)="onSearchChange()"
-        (focus)="resultadosBusca.length > 0 ? null : null" placeholder="Pesquisar..." />
+        placeholder="Pesquisar..." />
     </div>
 
     <div class="dropdown-panel search-results-dropdown" *ngIf="resultadosBusca.length > 0">
@@ -25,7 +26,7 @@
 
   <div class="user-area">
 
-    <div class="notification-wrapper" (click)="$event.stopPropagation()">
+    <div class="notification-wrapper">
       <div class="notification-icon" (click)="toggleNotificacoes()">
         <i class="bx bx-bell" [class.active-bell]="menuNotificacoesAberto"></i>
         <span class="dot" *ngIf="totalNaoLidas > 0"></span>
@@ -65,12 +66,12 @@
         </div>
 
         <div class="dropdown-footer">
-          <a routerLink="/notificacoes">Ver tudo</a>
+          <a routerLink="/notificacoes" (click)="toggleNotificacoes()">Ver tudo</a>
         </div>
       </div>
     </div>
 
-    <div class="profile-wrapper" (click)="$event.stopPropagation()">
+    <div class="profile-wrapper">
       <div class="profile-display" (click)="togglePerfil()" [class.active]="menuPerfilAberto">
         <img [src]="
             dadosUsuario?.foto ||
