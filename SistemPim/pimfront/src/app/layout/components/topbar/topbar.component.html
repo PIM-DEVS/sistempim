@@ -1,31 +1,20 @@
 <div class="topbar-container">
-  <div class="search-wrapper">
+  <div class="search-wrapper" (click)="$event.stopPropagation()">
     <div class="search-box">
       <i class="bx bx-search" *ngIf="!buscando"></i>
       <i class="bx bx-loader-alt bx-spin" *ngIf="buscando" style="color: var(--pim-green)"></i>
-      <input
-        type="text"
-        [(ngModel)]="searchTerm"
-        (input)="onSearchChange()"
-        placeholder="Pesquisar usuários pelo nome..."
-      />
+      <input type="text" [(ngModel)]="searchTerm" (input)="onSearchChange()"
+        (focus)="resultadosBusca.length > 0 ? null : null" placeholder="Pesquisar..." />
     </div>
 
     <div class="dropdown-panel search-results-dropdown" *ngIf="resultadosBusca.length > 0">
-      <div
-        class="search-item"
-        *ngFor="let user of resultadosBusca"
-        (click)="irParaPerfil(user.uid)"
-      >
-        <img
-          [src]="
+      <div class="search-item" *ngFor="let user of resultadosBusca" (click)="irParaPerfil(user.uid)">
+        <img [src]="
             user.foto ||
             (user.genero === 'Feminino'
               ? 'assets/images/feminino.jpg'
               : 'assets/images/masculino.jpg')
-          "
-          class="search-avatar"
-        />
+          " class="search-avatar" />
         <div class="search-info">
           <span class="search-name">{{ user.nome }}</span>
           <span class="search-role">{{ user.role || 'Estudante' }}</span>
@@ -35,7 +24,8 @@
   </div>
 
   <div class="user-area">
-    <div class="notification-wrapper">
+
+    <div class="notification-wrapper" (click)="$event.stopPropagation()">
       <div class="notification-icon" (click)="toggleNotificacoes()">
         <i class="bx bx-bell" [class.active-bell]="menuNotificacoesAberto"></i>
         <span class="dot" *ngIf="totalNaoLidas > 0"></span>
@@ -45,70 +35,58 @@
         <div class="dropdown-header-row">
           <span class="dd-title">Notificações</span>
           <button class="mark-read-link" (click)="marcarTodasComoLidas()" *ngIf="totalNaoLidas > 0">
-            Marcar todas como lidas
+            Ler tudo
           </button>
         </div>
 
         <div class="notif-list">
-          <div
-            class="notif-item"
-            *ngFor="let n of notificacoes"
-            [class.unread]="!n.lida"
-            (click)="marcarComoLida(n.id)"
-          >
+          <div class="notif-item" *ngFor="let n of notificacoes" [class.unread]="!n.lida"
+            (click)="marcarComoLida(n.id)">
             <div class="notif-icon-box" [ngClass]="n.tipo">
               <i class="bx bx-book-bookmark" *ngIf="n.tipo === 'atividade'"></i>
               <i class="bx bx-error-circle" *ngIf="n.tipo === 'aviso'"></i>
               <i class="bx bx-cog" *ngIf="n.tipo === 'sistema'"></i>
+              <i class="bx bx-bell" *ngIf="!n.tipo"></i>
             </div>
-
             <div class="notif-content">
               <div class="notif-top-line">
                 <span class="n-title">{{ n.titulo }}</span>
-                <span class="n-time">{{ n.tipo === 'sistema' ? 'Sistema' : n.data }}</span>
+                <span class="n-time">{{ formatarTempo(n.data) }}</span>
               </div>
               <p class="n-msg">{{ n.mensagem }}</p>
             </div>
-
             <div class="status-dot" *ngIf="!n.lida"></div>
           </div>
 
           <div class="empty-state" *ngIf="notificacoes.length === 0">
             <i class="bx bx-bell-off"></i>
-            <p>Nenhuma notificação nova.</p>
+            <p>Sem notificações</p>
           </div>
         </div>
 
         <div class="dropdown-footer">
-          <a routerLink="/notificacoes">Ver histórico completo</a>
+          <a routerLink="/notificacoes">Ver tudo</a>
         </div>
       </div>
     </div>
 
-    <div class="profile-wrapper">
+    <div class="profile-wrapper" (click)="$event.stopPropagation()">
       <div class="profile-display" (click)="togglePerfil()" [class.active]="menuPerfilAberto">
-        <img
-          [src]="
+        <img [src]="
             dadosUsuario?.foto ||
             (dadosUsuario?.genero === 'Feminino'
               ? 'assets/images/feminino.jpg'
               : 'assets/images/masculino.jpg')
-          "
-          class="user-avatar"
-        />
+          " class="user-avatar" />
         <div class="profile-info">
-          <span class="user-name">{{ dadosUsuario?.nome || 'Carregando...' }}</span>
-          <i
-            class="bx"
-            [class.bx-chevron-down]="!menuPerfilAberto"
-            [class.bx-chevron-up]="menuPerfilAberto"
-          ></i>
+          <span class="user-name">{{ dadosUsuario?.nome?.split(' ')[0] || '...' }}</span>
+          <i class="bx" [class.bx-chevron-down]="!menuPerfilAberto" [class.bx-chevron-up]="menuPerfilAberto"></i>
         </div>
       </div>
 
       <div class="dropdown-panel profile-dropdown" *ngIf="menuPerfilAberto">
         <div class="profile-header-info">
-          <span class="label-welcome">Bem-vindo(a),</span>
+          <span class="label-welcome">Olá,</span>
           <span class="label-name">{{ dadosUsuario?.nome }}</span>
         </div>
 
@@ -124,5 +102,6 @@
         </ul>
       </div>
     </div>
+
   </div>
 </div>
