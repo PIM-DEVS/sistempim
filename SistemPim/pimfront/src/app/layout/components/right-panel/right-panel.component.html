@@ -1,0 +1,69 @@
+<div class="right-panel-container">
+  <div class="section stats-section">
+    <div class="header">
+      <h3>Estatísticas</h3>
+      <select>
+        <option>Semanal</option>
+        <option>Mensal</option>
+      </select>
+    </div>
+
+    <div class="chart-container">
+      <div class="bar-group">
+        <div class="bar" style="height: 40%"></div>
+        <span class="label">S</span>
+      </div>
+      <div class="bar-group">
+        <div class="bar active" style="height: 70%"></div>
+        <span class="label">T</span>
+      </div>
+      <div class="bar-group">
+        <div class="bar" style="height: 50%"></div>
+        <span class="label">Q</span>
+      </div>
+      <div class="bar-group">
+        <div class="bar" style="height: 30%"></div>
+        <span class="label">Q</span>
+      </div>
+      <div class="bar-group">
+        <div class="bar" style="height: 85%"></div>
+        <span class="label">S</span>
+      </div>
+    </div>
+
+    <div class="time-card">
+      <p>Tempo de Estudo</p>
+      <h2>5h 30m</h2>
+      <span class="badge">+12% vs ontem</span>
+    </div>
+  </div>
+
+  <div class="section mentors-section">
+    <div class="header">
+      <h3>Mentores PIM</h3>
+      <a href="#" class="see-all">Ver todos</a>
+    </div>
+
+    <div class="mentor-list">
+      <div class="mentor-item" *ngFor="let mentor of mentors">
+        <img [src]="mentor.image" alt="Profile" class="mentor-img" />
+        <div class="mentor-info">
+          <h5>{{ mentor.name }}</h5>
+          <span>{{ mentor.role }}</span>
+        </div>
+
+        <button
+          class="btn-follow"
+          [class.active]="mentor.isFollowing"
+          (click)="toggleFollow(mentor)"
+        >
+          <i
+            class="bx"
+            [class.bx-check]="mentor.isFollowing"
+            [class.bx-plus]="!mentor.isFollowing"
+          ></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

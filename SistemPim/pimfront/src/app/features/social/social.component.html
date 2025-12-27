@@ -1,0 +1,117 @@
+<div class="container-social">
+  <div class="feed-col">
+    <div class="card box-criacao">
+      <div class="input-row">
+        <img
+          [src]="dadosUsuario?.foto || 'assets/avatar-placeholder.png'"
+          class="avatar"
+          (error)="dadosUsuario.foto = 'assets/avatar-placeholder.png'"
+        />
+        <textarea [(ngModel)]="novoPostTexto" placeholder="Comece uma publicação..."></textarea>
+      </div>
+
+      <div class="preview-img" *ngIf="imagemPreview">
+        <img [src]="imagemPreview" />
+        <button (click)="imagemPreview = null" class="btn-remove"><i class="bx bx-x"></i></button>
+      </div>
+
+      <div class="footer-criacao">
+        <label class="btn-midia" [class.disabled]="loadingPost">
+          <i class="bx bx-image-add"></i> Adicionar Mídia
+          <input
+            type="file"
+            (change)="selecionarImagem($event)"
+            hidden
+            accept="image/*"
+            [disabled]="loadingPost"
+          />
+        </label>
+        <button
+          class="btn-postar"
+          [disabled]="loadingPost || (!novoPostTexto.trim() && !imagemPreview)"
+          (click)="publicar()"
+        >
+          {{ loadingPost ? 'Publicando...' : 'Publicar' }}
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="initialLoading" class="skeleton-container">
+      <div class="card skeleton-card" *ngFor="let i of [1, 2, 3]">
+        <div class="skeleton-header">
+          <div class="skeleton-avatar shim"></div>
+          <div class="skeleton-lines">
+            <div class="line shim" style="width: 60%"></div>
+            <div class="line shim" style="width: 40%"></div>
+          </div>
+        </div>
+        <div class="skeleton-body shim"></div>
+      </div>
+    </div>
+
+    <div *ngIf="!initialLoading && posts.length === 0" class="empty-state">
+      <i class="bx bx-news"></i>
+      <h3>O feed está silencioso</h3>
+      <p>Seja o primeiro a compartilhar algo interessante hoje!</p>
+    </div>
+
+    <div class="card post-item" *ngFor="let post of posts">
+      <div class="post-header">
+        <img
+          [src]="post.userPhoto || 'assets/avatar-placeholder.png'"
+          class="avatar-sm"
+          (error)="post.userPhoto = 'assets/avatar-placeholder.png'"
+        />
+        <div class="meta">
+          <strong>{{ post.userName }}</strong>
+          <small>{{ post.createdAt?.toDate() | date: "dd 'de' MMM 'às' HH:mm" }}</small>
+        </div>
+        <button
+          *ngIf="post.userId === dadosUsuario?.uid"
+          (click)="excluir(post.id)"
+          class="btn-opcoes"
+        >
+          <i class="bx bx-trash"></i>
+        </button>
+      </div>
+
+      <div class="post-content">
+        <p>{{ post.content }}</p>
+        <img *ngIf="post.mediaUrl" [src]="post.mediaUrl" class="img-post" />
+      </div>
+
+      <div class="post-footer">
+        <button (click)="curtir(post)" [class.active]="post.likes.includes(dadosUsuario?.uid)">
+          <i
+            class="bx"
+            [ngClass]="post.likes.includes(dadosUsuario?.uid) ? 'bxs-heart' : 'bx-heart'"
+          ></i>
+          <span>{{ post.likes.length }} curtidas</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <aside class="sidebar-perfil">
+    <div class="card card-mini-perfil">
+      <div class="capa"></div>
+      <div class="detalhes">
+        <img
+          [src]="dadosUsuario?.foto"
+          class="avatar-lg"
+          (error)="dadosUsuario.foto = 'assets/avatar-placeholder.png'"
+        />
+        <h3>{{ dadosUsuario?.nome || 'Carregando...' }}</h3>
+        <p>{{ dadosUsuario?.cargo }}</p>
+        <div class="stats">
+          <div class="stat">
+            <strong>{{ posts.length }}</strong> <small>Feed</small>
+          </div>
+          <div class="stat">
+            <strong>{{ dadosUsuario?.certificados || 0 }}</strong> <small>Certificados</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>

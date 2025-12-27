@@ -1,0 +1,251 @@
+:root {
+  /* A cor verde principal do seu dashboard */
+  --primary-color: linear-gradient(135deg, #00ce71 0%, #006660 100%);
+  --primary-dark: #006660;
+  --secondary-bg: #f5f7fa; /* O fundo cinza claro */
+  --text-dark: #333;
+  --text-light: #777;
+  --border-radius: 12px;
+}
+
+* {
+  font-family: 'Poppins', sans-serif;
+}
+
+body,
+html {
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', sans-serif; /* Ou a fonte que você está usando */
+  background-color: var(--secondary-bg);
+  height: 100%;
+}
+
+/* Utilitários */
+.btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: var(--border-radius);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  width: 100%; /* Útil para formulários */
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-dark);
+}
+
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f0f2f5;
+}
+.auth-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+.form-group {
+  margin-bottom: 1rem;
+  text-align: left;
+}
+.form-group input {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.auth-footer {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+.auth-footer a {
+  color: #007bff;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* --- RESPONSIVIDADE GLOBAL DO LAYOUT --- */
+
+/* Esconde a barra inferior no Desktop */
+.mobile-bottom-nav {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  /* 1. Esconde a Sidebar Lateral */
+  app-sidebar,
+  .sidebar {
+    display: none !important;
+  }
+
+  /* 2. Remove a margem esquerda do conteúdo principal */
+  .main-content,
+  app-layout {
+    margin-left: 0 !important;
+    width: 100% !important;
+    padding-bottom: 80px; /* Espaço para a barra inferior não cobrir conteúdo */
+  }
+
+  /* 3. Mostra a Barra Inferior Fixa */
+  .mobile-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 65px;
+    background: white;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+    z-index: 1000;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0 10px;
+  }
+
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    text-decoration: none;
+    font-size: 0.75rem;
+    gap: 4px;
+  }
+
+  .nav-item i {
+    font-size: 1.5rem;
+  }
+
+  .nav-item.active {
+    color: #0d9488; /* Sua cor verde/teal */
+  }
+}
+
+/* --- LAYOUT BASE (DESKTOP) --- */
+.main-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f8f9fa; /* Cor de fundo geral */
+}
+
+/* Sidebar no Desktop (Fixo na esquerda) */
+.app-sidebar {
+  width: 280px; /* Largura da sua sidebar */
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  z-index: 100;
+  /* Assumindo que seu componente sidebar já tem estilos internos de cor */
+}
+
+/* Conteúdo no Desktop (Empurrado para a direita) */
+.content-area {
+  margin-left: 280px; /* Mesma largura da sidebar */
+  width: calc(100% - 280px);
+  padding: 30px;
+  transition: all 0.3s ease;
+}
+
+/* Mobile Header (Escondido no Desktop) */
+.mobile-header {
+  display: none;
+}
+
+.sidebar-overlay {
+  display: none;
+}
+
+/* ============================================================
+   RESPONSIVIDADE (MOBILE & TABLET - Até 992px)
+============================================================ */
+@media (max-width: 992px) {
+  /* 1. Header Mobile Aparece */
+  .mobile-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    height: 70px;
+    background: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 99; /* Abaixo da sidebar, acima do conteúdo */
+  }
+
+  .hamburger-btn {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: #333;
+    cursor: pointer;
+  }
+
+  .mobile-logo {
+    height: 40px; /* Ajuste conforme seu logo */
+  }
+
+  .spacer {
+    width: 32px;
+  } /* Equilibra o layout */
+
+  /* 2. Conteúdo Principal Expandido */
+  .content-area {
+    margin-left: 0; /* Remove a margem esquerda */
+    width: 100%;
+    padding: 20px;
+    padding-top: 90px; /* Espaço para o header mobile não cobrir o topo */
+  }
+
+  /* 3. Sidebar Escondida (Off-canvas) */
+  .app-sidebar {
+    left: -290px; /* Esconde totalmente para a esquerda */
+    transition: left 0.3s ease-in-out;
+    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+    z-index: 1000; /* Acima de tudo */
+    background: white; /* Garante que tenha fundo */
+  }
+
+  /* 4. Sidebar Ativa (Classe adicionada pelo TS) */
+  .app-sidebar.mobile-active {
+    left: 0; /* Traz de volta para a tela */
+  }
+
+  /* 5. Overlay Escuro */
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Fundo preto semi-transparente */
+    z-index: 900; /* Abaixo da sidebar, acima do resto */
+    animation: fadeIn 0.3s;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

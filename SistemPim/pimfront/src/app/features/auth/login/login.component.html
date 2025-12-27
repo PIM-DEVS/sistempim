@@ -1,0 +1,82 @@
+<div class="auth-container">
+  <div class="auth-banner">
+    <div class="banner-content">
+      <h1>Bem-vindo ao <br /><strong>PIM Online</strong></h1>
+      <p>Sua jornada de aprendizado começa aqui.</p>
+    </div>
+    <div class="circle c1"></div>
+    <div class="circle c2"></div>
+  </div>
+
+  <div class="auth-form-wrapper">
+    <div class="form-box login-box" *ngIf="!showGenderSelect">
+      <div class="header">
+        <img src="assets/images/pim.png" alt="Logo" class="logo-img" />
+        <h2>Acesse sua conta</h2>
+        <p>Utilize sua conta Google institucional ou pessoal.</p>
+      </div>
+
+      <button (click)="login()" class="btn-google">
+        <img
+          src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+          alt="Google"
+        />
+        <span>Entrar com Google</span>
+      </button>
+
+      <div class="footer-links">
+        <p>Problemas com acesso? <a href="#">Ajuda</a></p>
+      </div>
+    </div>
+
+    <div class="form-box gender-box" *ngIf="showGenderSelect">
+      <div class="header">
+        <h2>Quase lá!</h2>
+        <p>Escolha um avatar para o seu perfil.</p>
+      </div>
+
+      <button
+        class="btn-continue"
+        [disabled]="!selectedGender"
+        (click)="finalizarCadastro()"
+        style="
+          margin-top: 20px;
+          padding: 10px 30px;
+          background: #00ce71;
+          color: white;
+          border: none;
+          border-radius: 20px;
+          cursor: pointer;
+        "
+      >
+        Continuar <i class="bx bx-right-arrow-alt"></i>
+      </button>
+
+      <div class="gender-options">
+        <div
+          class="gender-card"
+          (click)="selectGender('Masculino')"
+          [class.selected]="selectedGender === 'Masculino'"
+        >
+          <div class="avatar-preview">
+            <img src="assets/images/masculino.jpg" alt="Masculino" />
+          </div>
+          <span>Masculino</span>
+        </div>
+
+        <div
+          class="gender-card"
+          (click)="selectGender('Feminino')"
+          [class.selected]="selectedGender === 'Feminino'"
+        >
+          <div class="avatar-preview">
+            <img src="assets/images/feminino.jpg" alt="Feminino" />
+          </div>
+          <span>Feminino</span>
+        </div>
+      </div>
+
+      <p class="note">*Isso define sua foto padrão, mas você pode mudar depois.</p>
+    </div>
+  </div>
+</div>

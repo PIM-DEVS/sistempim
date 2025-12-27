@@ -1,0 +1,102 @@
+<div class="main-content-container">
+  <div class="banner">
+    <div class="banner-text">
+      <p class="subtitle">PROJETO INTEGRADOR</p>
+      <h1>Aprimore suas habilidades com o<br />Projeto PIM Online</h1>
+      <button class="btn-join">Começar Agora <i class="bx bx-chevron-right"></i></button>
+    </div>
+    <div class="decoration-star star-1">✦</div>
+    <div class="decoration-star star-2">✦</div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="icon-box purple" style="background: #f3e5f5; color: #9c27b0">
+        <i class="bx bx-code-alt"></i>
+      </div>
+      <div class="stat-info">
+        <span>2/8 Módulos</span>
+        <h4>Desenvolvimento</h4>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="icon-box pink" style="background: #fce4ec; color: #e91e63">
+        <i class="bx bx-paint"></i>
+      </div>
+      <div class="stat-info">
+        <span>3/8 Módulos</span>
+        <h4>Design UI/UX</h4>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="icon-box blue" style="background: #e3f2fd; color: #2196f3">
+        <i class="bx bx-data"></i>
+      </div>
+      <div class="stat-info">
+        <span>6/12 Módulos</span>
+        <h4>Banco de Dados</h4>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <h3>Continue Estudando</h3>
+  </div>
+
+  <div class="course-list">
+    <div class="course-card" *ngFor="let course of courses" (click)="continueCourse(course.title)">
+      <div
+        class="course-icon"
+        [style.background-color]="course.color + '20'"
+        [style.color]="course.color"
+      >
+        <i class="bx" [ngClass]="course.image"></i>
+      </div>
+      <div class="course-details">
+        <div class="top-row">
+          <span class="category">{{ course.category }}</span>
+          <span class="time"><i class="bx bx-time"></i> {{ course.time }}</span>
+        </div>
+        <h4>{{ course.title }}</h4>
+        <div class="progress-wrapper">
+          <div class="progress-bg">
+            <div
+              class="progress-fill"
+              [style.width.%]="course.progress"
+              [style.background-color]="course.color"
+            ></div>
+          </div>
+          <span class="percentage">{{ course.progress }}%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-header" style="margin-top: 40px; margin-bottom: 20px">
+    <h3>Minhas Turmas Ativas</h3>
+  </div>
+
+  <div class="classes-grid">
+    <div class="class-card" *ngFor="let classItem of activeClasses">
+      <div class="card-header" [style.background-color]="classItem.color + '15'">
+        <span class="class-code" [style.color]="classItem.color">{{ classItem.code }}</span>
+        <i class="bx bx-dots-horizontal-rounded menu-icon"></i>
+      </div>
+      <div class="card-body">
+        <h4>{{ classItem.subject }}</h4>
+        <div class="info-row">
+          <i class="bx bx-user"></i> <span>{{ classItem.professor }}</span>
+        </div>
+        <div class="info-row">
+          <i class="bx bx-time"></i> <span>{{ classItem.time }}</span>
+        </div>
+        <div class="info-row">
+          <i class="bx bx-map"></i> <span>{{ classItem.room }}</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <button class="btn-enter" [style.background-color]="classItem.color">Acessar Sala</button>
+      </div>
+    </div>
+  </div>
+</div>

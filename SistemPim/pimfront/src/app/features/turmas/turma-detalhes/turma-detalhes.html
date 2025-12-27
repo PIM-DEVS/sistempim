@@ -1,0 +1,386 @@
+<div class="class-container" *ngIf="turma; else loadingTpl">
+  <div class="main-wrapper">
+    <nav class="nav-header">
+      <div style="display: flex; align-items: center; gap: 30px">
+        <a class="back-link" (click)="voltar()">
+          <i class="bx bx-left-arrow-alt" style="font-size: 1.5rem"></i> Voltar
+        </a>
+        <div class="tabs-inline">
+          <button class="tab-btn" [class.active]="abaAtiva === 'mural'" (click)="setAba('mural')">
+            Mural
+          </button>
+          <button
+            class="tab-btn"
+            [class.active]="abaAtiva === 'atividades'"
+            (click)="setAba('atividades')"
+          >
+            Atividades
+          </button>
+          <button
+            class="tab-btn"
+            [class.active]="abaAtiva === 'pessoas'"
+            (click)="setAba('pessoas')"
+          >
+            Pessoas
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <header class="hero-banner">
+      <div class="hero-meta" *ngIf="turma.codigo">CÓDIGO: {{ turma.codigo }}</div>
+      <h1 class="hero-title">{{ turma.disciplina }}</h1>
+      <p class="hero-subtitle">{{ turma.nome }}</p>
+    </header>
+
+    <div class="tab-content">
+      <div class="content-grid" *ngIf="abaAtiva === 'mural'">
+        <aside class="sidebar-section">
+          <div class="pim-card">
+            <span class="sidebar-title">Próximas Atividades</span>
+            <div *ngIf="atividades.length > 0; else semEntregas">
+              <div
+                style="
+                  margin-bottom: 12px;
+                  border-left: 3px solid var(--pim-green);
+                  padding-left: 12px;
+                "
+              >
+                <div style="font-weight: 600; font-size: 0.9rem">{{ atividades[0].titulo }}</div>
+                <div style="font-size: 0.8rem; color: #6b7280">
+                  {{ formatDate(atividades[0].dataEntrega) }}
+                </div>
+              </div>
+              <a
+                style="
+                  font-size: 0.85rem;
+                  color: var(--pim-green);
+                  font-weight: 600;
+                  cursor: pointer;
+                "
+                (click)="setAba('atividades')"
+                >Ver todas</a
+              >
+            </div>
+            <ng-template #semEntregas>
+              <p class="empty-state-small">Nenhuma atividade para breve.</p>
+            </ng-template>
+          </div>
+        </aside>
+
+        <main>
+          <div *ngIf="isProfessor && currentUser" class="pim-card create-post-box">
+            <div class="post-input-row" *ngIf="!novoPostTexto" (click)="novoPostTexto = ' '">
+              <img
+                [src]="currentUser.photoURL || 'assets/default-avatar.png'"
+                class="avatar-circle"
+              />
+              <div class="input-fake">Comece uma publicação para a turma...</div>
+            </div>
+
+            <div class="post-expanded-area" *ngIf="novoPostTexto">
+              <div style="display: flex; gap: 12px; margin-bottom: 12px">
+                <img
+                  [src]="currentUser.photoURL || 'assets/default-avatar.png'"
+                  class="avatar-circle"
+                  style="width: 40px; height: 40px"
+                />
+                <div style="font-weight: 600; padding-top: 8px">{{ currentUser.nome }}</div>
+              </div>
+              <textarea
+                [(ngModel)]="novoPostTexto"
+                placeholder="Escreva seu aviso aqui..."
+                autofocus
+              ></textarea>
+              <div class="post-actions">
+                <button class="btn-pim-ghost" (click)="novoPostTexto = ''">Cancelar</button>
+                <button
+                  class="btn-pim-primary"
+                  (click)="publicar()"
+                  [disabled]="!novoPostTexto.trim()"
+                >
+                  Publicar
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="feed-list">
+            <div class="pim-card post-feed-item" *ngFor="let post of posts">
+              <div class="post-header">
+                <img [src]="post.photoURL || 'assets/default-avatar.png'" class="avatar-circle" />
+                <div class="author-info" style="flex: 1">
+                  <h4>{{ post.autor }}</h4>
+                  <span>{{ formatDate(post.data) }}</span>
+                </div>
+
+                <div
+                  style="position: relative"
+                  *ngIf="isProfessor || post.uidAutor === currentUser?.uid"
+                >
+                  <button
+                    class="icon-btn"
+                    (click)="
+                      menuAbertoId = menuAbertoId === post.id ? null : post.id || null;
+                      $event.stopPropagation()
+                    "
+                  >
+                    <i class="bx bx-dots-vertical-rounded"></i>
+                  </button>
+                  <div
+                    class="dropdown-menu"
+                    *ngIf="menuAbertoId === post.id"
+                    style="
+                      position: absolute;
+                      right: 0;
+                      top: 100%;
+                      background: white;
+                      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                      border-radius: 8px;
+                      padding: 8px;
+                      min-width: 140px;
+                      z-index: 10;
+                    "
+                  >
+                    <button
+                      (click)="deletarPost(post.id)"
+                      style="
+                        width: 100%;
+                        text-align: left;
+                        background: none;
+                        border: none;
+                        padding: 8px;
+                        color: #dc2626;
+                        display: flex;
+                        gap: 8px;
+                        align-items: center;
+                        cursor: pointer;
+                        border-radius: 4px;
+                      "
+                    >
+                      <i class="bx bx-trash"></i> Excluir
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="post-body">{{ post.conteudo }}</div>
+
+              <div
+                style="
+                  margin-top: 16px;
+                  padding-top: 16px;
+                  border-top: 1px solid #f3f4f6;
+                  display: flex;
+                  gap: 16px;
+                "
+              >
+                <span
+                  style="
+                    font-size: 0.85rem;
+                    color: var(--text-secondary);
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    gap: 4px;
+                  "
+                >
+                  <i class="bx bx-heart"></i> Curtir
+                </span>
+              </div>
+            </div>
+
+            <div
+              *ngIf="posts.length === 0"
+              style="text-align: center; padding: 40px; color: var(--text-light)"
+            >
+              <i
+                class="bx bx-news"
+                style="font-size: 3rem; margin-bottom: 10px; display: block"
+              ></i>
+              Nenhum aviso no mural.
+            </div>
+          </div>
+        </main>
+      </div>
+
+      <div *ngIf="abaAtiva === 'atividades'" style="max-width: 800px; margin: 0 auto">
+        <div style="margin-bottom: 24px; text-align: right" *ngIf="isProfessor">
+          <button class="btn-pim-primary" (click)="criandoAtividade = !criandoAtividade">
+            <i class="bx bx-plus"></i> Criar Atividade
+          </button>
+        </div>
+
+        <div class="pim-card" *ngIf="criandoAtividade" style="margin-bottom: 24px">
+          <h3 style="margin: 0 0 16px 0; font-size: 1.1rem">Nova Atividade</h3>
+          <input
+            type="text"
+            [(ngModel)]="formAtividade.titulo"
+            placeholder="Título da atividade"
+            style="
+              width: 100%;
+              padding: 12px;
+              border: 1px solid #e5e7eb;
+              border-radius: 8px;
+              margin-bottom: 12px;
+              background: #fafafa;
+            "
+          />
+
+          <div class="post-actions">
+            <button class="btn-pim-ghost" (click)="criandoAtividade = false">Cancelar</button>
+            <button
+              class="btn-pim-primary"
+              (click)="salvarAtividade()"
+              [disabled]="!formAtividade.titulo"
+            >
+              Salvar
+            </button>
+          </div>
+        </div>
+
+        <div
+          class="pim-card"
+          *ngFor="let ativ of atividades"
+          style="
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+            cursor: pointer;
+            transition: transform 0.2s;
+          "
+        >
+          <div
+            style="
+              width: 48px;
+              height: 48px;
+              background: #f0fdf4;
+              color: var(--pim-green);
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              margin-right: 16px;
+            "
+          >
+            <i class="bx bx-notepad" style="font-size: 1.5rem"></i>
+          </div>
+          <div style="flex: 1">
+            <div style="font-weight: 600; font-size: 1rem">{{ ativ.titulo }}</div>
+            <div style="font-size: 0.85rem; color: var(--text-secondary)">
+              Postado em {{ formatDate(ativ.dataCriacao) }}
+            </div>
+          </div>
+          <button class="icon-btn" *ngIf="isProfessor" (click)="deletarAtividade(ativ.id)">
+            <i class="bx bx-trash"></i>
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="abaAtiva === 'pessoas'" style="max-width: 800px; margin: 0 auto">
+        <div class="pim-card" style="margin-bottom: 24px">
+          <h2
+            style="
+              font-size: 1.25rem;
+              color: var(--pim-green);
+              margin-bottom: 20px;
+              border-bottom: 1px solid #f3f4f6;
+              padding-bottom: 10px;
+            "
+          >
+            Professores
+          </h2>
+          <div style="display: flex; align-items: center; gap: 16px; padding: 8px 0">
+            <div
+              class="avatar-circle"
+              style="
+                background: var(--pim-green);
+                color: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: 600;
+              "
+            >
+              {{ turma.professor.charAt(0) }}
+            </div>
+            <span style="font-weight: 600">{{ turma.professor }}</span>
+          </div>
+        </div>
+
+        <div class="pim-card">
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 20px;
+              border-bottom: 1px solid #f3f4f6;
+              padding-bottom: 10px;
+            "
+          >
+            <h2 style="font-size: 1.25rem; color: var(--pim-green); margin: 0">Alunos</h2>
+            <span style="font-size: 0.9rem; color: var(--text-secondary)"
+              >{{ alunosDetalhes.length }} alunos</span
+            >
+          </div>
+
+          <div
+            *ngFor="let aluno of alunosDetalhes"
+            style="
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              padding: 12px 0;
+              border-bottom: 1px solid #f9fafb;
+            "
+          >
+            <div style="display: flex; align-items: center; gap: 16px">
+              <img [src]="aluno.foto || 'assets/default-avatar.png'" class="avatar-circle" />
+              <span style="font-weight: 600; color: var(--text-primary)">{{ aluno.nome }}</span>
+            </div>
+            <button class="icon-btn" *ngIf="isProfessor" (click)="removerAluno(aluno.uid)">
+              <i class="bx bx-user-minus"></i>
+            </button>
+          </div>
+          <div
+            *ngIf="alunosDetalhes.length === 0"
+            style="text-align: center; padding: 20px; color: var(--text-secondary)"
+          >
+            Nenhum aluno nesta turma.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #loadingTpl>
+  <div
+    style="
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: var(--bg-body);
+    "
+  >
+    <div
+      style="
+        width: 40px;
+        height: 40px;
+        border: 4px solid #e5e7eb;
+        border-top-color: var(--pim-green);
+        border-radius: 50%;
+        animation: spin 1s infinite;
+      "
+    ></div>
+  </div>
+  <style>
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</ng-template>

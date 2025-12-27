@@ -1,0 +1,150 @@
+* {
+  font-family: 'Poppins', sans-serif;
+}
+
+/* ==========================================================================
+   LAYOUT DESKTOP (APP SHELL)
+   ========================================================================== */
+.dashboard-container {
+  display: grid;
+  /* 3 Colunas: Sidebar (250px) | Principal (Flex) | Painel Direito (300px) */
+  grid-template-columns: 250px 1fr 300px;
+  grid-template-rows: 100vh; /* Ocupa exatamente a altura da tela */
+  gap: 24px;
+  padding: 24px;
+  box-sizing: border-box;
+  background-color: #f5f6fa;
+
+  /* TRAVA a rolagem da janela no PC (quem rola são as colunas internas) */
+  overflow: hidden;
+}
+
+/* --- Áreas com Rolagem Interna --- */
+.area-sidebar,
+.area-right {
+  height: 100%;
+  overflow-y: auto;
+  /* Esconde a barra de rolagem visualmente, mas mantém a função */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE */
+}
+.area-sidebar::-webkit-scrollbar,
+.area-right::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+/* --- Área Principal (Meio) --- */
+.area-main {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden; /* O container não rola... */
+}
+
+/* ...apenas o conteúdo abaixo do Topbar rola! */
+.scrollable-content {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 10px; /* Espaço para a barra de rolagem não colar */
+  padding-bottom: 20px;
+}
+
+/* Estilização da Barra de Rolagem (Scrollbar Premium) */
+.scrollable-content::-webkit-scrollbar {
+  width: 6px;
+}
+.scrollable-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollable-content::-webkit-scrollbar-thumb {
+  background-color: #d1d1d1;
+  border-radius: 20px;
+}
+
+/* --- Elementos Mobile (Escondidos no Desktop) --- */
+.mobile-overlay {
+  display: none;
+}
+
+/* ==========================================================================
+   LAYOUT MOBILE & TABLET (< 1024px)
+   ========================================================================== */
+@media (max-width: 1024px) {
+  /* 1. Destrava o layout: vira uma página normal que rola */
+  .dashboard-container {
+    display: flex;
+    flex-direction: column;
+    height: auto; /* Altura automática */
+    min-height: 100vh; /* Pelo menos o tamanho da tela */
+    padding: 16px;
+    padding-top: 10px; /* Pequeno ajuste no topo */
+    overflow: visible; /* LIBERA A ROLAGEM DA PÁGINA */
+    gap: 20px;
+  }
+
+  /* 2. Remove travas de altura dos filhos */
+  .area-main,
+  .scrollable-content,
+  .area-right {
+    height: auto;
+    overflow: visible;
+    padding-right: 0;
+  }
+
+  /* 3. SIDEBAR (Menu de Gaveta) */
+  .area-sidebar {
+    position: fixed;
+    top: 0;
+    left: -100%; /* Escondido à esquerda */
+    width: 280px;
+    height: 100vh;
+    background: #fff;
+    z-index: 2000; /* Acima de tudo */
+    transition: left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); /* Animação suave */
+    box-shadow: 5px 0 15px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+  }
+
+  /* Classe ativada pelo Angular quando clica no botão */
+  .area-sidebar.mobile-open {
+    left: 0;
+  }
+
+  /* 4. PAINEL DIREITO (Vai para o fim da página) */
+  .area-right {
+    margin-top: 20px;
+    border-top: 1px solid #e0e0e0;
+    padding-top: 30px;
+    display: block; /* Garante que apareça */
+  }
+
+  /* 5. OVERLAY (Fundo Escuro) */
+  .mobile-overlay {
+    display: none; /* Escondido por padrão */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1999; /* Logo abaixo da sidebar */
+    backdrop-filter: blur(3px);
+  }
+
+  /* Mostra o overlay se o menu estiver aberto */
+  .mobile-overlay.open {
+    display: block;
+  }
+}
+.auth-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f0f2f5;
+  z-index: 9999;
+}

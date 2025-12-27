@@ -1,0 +1,128 @@
+<div class="topbar-container">
+  <div class="search-wrapper">
+    <div class="search-box">
+      <i class="bx bx-search" *ngIf="!buscando"></i>
+      <i class="bx bx-loader-alt bx-spin" *ngIf="buscando" style="color: var(--pim-green)"></i>
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        (input)="onSearchChange()"
+        placeholder="Pesquisar usuários pelo nome..."
+      />
+    </div>
+
+    <div class="dropdown-panel search-results-dropdown" *ngIf="resultadosBusca.length > 0">
+      <div
+        class="search-item"
+        *ngFor="let user of resultadosBusca"
+        (click)="irParaPerfil(user.uid)"
+      >
+        <img
+          [src]="
+            user.foto ||
+            (user.genero === 'Feminino'
+              ? 'assets/images/feminino.jpg'
+              : 'assets/images/masculino.jpg')
+          "
+          class="search-avatar"
+        />
+        <div class="search-info">
+          <span class="search-name">{{ user.nome }}</span>
+          <span class="search-role">{{ user.role || 'Estudante' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="user-area">
+    <div class="notification-wrapper">
+      <div class="notification-icon" (click)="toggleNotificacoes()">
+        <i class="bx bx-bell" [class.active-bell]="menuNotificacoesAberto"></i>
+        <span class="dot" *ngIf="totalNaoLidas > 0"></span>
+      </div>
+
+      <div class="dropdown-panel notification-dropdown" *ngIf="menuNotificacoesAberto">
+        <div class="dropdown-header-row">
+          <span class="dd-title">Notificações</span>
+          <button class="mark-read-link" (click)="marcarTodasComoLidas()" *ngIf="totalNaoLidas > 0">
+            Marcar todas como lidas
+          </button>
+        </div>
+
+        <div class="notif-list">
+          <div
+            class="notif-item"
+            *ngFor="let n of notificacoes"
+            [class.unread]="!n.lida"
+            (click)="marcarComoLida(n.id)"
+          >
+            <div class="notif-icon-box" [ngClass]="n.tipo">
+              <i class="bx bx-book-bookmark" *ngIf="n.tipo === 'atividade'"></i>
+              <i class="bx bx-error-circle" *ngIf="n.tipo === 'aviso'"></i>
+              <i class="bx bx-cog" *ngIf="n.tipo === 'sistema'"></i>
+            </div>
+
+            <div class="notif-content">
+              <div class="notif-top-line">
+                <span class="n-title">{{ n.titulo }}</span>
+                <span class="n-time">{{ n.tipo === 'sistema' ? 'Sistema' : n.data }}</span>
+              </div>
+              <p class="n-msg">{{ n.mensagem }}</p>
+            </div>
+
+            <div class="status-dot" *ngIf="!n.lida"></div>
+          </div>
+
+          <div class="empty-state" *ngIf="notificacoes.length === 0">
+            <i class="bx bx-bell-off"></i>
+            <p>Nenhuma notificação nova.</p>
+          </div>
+        </div>
+
+        <div class="dropdown-footer">
+          <a routerLink="/notificacoes">Ver histórico completo</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-wrapper">
+      <div class="profile-display" (click)="togglePerfil()" [class.active]="menuPerfilAberto">
+        <img
+          [src]="
+            dadosUsuario?.foto ||
+            (dadosUsuario?.genero === 'Feminino'
+              ? 'assets/images/feminino.jpg'
+              : 'assets/images/masculino.jpg')
+          "
+          class="user-avatar"
+        />
+        <div class="profile-info">
+          <span class="user-name">{{ dadosUsuario?.nome || 'Carregando...' }}</span>
+          <i
+            class="bx"
+            [class.bx-chevron-down]="!menuPerfilAberto"
+            [class.bx-chevron-up]="menuPerfilAberto"
+          ></i>
+        </div>
+      </div>
+
+      <div class="dropdown-panel profile-dropdown" *ngIf="menuPerfilAberto">
+        <div class="profile-header-info">
+          <span class="label-welcome">Bem-vindo(a),</span>
+          <span class="label-name">{{ dadosUsuario?.nome }}</span>
+        </div>
+
+        <ul class="dropdown-list-items">
+          <li routerLink="/profile" (click)="togglePerfil()">
+            <i class="bx bx-user"></i> Meu Perfil
+          </li>
+          <li routerLink="/settings" (click)="togglePerfil()">
+            <i class="bx bx-cog"></i> Configurações
+          </li>
+          <li class="divider"></li>
+          <li (click)="logout()" class="item-logout"><i class="bx bx-log-out"></i> Sair</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

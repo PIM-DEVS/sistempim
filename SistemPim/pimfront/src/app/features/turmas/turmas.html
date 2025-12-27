@@ -1,0 +1,126 @@
+<div class="pim-dashboard" (click)="fecharMenu()">
+  <header class="dashboard-header">
+    <div class="header-text">
+      <h1>{{ isProfessor ? 'Painel do Professor' : 'Área do Aluno' }}</h1>
+      <p>Bem-vindo, {{ userName }}</p>
+    </div>
+
+    <div class="header-actions">
+      <div class="join-group" *ngIf="!isProfessor">
+        <input type="text" [(ngModel)]="codigoInput" placeholder="Inserir código da turma..."
+          (keyup.enter)="entrarNaTurma()" />
+        <button (click)="entrarNaTurma()" [disabled]="loading">
+          <i class="bx" [ngClass]="loading ? 'bx-loader-alt bx-spin' : 'bx-log-in-circle'"></i>
+          {{ loading ? 'Entrando...' : 'Entrar' }}
+        </button>
+      </div>
+
+      <button class="btn-new-class" *ngIf="isProfessor" (click)="abrirModalCriar()">
+        <i class="bx bx-plus"></i> Criar Nova Turma
+      </button>
+    </div>
+  </header>
+
+  <div *ngIf="loading && minhasTurmas.length === 0" class="loader-container">
+    <div class="loader"></div>
+    <p>Carregando suas turmas...</p>
+  </div>
+
+  <div class="empty-state" *ngIf="!loading && minhasTurmas.length === 0">
+    <i class="bx bx-folder-open"></i>
+    <p>
+      {{
+      isProfessor ? 'Você ainda não criou nenhuma turma.' : 'Você não participa de nenhuma turma.'
+      }}
+    </p>
+  </div>
+
+  <div class="grid-turmas" *ngIf="!loading && minhasTurmas.length > 0">
+    <div class="card-turma" *ngFor="let turma of minhasTurmas" (click)="acessarSala(turma.id)">
+      <div class="card-cover">
+        <div class="cover-content">
+          <h3>{{ turma.nome }}</h3>
+          <span>{{ turma.disciplina }}</span>
+        </div>
+
+        <div class="menu-container" *ngIf="isProfessor" (click)="$event.stopPropagation()">
+          <button class="btn-menu" (click)="toggleMenu(turma.id, $event)">
+            <i class="bx bx-dots-vertical-rounded"></i>
+          </button>
+
+          <div class="dropdown-menu" *ngIf="menuAbertoId === turma.id">
+            <button class="btn-excluir" (click)="excluirTurma(turma.id, $event)">
+              <i class="bx bx-trash"></i> Excluir
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-body">
+        <div class="info-row professor-row">
+          <img *ngIf="turma.professorPhoto" [src]="turma.professorPhoto" class="prof-avatar" alt="Foto" />
+          <div *ngIf="!turma.professorPhoto" class="prof-avatar-placeholder">
+            <i class="bx bx-user"></i>
+          </div>
+          <span class="prof-name">{{ turma.professor }}</span>
+        </div>
+
+        <div class="info-row" *ngIf="turma.horario">
+          <i class="bx bx-time"></i> {{ turma.horario }}
+        </div>
+
+        <div class="info-row code-row">
+          <span class="code-badge">{{ turma.codigo }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" *ngIf="modalCriarAberto" (click)="fecharModalCriar()">
+    <div class="modal-card card-shadow" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Criar Nova Turma</h2>
+        <button class="btn-close-modal" (click)="fecharModalCriar()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Nome da Turma</label>
+          <input type="text" [(ngModel)]="novaTurma.nome" placeholder="Ex: 3º Ano A" />
+        </div>
+
+        <div class="form-group">
+          <label>Disciplina</label>
+          <input type="text" [(ngModel)]="novaTurma.disciplina" placeholder="Ex: Matemática" />
+        </div>
+
+        <div class="form-row-grid">
+          <div class="form-group">
+            <label>Sala</label>
+            <input type="text" [(ngModel)]="novaTurma.sala" placeholder="Lab 04" />
+          </div>
+          <div class="form-group">
+            <label>Horário</label>
+            <input type="text" [(ngModel)]="novaTurma.horario" placeholder="Seg 10:00" />
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-cancel" (click)="fecharModalCriar()">Cancelar</button>
+        <button class="btn-confirm" (click)="confirmarCriacao()" [disabled]="loading">
+          <i class="bx" [ngClass]="loading ? 'bx-loader-alt bx-spin' : 'bx-plus-circle'"></i>
+          {{ loading ? 'Criando...' : 'Criar Turma' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" *ngIf="notificacao.tipo" [ngClass]="notificacao.tipo">
+    <div class="toast-content">
+      <i class="bx" [ngClass]="notificacao.tipo === 'sucesso' ? 'bx-check-circle' : 'bx-error-circle'"></i>
+      <span>{{ notificacao.mensagem }}</span>
+    </div>
+    <div class="progress-bar"></div>
+  </div>
+</div>

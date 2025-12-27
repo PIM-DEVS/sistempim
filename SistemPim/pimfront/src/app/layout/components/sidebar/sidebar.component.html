@@ -1,0 +1,26 @@
+<div class="sidebar">
+  <div class="logo">
+    <img src="assets/images/pim.png" alt="PIM Logo" />
+  </div>
+
+  <nav class="menu">
+    <p class="menu-title">OVERVIEW</p>
+
+    <a
+      *ngFor="let item of menuItems"
+      [routerLink]="item.route"
+      routerLinkActive="active"
+      class="menu-item"
+    >
+      <i class="bx" [ngClass]="item.icon"></i>
+      <span>{{ item.name }}</span>
+    </a>
+  </nav>
+
+  <div class="logout-section">
+    <div (click)="logout()" class="menu-item logout" style="cursor: pointer">
+      <i class="bx bx-log-out"></i>
+      <span>Logout</span>
+    </div>
+  </div>
+</div>

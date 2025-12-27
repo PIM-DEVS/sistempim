@@ -1,0 +1,389 @@
+/* ==========================================================================
+   CONTAINER PRINCIPAL
+   ========================================================================== */
+.main-content-container {
+  display: flex;
+  flex-direction: column;
+  gap: 32px; /* Espaço consistente entre seções */
+  padding-bottom: 60px; /* Espaço extra no final para o scroll não cortar */
+  width: 100%;
+}
+
+* {
+  font-family: 'Poppins', sans-serif;
+}
+
+/* ==========================================================================
+   BANNER PRINCIPAL (HERO)
+   ========================================================================== */
+.banner {
+  background: linear-gradient(135deg, #00ce71 0%, #006660 100%);
+  border-radius: 24px;
+  padding: 40px;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 15px 30px rgba(0, 206, 113, 0.25); /* Sombra colorida suave */
+  transition: transform 0.3s ease;
+}
+
+.banner-text {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+}
+
+.banner .subtitle {
+  opacity: 0.9;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+.banner h1 {
+  font-size: 2em;
+  font-weight: 700;
+  margin-bottom: 25px;
+  line-height: 1.25;
+}
+
+.banner .btn-join {
+  background: #fff;
+  color: #006660;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.banner .btn-join:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+}
+
+/* Decorações do Banner */
+.decoration-star {
+  position: absolute;
+  color: rgba(255, 255, 255, 0.15);
+  user-select: none;
+  font-weight: bold;
+}
+.star-1 {
+  top: 10%;
+  right: 10%;
+  font-size: 5rem;
+  transform: rotate(15deg);
+}
+.star-2 {
+  bottom: 10%;
+  right: 30%;
+  font-size: 3rem;
+  transform: rotate(-10deg);
+}
+
+/* ==========================================================================
+   CARDS DE ESTATÍSTICA
+   ========================================================================== */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 24px;
+}
+
+.stat-card {
+  background: #fff;
+  padding: 24px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.02);
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+.icon-box {
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  flex-shrink: 0;
+}
+
+.stat-info span {
+  font-size: 0.8rem;
+  color: #8d8d8d;
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.stat-info h4 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1f1f1f;
+  margin: 0;
+}
+
+/* ==========================================================================
+   LISTA DE CURSOS (CONTINUE ESTUDANDO)
+   ========================================================================== */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.section-header h3 {
+  font-size: 1.25rem;
+  color: #1f1f1f;
+  font-weight: 600;
+}
+
+.course-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.course-card {
+  background: #fff;
+  padding: 24px;
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.course-card:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.03);
+}
+
+.course-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+}
+
+.course-card:hover .course-icon {
+  transform: scale(1.1) rotate(-3deg);
+}
+
+.course-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.top-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 0.8rem;
+  color: #888;
+  font-weight: 500;
+}
+
+.course-details h4 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: #333;
+}
+
+/* Barra de Progresso */
+.progress-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.progress-bg {
+  flex: 1;
+  height: 8px;
+  background: #edf2f7;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 10px;
+  /* Brilho sutil na barra */
+  background-image: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.15) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.15) 50%,
+    rgba(255, 255, 255, 0.15) 75%,
+    transparent 75%,
+    transparent
+  );
+  background-size: 1rem 1rem;
+}
+
+.percentage {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #333;
+  width: 45px;
+  text-align: right;
+}
+
+/* ==========================================================================
+   GRID DE TURMAS (CLASSES)
+   ========================================================================== */
+.classes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 24px;
+}
+
+.class-card {
+  background: #fff;
+  border-radius: 24px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+  border: 1px solid transparent;
+}
+
+.class-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  border-color: rgba(0, 0, 0, 0.05);
+}
+
+.card-header {
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.class-code {
+  font-weight: 700;
+  font-size: 0.8rem;
+  background: #fff;
+  padding: 6px 12px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.card-body {
+  padding: 24px;
+  flex: 1;
+}
+
+.card-body h4 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1f1f1f;
+  margin-bottom: 16px;
+  line-height: 1.4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 3.1em;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.info-row i {
+  color: #ccc;
+  font-size: 1.1rem;
+}
+
+.card-footer {
+  padding: 24px;
+  padding-top: 0;
+}
+
+.btn-enter {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition:
+    opacity 0.2s,
+    transform 0.2s;
+}
+
+.btn-enter:hover {
+  opacity: 0.95;
+  transform: scale(1.02);
+}
+
+/* ==========================================================================
+   RESPONSIVIDADE
+   ========================================================================== */
+
+/* Adaptação para Telas Menores */
+@media (max-width: 768px) {
+  /* Se você usa GRID para os cards */
+  .class-grid,
+  .dashboard-grid {
+    /* Força 1 coluna apenas */
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Se você usa FLEX */
+  .cards-container {
+    flex-direction: column;
+  }
+
+  /* Ajuste de espaçamento */
+  .page-container {
+    padding: 15px;
+  }
+}

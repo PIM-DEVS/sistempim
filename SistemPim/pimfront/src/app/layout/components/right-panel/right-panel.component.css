@@ -1,0 +1,221 @@
+/* ==========================================================================
+   CONTAINER PRINCIPAL
+   ========================================================================== */
+.right-panel-container {
+  display: flex;
+  flex-direction: column;
+  gap: 30px; /* Espaço entre as seções (Gráfico, Tempo, Mentores) */
+  height: 100%;
+  padding-left: 5px; /* Pequeno respiro da esquerda */
+}
+
+/* ==========================================================================
+   CABEÇALHOS DE SEÇÃO
+   ========================================================================== */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+
+  /* IMPORTANTE: Altura fixa de 50px para alinhar com Topbar e Logo */
+  height: 50px;
+}
+
+.header h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1f1f1f;
+  margin: 0;
+}
+
+.header select {
+  border: none;
+  background: transparent;
+  color: #8d8d8d;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.85rem;
+  cursor: pointer;
+  outline: none;
+}
+
+.header .see-all {
+  color: #00ce71; /* Verde Principal */
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.header .see-all:hover {
+  opacity: 0.8;
+}
+
+/* ==========================================================================
+   GRÁFICO DE ESTATÍSTICAS (Barras)
+   ========================================================================== */
+.chart-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end; /* Alinha as barras na parte de baixo */
+  height: 160px;
+  margin-bottom: 10px;
+  padding: 10px;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+}
+
+.bar-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  height: 100%;
+  justify-content: flex-end;
+  cursor: pointer;
+}
+
+/* A Barra Cinza/Verde */
+.bar {
+  width: 8px;
+  background-color: #f0f0f0;
+  border-radius: 10px;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  position: relative;
+}
+
+/* Barra Ativa (Verde) */
+.bar.active {
+  background-color: #00ce71;
+}
+
+/* Efeito Hover na Barra */
+.bar-group:hover .bar {
+  background-color: #00ce71;
+  transform: scaleY(1.05); /* Cresce um pouquinho */
+}
+
+.label {
+  font-size: 0.75rem;
+  color: #8d8d8d;
+  font-weight: 500;
+}
+
+/* ==========================================================================
+   CARD DE TEMPO DE ESTUDO
+   ========================================================================== */
+.time-card {
+  background: #e0f2f1; /* Fundo verde bem claro */
+  padding: 24px;
+  border-radius: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.time-card p {
+  font-size: 0.85rem;
+  color: #555;
+  margin: 0 0 8px 0;
+  font-weight: 500;
+}
+
+.time-card h2 {
+  font-size: 1.8rem;
+  color: #00ce71;
+  display: inline-block;
+  margin: 0;
+  font-weight: 700;
+}
+
+.time-card .badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  background: #fff;
+  padding: 4px 8px;
+  border-radius: 6px;
+  color: #00ce71;
+  font-weight: 600;
+  margin-left: 10px;
+  vertical-align: middle;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+/* ==========================================================================
+   LISTA DE MENTORES
+   ========================================================================== */
+.mentors-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.mentor-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 10px;
+  border-radius: 15px;
+  transition:
+    background-color 0.2s,
+    transform 0.2s;
+  background: #fff; /* Fundo branco para destacar */
+}
+
+.mentor-item:hover {
+  transform: translateX(5px); /* Move levemente para a direita */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+}
+
+.mentor-item img {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #f5f5f5;
+}
+
+.mentor-info {
+  flex: 1;
+}
+
+.mentor-info h5 {
+  font-size: 0.95rem;
+  margin: 0 0 4px 0;
+  color: #333;
+}
+
+.mentor-info span {
+  font-size: 0.75rem;
+  color: #8d8d8d;
+  display: block;
+}
+
+/* Botão Seguir (+) */
+.btn-follow {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid #eee;
+  background: transparent;
+  cursor: pointer;
+  color: #8d8d8d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  font-size: 1.2rem;
+}
+
+.btn-follow:hover {
+  border-color: #00ce71;
+  color: #00ce71;
+}
+
+.btn-follow.active {
+  background: #00ce71;
+  color: #fff;
+  border-color: #00ce71;
+  box-shadow: 0 2px 5px #006660;
+}

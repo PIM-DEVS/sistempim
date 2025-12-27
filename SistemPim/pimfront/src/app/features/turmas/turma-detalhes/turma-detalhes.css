@@ -1,0 +1,356 @@
+:root {
+  /* Identidade Visual PIM (Extraída das imagens) */
+  --pim-green: #00a859;
+  --pim-green-hover: #008f4c;
+  --pim-gradient: linear-gradient(135deg, #00a859 0%, #028a4b 100%);
+
+  --bg-body: #f5f7fa;
+  /* O cinza de fundo das telas enviadas */
+  --surface: #ffffff;
+
+  --text-primary: #1f2937;
+  /* Cinza escuro quase preto */
+  --text-secondary: #6b7280;
+  /* Cinza médio */
+  --text-light: #9ca3af;
+
+  --radius-card: 16px;
+  /* Arredondamento característico do PIM */
+  --radius-btn: 8px;
+
+  /* Sombra difusa estilo Dashboard */
+  --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+}
+
+/* CONTAINER GERAL */
+.class-container {
+  min-height: 100vh;
+  background-color: var(--bg-body);
+  font-family: 'Poppins', 'Inter', sans-serif;
+  /* Fontes prováveis do design */
+  color: var(--text-primary);
+  padding-bottom: 40px;
+}
+
+/* NAV SIMPLIFICADA (Estilo "Voltar" limpo) */
+.top-nav {
+  background: transparent;
+  /* Remove fundo branco para integrar ao layout */
+  padding: 20px 0;
+  margin-bottom: 10px;
+}
+
+.main-wrapper {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* CABEÇALHO DA NAV */
+.nav-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.back-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+  cursor: pointer;
+}
+
+.back-link:hover {
+  color: var(--pim-green);
+}
+
+/* ABAS (Estilo minimalista, apenas texto) */
+.tabs-inline {
+  display: flex;
+  gap: 24px;
+}
+
+.tab-btn {
+  background: none;
+  border: none;
+  padding: 8px 0;
+  font-size: 1rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  cursor: pointer;
+  position: relative;
+}
+
+.tab-btn.active {
+  color: var(--pim-green);
+  font-weight: 600;
+}
+
+.tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--pim-green);
+  border-radius: 3px;
+}
+
+/* HERO BANNER (Estilo Dashboard - Verde Vibrante) */
+.hero-banner {
+  background: var(--primary-color);
+  border-radius: 16px;
+  padding: 40px;
+  color: white;
+  margin-bottom: 30px;
+  box-shadow: var(--shadow-soft);
+  position: relative;
+  overflow: hidden;
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+/* Efeito sutil de brilho no banner (igual imagem dashboard) */
+.hero-banner::before {
+  content: '';
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 200px;
+  height: 200px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+}
+
+.hero-meta {
+  font-size: 0.85rem;
+  opacity: 0.9;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.hero-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.hero-subtitle {
+  font-size: 1rem;
+  opacity: 0.95;
+  margin-top: 4px;
+  font-weight: 400;
+}
+
+/* LAYOUT GRID (Sidebar + Feed) */
+.content-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 30px;
+}
+
+/* CARDS BRANCOS (Identidade PIM) */
+.pim-card {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-soft);
+  padding: 24px;
+  border: 1px solid rgba(0, 0, 0, 0.02);
+  /* Borda quase invisível */
+}
+
+/* SIDEBAR (Próximas Entregas) */
+.sidebar-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+  display: block;
+}
+
+.empty-state-small {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+/* CAIXA DE POSTAGEM (Igual imagem image_1f1c3c.png) */
+.create-post-box {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.post-input-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.input-fake {
+  flex: 1;
+  background: #f3f4f6;
+  border-radius: var(--radius-btn);
+  padding: 12px 16px;
+  color: var(--text-secondary);
+  cursor: text;
+  font-size: 0.95rem;
+  transition: background 0.2s;
+}
+
+.input-fake:hover {
+  background: #e5e7eb;
+}
+
+/* Form expandido */
+.post-expanded-area textarea {
+  width: 100%;
+  border: 1px solid #e5e7eb;
+  background: #fafafa;
+  border-radius: var(--radius-btn);
+  padding: 16px;
+  resize: none;
+  font-family: inherit;
+  min-height: 120px;
+}
+
+.post-expanded-area textarea:focus {
+  outline: none;
+  border-color: var(--pim-green);
+  background: #fff;
+}
+
+.post-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+/* FEED POSTS (Estilo Cartão) */
+.post-feed-item {
+  margin-bottom: 20px;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+
+.post-feed-item:hover {
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-2px);
+}
+
+.post-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.author-info h4 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.author-info span {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.post-body {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #374151;
+  white-space: pre-wrap;
+}
+
+/* BOTÕES */
+.btn-pim-primary {
+  background-color: var(--pim-green);
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  /* Arredondado mas não full pill */
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-pim-primary:hover {
+  background-color: var(--pim-green-hover);
+}
+
+.btn-pim-primary:disabled {
+  background-color: #d1d5db;
+  cursor: not-allowed;
+}
+
+.btn-pim-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  border: none;
+  padding: 10px 20px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.btn-pim-ghost:hover {
+  background: #f3f4f6;
+  border-radius: 8px;
+  color: var(--text-primary);
+}
+
+/* AVATAR */
+.avatar-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: #e5e7eb;
+}
+
+/* UTILS */
+.icon-btn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+.icon-btn:hover {
+  background: #f3f4f6;
+  color: var(--text-primary);
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar-section {
+    display: none;
+  }
+
+  /* Oculta sidebar no mobile se quiser */
+}

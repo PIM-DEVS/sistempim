@@ -1,0 +1,125 @@
+/* ==========================================================================
+   SIDEBAR CONTAINER
+   ========================================================================== */
+.sidebar {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 10px 10px;
+  box-sizing: border-box;
+  background: #fff;
+  border-right: 1px solid #eaeaea;
+}
+
+/* ==========================================================================
+   LOGO
+   ========================================================================== */
+.logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 30px 0;
+  margin-bottom: 60px;
+  height: 50px;
+}
+
+.logo img {
+  width: auto;
+  height: 70px; /* Altura controlada da imagem */
+  object-fit: contain;
+}
+
+/* ==========================================================================
+   MENU
+   ========================================================================== */
+.menu-title {
+  color: #a0a0a0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  padding-left: 15px;
+}
+
+/* Item do Menu (Link) */
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 20px;
+  text-decoration: none;
+  color: #666;
+  border-radius: 14px;
+  margin-bottom: 8px;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  font-weight: 500;
+  font-size: 0.95rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.menu-item i {
+  font-size: 1.3rem;
+  color: #8d8d8d;
+  transition: color 0.3s ease;
+}
+
+/* Estado Hover (Passar o mouse) */
+.menu-item:hover {
+  background-color: #f5f6fa;
+  color: #00ce71; /* Verde Principal */
+  transform: translateX(3px); /* Pequeno movimento para direita */
+}
+
+.menu-item:hover i {
+  color: #00ce71;
+}
+
+/* Estado Ativo (Selecionado) */
+.menu-item.active {
+  color: #00ce71;
+  background-color: #e0f2f1; /* Verde bem clarinho */
+  font-weight: 600;
+  box-shadow: 0 4px 10px rgba(0, 191, 165, 0.1);
+}
+
+.menu-item.active i {
+  color: #00ce71;
+}
+
+/* Indicador lateral do item ativo (Barra vertical) */
+.menu-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 20px;
+  width: 4px;
+  background-color: #00ce71;
+  border-radius: 0 4px 4px 0;
+}
+
+/* ==========================================================================
+   LOGOUT (Sair)
+   ========================================================================== */
+.logout-section {
+  margin-top: auto; /* Empurra para o final da sidebar */
+  padding-top: 20px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.menu-item.logout {
+  color: #ff5b5b; /* Vermelho */
+}
+
+.menu-item.logout i {
+  color: #ff5b5b;
+}
+
+.menu-item.logout:hover {
+  background-color: #fff0f0; /* Fundo vermelho bem claro */
+  color: #d32f2f;
+  box-shadow: none;
+}
