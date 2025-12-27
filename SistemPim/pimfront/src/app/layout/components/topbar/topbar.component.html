@@ -4,23 +4,45 @@
     <div class="search-box">
       <i class="bx bx-search" *ngIf="!buscando"></i>
       <i class="bx bx-loader-alt bx-spin" *ngIf="buscando" style="color: var(--pim-green)"></i>
-      <input type="text" [(ngModel)]="searchTerm" (input)="onSearchChange()"
-        placeholder="Pesquisar..." />
+      
+      <input type="text" 
+             [(ngModel)]="searchTerm" 
+             (input)="onSearchChange()"
+             (focus)="onSearchFocus()"
+             placeholder="Pesquisar..." />
     </div>
 
-    <div class="dropdown-panel search-results-dropdown" *ngIf="resultadosBusca.length > 0">
-      <div class="search-item" *ngFor="let user of resultadosBusca" (click)="irParaPerfil(user.uid)">
-        <img [src]="
-            user.foto ||
-            (user.genero === 'Feminino'
-              ? 'assets/images/feminino.jpg'
-              : 'assets/images/masculino.jpg')
-          " class="search-avatar" />
-        <div class="search-info">
-          <span class="search-name">{{ user.nome }}</span>
-          <span class="search-role">{{ user.role || 'Estudante' }}</span>
+    <div class="dropdown-panel search-results-dropdown" 
+         *ngIf="dropdownBuscaAberto && (resultadosBusca.length > 0 || (searchTerm === '' && pesquisasRecentes.length > 0))">
+
+      <ng-container *ngIf="resultadosBusca.length > 0">
+        <div class="dropdown-section-title">Resultados</div>
+        <div class="search-item" *ngFor="let user of resultadosBusca" (click)="irParaPerfil(user)">
+          <img [src]="user.foto || (user.genero === 'Feminino' ? 'assets/images/feminino.jpg' : 'assets/images/masculino.jpg')" class="search-avatar" />
+          <div class="search-info">
+            <span class="search-name">{{ user.nome }}</span>
+            <span class="search-role">{{ user.role || 'Estudante' }}</span>
+          </div>
         </div>
-      </div>
+      </ng-container>
+
+      <ng-container *ngIf="searchTerm === '' && pesquisasRecentes.length > 0">
+        <div class="dropdown-header-row history-header">
+          <span class="dd-title-small">Recentes</span>
+          <button class="clear-history-btn" (click)="limparHistorico()">Limpar</button>
+        </div>
+        
+        <div class="search-item recent-item" *ngFor="let user of pesquisasRecentes" (click)="irParaPerfil(user)">
+          <div class="recent-icon">
+            <i class="bx bx-time-five"></i>
+          </div>
+          <div class="search-info">
+            <span class="search-name">{{ user.nome }}</span>
+            <span class="search-role" style="font-size: 0.75rem; color: #999;">Visualizado recentemente</span>
+          </div>
+        </div>
+      </ng-container>
+
     </div>
   </div>
 
@@ -35,14 +57,11 @@
       <div class="dropdown-panel notification-dropdown" *ngIf="menuNotificacoesAberto">
         <div class="dropdown-header-row">
           <span class="dd-title">Notificações</span>
-          <button class="mark-read-link" (click)="marcarTodasComoLidas()" *ngIf="totalNaoLidas > 0">
-            Ler tudo
-          </button>
+          <button class="mark-read-link" (click)="marcarTodasComoLidas()" *ngIf="totalNaoLidas > 0">Ler tudo</button>
         </div>
 
         <div class="notif-list">
-          <div class="notif-item" *ngFor="let n of notificacoes" [class.unread]="!n.lida"
-            (click)="marcarComoLida(n.id)">
+          <div class="notif-item" *ngFor="let n of notificacoes" [class.unread]="!n.lida" (click)="marcarComoLida(n.id)">
             <div class="notif-icon-box" [ngClass]="n.tipo">
               <i class="bx bx-book-bookmark" *ngIf="n.tipo === 'atividade'"></i>
               <i class="bx bx-error-circle" *ngIf="n.tipo === 'aviso'"></i>
@@ -58,27 +77,20 @@
             </div>
             <div class="status-dot" *ngIf="!n.lida"></div>
           </div>
-
           <div class="empty-state" *ngIf="notificacoes.length === 0">
             <i class="bx bx-bell-off"></i>
             <p>Sem notificações</p>
           </div>
         </div>
-
         <div class="dropdown-footer">
-          <a routerLink="/notificacoes" (click)="toggleNotificacoes()">Ver tudo</a>
+          <a routerLink="/notificacoes">Ver tudo</a>
         </div>
       </div>
     </div>
 
     <div class="profile-wrapper">
       <div class="profile-display" (click)="togglePerfil()" [class.active]="menuPerfilAberto">
-        <img [src]="
-            dadosUsuario?.foto ||
-            (dadosUsuario?.genero === 'Feminino'
-              ? 'assets/images/feminino.jpg'
-              : 'assets/images/masculino.jpg')
-          " class="user-avatar" />
+        <img [src]="dadosUsuario?.foto || (dadosUsuario?.genero === 'Feminino' ? 'assets/images/feminino.jpg' : 'assets/images/masculino.jpg')" class="user-avatar" />
         <div class="profile-info">
           <span class="user-name">{{ dadosUsuario?.nome?.split(' ')[0] || '...' }}</span>
           <i class="bx" [class.bx-chevron-down]="!menuPerfilAberto" [class.bx-chevron-up]="menuPerfilAberto"></i>
@@ -90,14 +102,9 @@
           <span class="label-welcome">Olá,</span>
           <span class="label-name">{{ dadosUsuario?.nome }}</span>
         </div>
-
         <ul class="dropdown-list-items">
-          <li routerLink="/profile" (click)="togglePerfil()">
-            <i class="bx bx-user"></i> Meu Perfil
-          </li>
-          <li routerLink="/settings" (click)="togglePerfil()">
-            <i class="bx bx-cog"></i> Configurações
-          </li>
+          <li routerLink="/profile" (click)="togglePerfil()"><i class="bx bx-user"></i> Meu Perfil</li>
+          <li routerLink="/settings" (click)="togglePerfil()"><i class="bx bx-cog"></i> Configurações</li>
           <li class="divider"></li>
           <li (click)="logout()" class="item-logout"><i class="bx bx-log-out"></i> Sair</li>
         </ul>

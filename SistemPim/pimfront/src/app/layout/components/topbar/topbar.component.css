@@ -469,3 +469,67 @@
 .item-logout:hover {
   background-color: #fff0f0 !important;
 }
+
+/* --- Estilos Novos para a Busca e Histórico --- */
+
+.dropdown-section-title {
+  padding: 10px 20px 5px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #f9f9f9;
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.dd-title-small {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #999;
+  text-transform: uppercase;
+}
+
+.clear-history-btn {
+  background: none;
+  border: none;
+  font-size: 0.75rem;
+  color: #ff5b5b;
+  cursor: pointer;
+  padding: 0;
+}
+
+.clear-history-btn:hover {
+  text-decoration: underline;
+}
+
+/* Ícone de relógio para itens recentes */
+.recent-icon {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background-color: #f0f2f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+  font-size: 1.1rem;
+}
+
+.recent-item .search-name {
+  color: #555;
+}
+
+/* Garante que o dropdown de busca tenha prioridade e tamanho correto */
+.search-results-dropdown {
+  display: block; /* Controlado pelo *ngIf */
+  max-height: 400px;
+  overflow-y: auto;
+}

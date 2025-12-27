@@ -6,6 +6,7 @@ import {
   HostListener,
   ElementRef,
   OnDestroy,
+  NgZone, // <--- IMPORTANTE
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
@@ -28,18 +29,22 @@ export class TopbarComponent implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
   private eRef = inject(ElementRef);
   private router = inject(Router);
+  private zone = inject(NgZone); // <--- INJEÇÃO DA CORREÇÃO
 
   dadosUsuario: any = null;
   notificacoes: Notificacao[] = [];
+  
+  // Controles de Menu
   menuPerfilAberto = false;
   menuNotificacoesAberto = false;
+  dropdownBuscaAberto = false;
 
-  // --- Propriedades da Busca ---
+  // Busca e Histórico
   searchTerm = '';
   resultadosBusca: any[] = [];
+  pesquisasRecentes: any[] = [];
   buscando = false;
   private searchSubject = new Subject<string>();
-
   private subscricoes = new Subscription();
 
   get totalNaoLidas(): number {
@@ -47,31 +52,56 @@ export class TopbarComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    // 1. Lógica de Usuário
+    this.carregarHistorico();
+
+    // 1. Dados do Usuário (Com correção de Zone)
     const subUser = this.authService.user$.subscribe(async (user) => {
       if (user) {
-        this.dadosUsuario = await this.authService.getDadosUsuario(user.uid);
-        this.carregarNotificacoes(user.uid);
-        this.cdr.detectChanges(); // Garante atualização na carga inicial
+        const dados = await this.authService.getDadosUsuario(user.uid);
+        
+        // A MÁGICA: Força a execução dentro do Angular
+        this.zone.run(() => {
+          this.dadosUsuario = dados;
+          this.carregarNotificacoes(user.uid);
+          this.cdr.detectChanges();
+        });
       }
     });
     this.subscricoes.add(subUser);
 
-    // 2. Lógica da Busca
+    // 2. Busca (Com correção de Zone)
     const subSearch = this.searchSubject
       .pipe(debounceTime(400), distinctUntilChanged())
       .subscribe(async (term) => {
         if (term.length >= 2) {
-          this.buscando = true;
-          this.cdr.detectChanges(); // Atualiza ícone de loading
+          this.zone.run(() => { 
+            this.buscando = true; 
+            this.cdr.detectChanges();
+          });
           
-          this.resultadosBusca = await this.authService.buscarUsuariosPorNome(term);
+          let resultados = [];
+          try {
+            resultados = await this.authService.buscarUsuariosPorNome(term);
+          } catch (error) {
+            console.error(error);
+          }
           
-          this.buscando = false;
-          this.cdr.detectChanges(); // Mostra resultados
+          // Volta para a zona do Angular para mostrar os resultados
+          this.zone.run(() => {
+            this.resultadosBusca = resultados;
+            this.buscando = false;
+            this.dropdownBuscaAberto = true;
+            this.cdr.detectChanges();
+          });
+
         } else {
-          this.resultadosBusca = [];
-          this.cdr.detectChanges();
+          this.zone.run(() => {
+            this.resultadosBusca = [];
+            this.buscando = false;
+            // Se limpou o texto, mostra o histórico se estiver focado
+            this.dropdownBuscaAberto = true;
+            this.cdr.detectChanges();
+          });
         }
       });
     this.subscricoes.add(subSearch);
@@ -81,25 +111,81 @@ export class TopbarComponent implements OnInit, OnDestroy {
     this.subscricoes.unsubscribe();
   }
 
-  // --- Ações de Busca ---
-  onSearchChange() {
-    this.searchSubject.next(this.searchTerm);
+  // --- Histórico e Busca ---
+
+  carregarHistorico() {
+    const salvo = localStorage.getItem('historicoBuscaPim');
+    if (salvo) {
+      this.pesquisasRecentes = JSON.parse(salvo);
+    }
   }
 
-  irParaPerfil(uid: string) {
-    this.resultadosBusca = [];
-    this.searchTerm = '';
-    this.router.navigate(['/profile', uid]);
+  salvarNoHistorico(user: any) {
+    // Remove duplicados e adiciona no topo
+    this.pesquisasRecentes = this.pesquisasRecentes.filter(u => u.uid !== user.uid);
+    this.pesquisasRecentes.unshift(user);
+    if (this.pesquisasRecentes.length > 5) this.pesquisasRecentes.pop(); // Limite de 5
+    localStorage.setItem('historicoBuscaPim', JSON.stringify(this.pesquisasRecentes));
+  }
+
+  limparHistorico() {
+    this.pesquisasRecentes = [];
+    localStorage.removeItem('historicoBuscaPim');
     this.cdr.detectChanges();
   }
 
-  // --- Funções Auxiliares ---
+  onSearchFocus() {
+    // Fecha outros menus e abre a busca
+    this.menuPerfilAberto = false;
+    this.menuNotificacoesAberto = false;
+    this.dropdownBuscaAberto = true;
+    this.cdr.detectChanges();
+  }
+
+  onSearchChange() {
+    this.searchSubject.next(this.searchTerm);
+    if (this.searchTerm.length === 0) {
+      this.dropdownBuscaAberto = true; // Mantém aberto para ver recentes
+    }
+  }
+
+  irParaPerfil(user: any) {
+    this.salvarNoHistorico(user);
+    this.searchTerm = '';
+    this.resultadosBusca = [];
+    this.dropdownBuscaAberto = false;
+    
+    this.router.navigate(['/profile', user.uid]);
+    this.cdr.detectChanges();
+  }
+
+  // --- Toggles ---
+  togglePerfil() {
+    this.menuPerfilAberto = !this.menuPerfilAberto;
+    if (this.menuPerfilAberto) {
+      this.menuNotificacoesAberto = false;
+      this.dropdownBuscaAberto = false;
+    }
+    this.cdr.detectChanges();
+  }
+
+  toggleNotificacoes() {
+    this.menuNotificacoesAberto = !this.menuNotificacoesAberto;
+    if (this.menuNotificacoesAberto) {
+      this.menuPerfilAberto = false;
+      this.dropdownBuscaAberto = false;
+    }
+    this.cdr.detectChanges();
+  }
+
+  // --- Outros ---
   carregarNotificacoes(uid: string) {
-    const sub = this.notifService.getNotificacoes(uid).subscribe((res) => {
-      this.notificacoes = res;
-      this.cdr.detectChanges();
+    this.notifService.getNotificacoes(uid).subscribe((res) => {
+      this.zone.run(() => {
+        this.notificacoes = res;
+        this.cdr.detectChanges();
+      });
     });
-    this.subscricoes.add(sub);
   }
 
   formatarTempo(timestamp: any): string {
@@ -111,65 +197,26 @@ export class TopbarComponent implements OnInit, OnDestroy {
     return timestamp.toDate().toLocaleDateString();
   }
 
-  // --- Toggles com Detecção de Mudança Forçada (FIX DO BUG) ---
-  togglePerfil() {
-    this.menuPerfilAberto = !this.menuPerfilAberto;
-    
-    if (this.menuPerfilAberto) {
-      this.menuNotificacoesAberto = false;
-      this.resultadosBusca = []; 
-    }
-    
-    // Força o Angular a renderizar o *ngIf
-    this.cdr.detectChanges(); 
-  }
-
-  toggleNotificacoes() {
-    this.menuNotificacoesAberto = !this.menuNotificacoesAberto;
-    
-    if (this.menuNotificacoesAberto) {
-      this.menuPerfilAberto = false;
-      this.resultadosBusca = [];
-    }
-
-    // Força o Angular a renderizar o *ngIf
-    this.cdr.detectChanges();
-  }
-
   marcarComoLida(id: string | undefined) {
-    if (id) {
-      this.notifService.marcarComoLida(id);
-      // O subscribe das notificações deve atualizar a lista automaticamente, 
-      // mas se não atualizar a cor na hora:
-      this.cdr.detectChanges();
-    }
+    if (id) this.notifService.marcarComoLida(id);
   }
 
   marcarTodasComoLidas() {
-    if (this.dadosUsuario?.uid) {
-      this.notifService.marcarTodasLidas(this.dadosUsuario.uid);
-    }
+    if (this.dadosUsuario?.uid) this.notifService.marcarTodasLidas(this.dadosUsuario.uid);
   }
 
   async logout() {
     await this.authService.logout();
   }
 
-  // --- Listener Global para fechar ao clicar fora ---
   @HostListener('document:click', ['$event'])
   clickout(event: any) {
-    // Só executa lógica se tiver algum menu aberto (Performance)
-    if (this.menuPerfilAberto || this.menuNotificacoesAberto || this.resultadosBusca.length > 0) {
-      
-      // Verifica se o clique foi fora do componente
-      if (!this.eRef.nativeElement.contains(event.target)) {
-        this.menuPerfilAberto = false;
-        this.menuNotificacoesAberto = false;
-        this.resultadosBusca = []; // Opcional: fecha busca também
-        
-        // Garante que o fechamento visual ocorra
-        this.cdr.detectChanges();
-      }
+    if (!this.eRef.nativeElement.contains(event.target)) {
+      // Se clicar fora, fecha tudo
+      this.menuPerfilAberto = false;
+      this.menuNotificacoesAberto = false;
+      this.dropdownBuscaAberto = false;
+      this.cdr.detectChanges();
     }
   }
 }
