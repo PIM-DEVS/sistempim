@@ -106,7 +106,7 @@
   top: 55px;
   right: 0;
   background: white;
-  border-radius: var(--radius-pim);
+  border-radius: 16px;
   box-shadow: var(--shadow-dropdown);
   z-index: 1000;
   border: 1px solid #f0f0f0;
@@ -130,6 +130,7 @@
 /* --- DROPDOWN NOTIFICAÇÕES --- */
 .notification-dropdown {
   width: 340px;
+  border-radius: 16px;
 }
 
 .dropdown-header-row {
