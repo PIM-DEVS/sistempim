@@ -10,6 +10,14 @@
     </div>
 
     <div class="contacts-list">
+      <div *ngIf="loadingContatos" style="padding: 20px; text-align: center;">
+        <i class="bx bx-loader-alt bx-spin"></i> Carregando contatos...
+      </div>
+
+      <div *ngIf="!loadingContatos && contatos.length === 0" style="padding: 20px; text-align: center; color: #999; font-size: 0.9rem;">
+        Você precisa seguir alguém para iniciar uma conversa.
+      </div>
+
       <div 
         class="contact-item" 
         *ngFor="let contato of contatos" 
@@ -17,15 +25,13 @@
         (click)="selecionarChat(contato)"
       >
         <div class="contact-avatar">
-          <img [src]="contato.foto || 'assets/images/masculino.jpg'" alt="">
-          <span class="status-dot online"></span>
+          <img [src]="contato.fotoPerfil || contato.photoURL || 'assets/images/avatar-default.png'" alt="">
         </div>
         <div class="contact-info">
           <div class="ci-top">
-            <span class="name">{{ contato.nome }}</span>
-            <span class="time">10:42</span>
+            <span class="name">{{ contato.nome || contato.displayName }}</span>
           </div>
-          <p class="last-msg">Vamos estudar Angular hoje?</p>
+          <p class="last-msg">Clique para conversar</p>
         </div>
       </div>
     </div>
@@ -35,40 +41,45 @@
     
     <div class="chat-header">
       <div class="user-info">
-        <img [src]="chatAtivo.foto || 'assets/images/masculino.jpg'" class="header-avatar">
+        <img [src]="chatAtivo.fotoPerfil || chatAtivo.photoURL || 'assets/images/avatar-default.png'" class="header-avatar">
         <div>
-          <h3>{{ chatAtivo.nome }}</h3>
-          <span class="status-text">Online agora</span>
-        </div>
+          <h3>{{ chatAtivo.nome || chatAtivo.displayName }}</h3>
+          <span class="status-text">{{ chatAtivo.email }}</span> </div>
       </div>
       <div class="header-actions">
-        <i class="bx bx-phone"></i>
-        <i class="bx bx-video"></i>
         <i class="bx bx-dots-vertical-rounded"></i>
       </div>
     </div>
 
-    <div class="messages-area">
-      <div class="msg-bubble received">
-        <p>Oi! Vi que você começou o curso de Frontend.</p>
-        <span class="msg-time">10:30</span>
-      </div>
-
-      <div class="msg-bubble sent">
-        <p>Sim! Estou gostando muito da plataforma PIM.</p>
-        <span class="msg-time">10:31</span>
-      </div>
+    <div class="messages-area" #scrollContainer>
       
-      <div class="msg-bubble received">
-        <p>Show! Se precisar de ajuda, só chamar.</p>
-        <span class="msg-time">10:32</span>
-      </div>
+      <ng-container *ngIf="mensagens$ | async as mensagens">
+        
+        <div *ngIf="mensagens.length === 0" style="text-align: center; padding: 20px; color: #ccc;">
+          <small>Nenhuma mensagem ainda. Diga olá!</small>
+        </div>
+
+        <div 
+          class="msg-bubble" 
+          *ngFor="let msg of mensagens"
+          [ngClass]="{'sent': msg.senderId === currentUser.uid, 'received': msg.senderId !== currentUser.uid}"
+        >
+          <p>{{ msg.text }}</p>
+          <span class="msg-time">{{ formatarData(msg.timestamp) | date:'HH:mm' }}</span>
+        </div>
+
+      </ng-container>
+
     </div>
 
     <div class="chat-input-area">
-      <button class="btn-attach"><i class="bx bx-paperclip"></i></button>
-      <input type="text" placeholder="Digite sua mensagem..." [(ngModel)]="mensagemAtual" (keyup.enter)="enviarMensagem()">
-      <button class="btn-send" (click)="enviarMensagem()">
+      <input 
+        type="text" 
+        placeholder="Digite sua mensagem..." 
+        [(ngModel)]="mensagemAtual" 
+        (keyup.enter)="enviarMensagem()"
+      >
+      <button class="btn-send" (click)="enviarMensagem()" [disabled]="!mensagemAtual.trim()">
         <i class="bx bx-send"></i>
       </button>
     </div>
