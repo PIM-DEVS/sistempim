@@ -223,4 +223,8 @@ export class AuthService {
       return [];
     }
   }
+
+  getCurrentUserId(): string | null {
+    return this.auth.currentUser?.uid || null;
+  }
 }

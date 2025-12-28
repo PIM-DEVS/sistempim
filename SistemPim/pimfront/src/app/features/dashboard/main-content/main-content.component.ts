@@ -1,106 +1,124 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-// O import do Layout:
-import { MainLayoutComponent } from '../../../layout/main-layout/main-layout.component';
+import { Router } from '@angular/router';
 
-// Interfaces (podem ficar aqui ou em arquivo separado)
-interface Course {
-  category: string;
-  title: string;
-  time: string;
-  progress: number;
-  color: string;
-  image: string;
-}
-
-interface ClassSession {
-  code: string;
-  subject: string;
-  professor: string;
-  room: string;
-  time: string;
-  color: string;
-}
+// Serviços
+import { TurmaService } from '../../../core/services/turma.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { DashboardService } from '../../../core/services/dashboard.service';
 
 @Component({
   selector: 'app-main-content',
   standalone: true,
-  // AQUI É O PULO DO GATO: Importar o Layout para usar no HTML
   imports: [CommonModule],
   templateUrl: './main-content.component.html',
   styleUrl: './main-content.component.css',
 })
-export class MainContentComponent {
-  // SEÇÃO 1: CURSOS
-  courses: Course[] = [
-    {
-      category: 'Design',
-      title: 'UI/UX Fundamental',
-      time: '1h 30m',
-      progress: 75,
-      color: '#E91E63',
-      image: 'bx-paint',
-    },
-    {
-      category: 'Dev',
-      title: 'Angular Avançado',
-      time: '12h 10m',
-      progress: 30,
-      color: '#00Bfa5',
-      image: 'bx-code-alt',
-    },
-    {
-      category: 'Database',
-      title: 'SQL Mastery',
-      time: '5h 45m',
-      progress: 90,
-      color: '#2196F3',
-      image: 'bx-data',
-    },
-    {
-      category: 'Dev',
-      title: 'Node.js Backend',
-      time: '8h 00m',
-      progress: 10,
-      color: '#00Bfa5',
-      image: 'bx-server',
-    },
-  ];
+export class MainContentComponent implements OnInit {
+  // Injeções
+  private turmaService = inject(TurmaService);
+  private dashboardService = inject(DashboardService);
+  private authService = inject(AuthService);
+  private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef); // <--- A MÁGICA: Força a tela a atualizar
 
-  // SEÇÃO 2: TURMAS
-  activeClasses: ClassSession[] = [
-    {
-      code: 'T-901',
-      subject: 'Desenvolvimento Web II',
-      professor: 'Prof. Ricardo',
-      room: 'Lab 03',
-      time: 'Seg - 19:00',
-      color: '#00Bfa5',
-    },
-    {
-      code: 'T-805',
-      subject: 'Banco de Dados Avançado',
-      professor: 'Profa. Amanda',
-      room: 'Lab 01',
-      time: 'Qua - 20:40',
-      color: '#6C5DD3',
-    },
-    {
-      code: 'T-102',
-      subject: 'Gestão de Projetos',
-      professor: 'Prof. Carlos',
-      room: 'Sala B12',
-      time: 'Sex - 19:00',
-      color: '#FF9F43',
-    },
-  ];
+  // Dados
+  cursos: any[] = [];
+  turmas: any[] = [];
+  
+  loading = true;
+  uid = '';
+  userName = ''; 
+  isProfessor = false;
 
-  // AÇÕES
-  continueCourse(courseTitle: string) {
-    alert(`Abrindo o módulo: ${courseTitle}...`);
+  // Stats
+  totalCursos = 0;
+  totalTurmas = 0;
+  statusAluno = 'Carregando...';
+
+  ngOnInit() {
+    this.loading = true;
+    
+    // 1. Monitorar Autenticação
+    this.authService.user$.subscribe(async (user) => {
+      if (user) {
+        this.uid = user.uid;
+        this.isProfessor = !user.email?.includes('@aluno');
+
+        // --- A. BUSCAR NOME (Prioridade) ---
+        try {
+          const perfil = await this.authService.getDadosUsuario(this.uid);
+          this.userName = perfil?.nome || user.displayName || 'Aluno';
+        } catch (e) {
+          this.userName = user.displayName || 'Aluno';
+        }
+        
+        // FORÇA O NOME A APARECER AGORA
+        this.cdr.detectChanges(); 
+
+        // Inicia o resto dos dados
+        this.carregarDados();
+      } else {
+        this.loading = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
-  enterClass(classCode: string) {
-    alert(`Entrando na sala virtual da turma ${classCode}...`);
+  async carregarDados() {
+    // --- B. BUSCAR TURMAS (Seguro) ---
+    try {
+      const turmasData = await this.turmaService.getMinhasTurmas(this.uid, this.isProfessor);
+      this.turmas = turmasData || [];
+      this.totalTurmas = this.turmas.length;
+    } catch (error) {
+      console.error('Erro ao buscar turmas:', error);
+    }
+    
+    // Atualiza a tela parcial (se as turmas chegarem antes dos cursos)
+    this.cdr.detectChanges();
+
+    // --- C. BUSCAR CURSOS (Com proteção contra erro) ---
+    this.dashboardService.getAllCursos().subscribe({
+      next: (cursos: any[]) => {
+        this.cursos = cursos.filter((c: any) => JSON.stringify(c).includes(this.uid));
+        this.totalCursos = this.cursos.length;
+        this.finalizarLoading();
+      },
+      error: (err: any) => {
+        console.warn('Erro ao buscar cursos, ignorando...', err);
+        this.finalizarLoading();
+      }
+    });
+
+    // --- D. TRAVA DE SEGURANÇA ---
+    // Se o banco de dados falhar silenciosamente, destrava em 1.5 segundos
+    setTimeout(() => {
+      if (this.loading) {
+        console.log('Timeout forçado para liberar a tela.');
+        this.finalizarLoading();
+      }
+    }, 1500);
+  }
+
+  finalizarLoading() {
+    this.loading = false;
+    
+    if (this.totalTurmas > 0 || this.totalCursos > 0) {
+      this.statusAluno = 'Ativo';
+    } else {
+      this.statusAluno = 'Sem Vínculos';
+    }
+
+    // FORÇA ATUALIZAÇÃO FINAL (Garante que o loading suma)
+    this.cdr.detectChanges();
+  }
+
+  acessarTurma(id: string) {
+    this.router.navigate(['/turmas', id]);
+  }
+
+  getCor(turma: any): string {
+    return turma.cor || '#00ce71';
   }
 }
