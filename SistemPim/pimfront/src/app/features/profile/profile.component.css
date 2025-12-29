@@ -1,3 +1,6 @@
+/* =========================================
+   ESTRUTURA BASE
+========================================= */
 .profile-page {
   background: #f4f7f6;
   min-height: 100vh;
@@ -6,386 +9,399 @@
 }
 
 /* Banner */
-.profile-background {
-  height: 220px;
-  background-color: #00ce71; /* Cor padrão PIM */
+.profile-background,
+.sk-banner {
+  height: 250px;
+  background-color: #00ce71;
+  /* Fallback color */
   background-size: cover;
   background-position: center;
   position: relative;
-  border-radius: 0 0 25px 25px;
+  border-radius: 0 0 30px 30px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
+
 .overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, #00ce71 0%, #006660 100%);
-  border-radius: 0 0 25px 25px;
+  background: linear-gradient(180deg, rgba(0, 206, 113, 0.2) 0%, rgba(0, 51, 43, 0.6) 100%);
+  border-radius: 0 0 30px 30px;
 }
 
-/* Layout Grid */
+/* Layout Grid Principal */
 .profile-content {
   display: grid;
   grid-template-columns: 320px 1fr;
   gap: 30px;
-  max-width: 1100px;
+  max-width: 1200px;
   margin: -100px auto 0;
+  /* Puxa o conteúdo para cima do banner */
   padding: 0 20px;
   position: relative;
+  z-index: 10;
 }
 
-/* Cards */
+/* Utils */
 .card-shadow {
   background: white;
   border-radius: 20px;
   padding: 25px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.02);
 }
+
 .mt-20 {
   margin-top: 20px;
 }
 
-/* Foto de Perfil */
+.mb-3 {
+  margin-bottom: 1rem;
+}
+
+.mb-4 {
+  margin-bottom: 1.5rem;
+}
+
+/* =========================================
+   COLUNA ESQUERDA (User Card)
+========================================= */
 .avatar-container {
   position: relative;
-  width: 130px;
-  height: 130px;
+  width: 140px;
+  height: 140px;
   margin: 0 auto 15px;
 }
+
 .avatar-img {
   width: 100%;
   height: 100%;
   border-radius: 50%;
   border: 5px solid white;
   object-fit: cover;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  background: white;
 }
+
 .edit-badge {
   position: absolute;
-  bottom: 5px;
-  right: 5px;
-  background: #00ce71;
+  bottom: 8px;
+  right: 8px;
+  background: var(--primary-color);
   color: white;
-  border: none;
+  border: 3px solid white;
   border-radius: 50%;
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid white;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s;
 }
 
-/* Textos */
+.edit-badge:hover {
+  transform: scale(1.1);
+}
+
 .user-main-info h2 {
-  font-size: 1.3rem;
-  color: #333;
+  font-size: 1.4rem;
+  color: #2d3436;
   margin-bottom: 5px;
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
-.role {
-  color: #888;
-  font-size: 0.9rem;
-  text-align: center;
-  margin-bottom: 20px;
-}
+
 .verified {
   color: #00ce71;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
+}
+
+.role {
+  color: #636e72;
+  font-size: 0.95rem;
+  text-align: center;
+  margin-bottom: 25px;
+  font-weight: 500;
 }
 
 /* Stats */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  background: #f9f9f9;
+  background: #f8f9fa;
   padding: 15px;
   border-radius: 15px;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
   text-align: center;
 }
+
 .stat strong {
   display: block;
-  font-size: 1.1rem;
-  color: #333;
+  font-size: 1.2rem;
+  color: #2d3436;
+  font-weight: 700;
 }
+
 .stat span {
-  font-size: 0.7rem;
-  color: #aaa;
+  font-size: 0.75rem;
+  color: #b2bec3;
   text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
 }
 
 /* Botões */
-.btn-edit {
+.actions-area button {
   width: 100%;
   padding: 12px;
-  border: none;
   border-radius: 12px;
-  background: #004d40;
-  color: white;
+  border: none;
   font-weight: 600;
   cursor: pointer;
-  transition: 0.3s;
-}
-.btn-edit:hover {
-  background: #00332b;
-}
-.btn-save {
-  background: #00ce71;
-  color: white;
-  border: none;
-  padding: 12px 30px;
-  border-radius: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 15px;
-}
-
-/* Formulário de Edição */
-.form-group {
-  margin-bottom: 15px;
-  display: flex;
-  flex-direction: column;
-}
-.form-group label {
-  font-size: 0.85rem;
-  color: #777;
-  margin-bottom: 5px;
-  font-weight: 500;
-}
-.form-group input,
-.form-group textarea {
-  padding: 12px;
-  border: 1.5px solid #eee;
-  border-radius: 10px;
-  font-family: inherit;
-  transition: 0.3s;
-}
-.form-group input:focus {
-  border-color: #00ce71;
-  outline: none;
-}
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 15px;
-}
-
-/* Info Pessoal Style */
-.info-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  margin-top: 15px;
-}
-.fake-input {
-  background: #f8f9fa;
-  padding: 12px;
-  border-radius: 10px;
-  color: #444;
+  transition: all 0.2s ease;
   font-size: 0.95rem;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  border: 1px solid #eee;
-}
-.fake-input i {
-  color: #00ce71;
-  font-size: 1.2rem;
-}
-.lock {
-  margin-left: auto;
-  color: #ccc !important;
-  font-size: 0.9rem !important;
-}
-
-/* Tags */
-.tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 10px;
-}
-.tag {
-  background: #e8fcf3;
-  color: #00ce71;
-  padding: 4px 12px;
-  border-radius: 15px;
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-/* ... Mantenha seu CSS anterior ... */
-
-/* Botões de Ação Social */
-.social-buttons {
-  display: flex;
-  gap: 10px;
-  width: 100%;
-  margin-top: 15px;
-}
-
-.btn-action {
-  flex: 1;
-  padding: 12px;
-  border-radius: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: all 0.2s;
 }
 
-/* Botão Seguir */
-.btn-follow {
-  background-color: #00ce71;
+.btn-edit {
+  background: #004d40;
   color: white;
 }
-.btn-follow:hover {
-  background-color: #00b060;
+
+.btn-edit:hover {
+  background: #00332b;
   transform: translateY(-2px);
 }
 
-/* Botão Deixar de Seguir */
-.btn-unfollow {
-  background-color: #e2e8f0;
-  color: #64748b;
-  border: 1px solid #cbd5e1;
-}
-.btn-unfollow:hover {
-  background-color: #ff5b5b;
-  color: white;
-  border-color: #ff5b5b;
-  content: 'Deixar de seguir'; /* Truque visual avançado se quiser */
-}
-
-/* Botão Mensagem */
-.btn-msg {
-  background-color: #f0fdf4; /* Verde bem clarinho */
-  color: #00ce71;
-  border: 1px solid #00ce71;
-}
-.btn-msg:hover {
-  background-color: #00ce71;
-  color: white;
-}
-
 .btn-edit.cancel-mode {
-  background-color: #f8d7da;
-  color: #721c24;
-  border: 1px solid #f5c6cb;
-}
-.btn-edit.cancel-mode:hover {
-  background-color: #f1b0b7;
+  background: #ffebee;
+  color: #c62828;
 }
 
-/* --- COMPETÊNCIAS --- */
+.btn-edit.cancel-mode:hover {
+  background: #ffcdd2;
+}
+
+.social-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-follow {
+  background: var(--primary-color);
+  color: white;
+}
+
+.btn-follow:hover {
+  background: var(--primary-color);
+  transform: translateY(-2px);
+}
+
+.btn-unfollow {
+  background: #edf2f7;
+  color: #718096;
+}
+
+.btn-unfollow:hover {
+  background: #e53e3e;
+  color: white;
+}
+
+.btn-msg {
+  background: #e8fcf3;
+  color: #00ce71;
+  border: 1px solid #00ce71 !important;
+}
+
+.btn-msg:hover {
+  background: #00ce71;
+  color: white;
+}
+
+/* =========================================
+   COMPETÊNCIAS
+========================================= */
+.skills-card h3 {
+  font-size: 1.1rem;
+  color: #2d3436;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .add-skill-area {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   margin-bottom: 15px;
 }
 
 .add-skill-area input {
   flex: 1;
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 0.9rem;
+  padding: 10px;
+  border: 1px solid #dfe6e9;
+  border-radius: 8px;
   outline: none;
-}
-
-.add-skill-area input:focus {
-  border-color: #00ce71;
 }
 
 .add-skill-area button {
   background: #00ce71;
   color: white;
   border: none;
-  border-radius: 6px;
-  width: 36px;
+  border-radius: 8px;
+  width: 40px;
   cursor: pointer;
+}
+
+.tags {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.2rem;
-  transition: background 0.2s;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
-.add-skill-area button:hover {
-  background: #00a55a;
-}
-
-/* Tags com botão de remover */
 .tag {
+  background: #e8fcf3;
+  color: #00ce71;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding-right: 10px; /* Espaço extra pro X */
 }
 
 .remove-tag {
   cursor: pointer;
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.05);
+  padding: 2px;
   border-radius: 50%;
-  width: 16px;
-  height: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  transition: all 0.2s;
+  font-size: 0.8rem;
+  transition: 0.2s;
 }
 
 .remove-tag:hover {
-  background: #ff4d4d;
+  background: #ff7675;
   color: white;
 }
 
-.no-skills {
-  font-size: 0.9rem;
-  color: #aaa;
-  font-style: italic;
+/* =========================================
+   COLUNA DIREITA (Detalhes)
+========================================= */
+.card-header h3 {
+  font-size: 1.25rem;
+  color: #2d3436;
+  border-bottom: 2px solid #f1f2f6;
+  padding-bottom: 15px;
+  margin-bottom: 20px;
 }
 
-/* Botão Salvar Principal */
-.btn-save {
+.bio-text {
+  line-height: 1.8;
+  color: #636e72;
+  font-size: 1rem;
+  white-space: pre-line;
+}
+
+/* Formulário Edição */
+.edit-form label {
+  display: block;
+  color: #636e72;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.edit-form input,
+.edit-form textarea {
   width: 100%;
   padding: 12px;
-  background-color: #00ce71;
+  border: 1px solid #dfe6e9;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: #2d3436;
+  transition: 0.2s;
+  margin-bottom: 15px;
+}
+
+.edit-form input:focus,
+.edit-form textarea:focus {
+  border-color: #00ce71;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 206, 113, 0.1);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.btn-save {
+  background: #00ce71;
   color: white;
   border: none;
-  border-radius: 8px;
+  padding: 14px;
+  width: 100%;
+  border-radius: 10px;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  font-size: 1rem;
-  margin-top: 20px;
+  margin-top: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: transform 0.2s;
 }
 
 .btn-save:hover {
-  background-color: #00a55a;
-  transform: translateY(-2px);
+  background: #00b060;
+}
+
+/* Info Grid */
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.fake-input {
+  background: #f8f9fa;
+  padding: 12px 16px;
+  border-radius: 10px;
+  color: #2d3436;
+  font-size: 0.95rem;
+  border: 1px solid #dfe6e9;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.fake-input i {
+  color: #00ce71;
+  font-size: 1.2rem;
 }
 
 /* =========================================
-   SKELETON LOADING (Estrutura Idêntica)
+   SKELETON LOADING (Novo)
 ========================================= */
-
-/* Animação de Pulso */
 @keyframes pulse {
   0% {
     opacity: 1;
   }
+
   50% {
-    opacity: 0.6;
+    opacity: 0.4;
   }
+
   100% {
     opacity: 1;
   }
@@ -393,280 +409,172 @@
 
 .animate-pulse {
   animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  background-color: #e0e0e0 !important; /* Força a cor cinza */
-  border-color: #e0e0e0 !important;
-  color: transparent !important;
+  background-color: #e2e8f0;
+  /* Cor cinza do skeleton */
 }
 
-/* Ajustes para o modo Skeleton */
-.skeleton-mode .profile-content {
-  /* Garante que o conteúdo suba sobre o banner igual ao real */
-  position: relative;
-  z-index: 2;
-}
-
-/* Banner Skeleton - ALTURA CORRIGIDA */
+/* Skeleton Específicos */
 .sk-banner {
-  height: 280px; /* Mesma altura do .profile-background real */
-  background-color: #d1d5db;
   border-radius: 0 0 30px 30px;
+  height: 250px;
+  background-color: #cbd5e0;
 }
 
-/* Cards Skeleton */
 .sk-card {
-  background: white;
-  /* Remove padding extra se houver, usa o do card real */
+  min-height: 200px;
 }
 
-/* Avatar Skeleton */
 .sk-avatar {
   width: 140px;
   height: 140px;
   border-radius: 50%;
   border: 5px solid white;
-  background-color: #d1d5db;
-  /* Centraliza no container */
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: 0;
+  margin: -70px auto 15px;
+  position: relative;
+  background-color: #cbd5e0;
 }
 
-/* Textos e Linhas */
 .sk-text-center {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 10px;
-  margin-top: 80px; /* Espaço para o avatar que subiu */
   margin-bottom: 25px;
 }
 
 .sk-line {
-  height: 16px;
-  border-radius: 4px;
+  height: 12px;
+  border-radius: 6px;
+  background-color: #e2e8f0;
 }
+
 .sk-line.title {
-  width: 70%;
+  width: 60%;
   height: 24px;
+  margin-bottom: 5px;
 }
+
 .sk-line.subtitle {
   width: 40%;
+  height: 16px;
 }
+
+.sk-stats {
+  height: 60px;
+  border-radius: 12px;
+  margin-bottom: 25px;
+}
+
+.sk-btn {
+  height: 45px;
+  border-radius: 12px;
+  width: 100%;
+}
+
 .sk-line.title-sm {
+  width: 120px;
   height: 20px;
-  display: inline-block;
 }
-.sk-line.label {
-  width: 30%;
-  margin-bottom: 8px;
+
+.sk-tags {
+  display: flex;
+  gap: 8px;
 }
+
+.sk-tag {
+  width: 80px;
+  height: 32px;
+  border-radius: 20px;
+}
+
 .sk-line.full {
   width: 100%;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
+
 .sk-line.half {
   width: 50%;
 }
 
-/* Stats Skeleton */
-.sk-stats {
-  display: flex;
-  gap: 15px;
-  margin-bottom: 25px;
-}
-.sk-stat {
-  flex: 1;
-  height: 60px;
-  border-radius: 12px;
-  background-color: #f3f4f6;
-}
-
-/* Botão Skeleton */
-.sk-btn {
-  width: 100%;
-  height: 45px;
-  border-radius: 12px;
-}
-
-/* Tags Skeleton */
-.sk-tags {
-  display: flex;
-  gap: 10px;
-}
-.sk-tag {
-  width: 70px;
-  height: 30px;
-  border-radius: 20px;
-}
-
-/* Inputs Fake do Info Pessoal */
 .sk-info-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
 }
+
 .sk-input-fake {
-  width: 100%;
-  height: 45px;
-  border-radius: 12px;
-  background-color: #f9f9f9;
+  height: 48px;
+  border-radius: 10px;
 }
 
-.sk-body {
-  padding: 20px 0;
-}
-
-/* ============================================================
+/* =========================================
    RESPONSIVIDADE (MOBILE & TABLET)
-============================================================ */
+========================================= */
 
-@media (max-width: 1024px) {
-  /* No Tablet/Mobile, removemos o layout de colunas lado a lado */
+/* Tablet e Mobile (Abaixo de 992px) */
+@media (max-width: 992px) {
   .profile-content {
-    flex-direction: column; /* Empilha verticalmente */
+    /* Muda de Grid para Flex Column - Empilha tudo */
+    display: flex;
+    flex-direction: column;
+    margin-top: -60px;
+    /* Sobe menos no mobile */
     gap: 20px;
-    padding: 0 20px; /* Adiciona margem lateral para não colar na borda */
-    margin-top: -60px; /* Ajusta a subida do avatar */
   }
 
-  .left-column,
-  .right-column {
-    width: 100%; /* Ocupam largura total */
-    max-width: 100%;
-  }
-
-  /* Ajuste do Banner */
   .profile-background,
   .sk-banner {
-    height: 200px; /* Banner menor no mobile */
-    border-radius: 0 0 20px 20px;
+    height: 180px;
   }
 
-  /* Ajuste do Avatar */
-  .avatar-img,
+  /* Garante largura total */
+  .left-column,
+  .right-column {
+    width: 100%;
+  }
+
+  .avatar-container,
   .sk-avatar {
     width: 120px;
     height: 120px;
+    margin-top: -60px;
+    /* Puxa o avatar pra cima do card no mobile */
+  }
+
+  /* Ajusta o skeleton do avatar no mobile também */
+  .sk-avatar {
+    margin: -60px auto 15px;
   }
 }
 
-.user-main-info {
-  text-align: center; /* Centraliza o nome "José Lucena" */
-}
-
-.user-main-info h2 {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-/* Container do Toast */
-.toast-container {
-  position: fixed;
-  bottom: 30px;
-  right: 30px;
-  background: white;
-  padding: 16px 25px;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-  display: flex;
-  flex-direction: column;
-  z-index: 11000;
-  animation: slideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  border-left: 6px solid #00ce71; /* Cor padrão do PIM */
-}
-
-.toast-container.erro {
-  border-left-color: #ff5b5b;
-}
-
-.toast-content {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.toast-content i {
-  font-size: 1.5rem;
-  color: #00ce71;
-}
-
-.toast-container.erro i {
-  color: #ff5b5b;
-}
-
-.toast-content span {
-  font-weight: 500;
-  color: #333;
-}
-
-/* Barra de progresso fugindo */
-.progress-bar {
-  height: 3px;
-  background: #f0f0f0;
-  margin-top: 10px;
-  position: relative;
-  overflow: hidden;
-}
-
-.progress-bar::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  height: 100%;
-  width: 100%;
-  background: #00ce71;
-  animation: progress 3s linear forwards;
-}
-
-.toast-container.erro .progress-bar::after {
-  background: #ff5b5b;
-}
-
-@keyframes slideIn {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-@keyframes progress {
-  from {
-    width: 100%;
-  }
-  to {
-    width: 0%;
-  }
-}
-
-@media (max-width: 600px) {
-  /* Ajustes finos para celulares pequenos */
-  .stats-grid,
-  .sk-stats {
-    gap: 10px;
+/* Mobile Pequeno (Abaixo de 576px) */
+@media (max-width: 576px) {
+  .profile-content {
+    padding: 0 15px;
   }
 
-  .stat strong,
-  .sk-stat strong {
-    font-size: 1.2rem;
-  }
-
-  .user-main-info h2 {
-    font-size: 1.5rem;
-  }
-
-  /* Inputs ficam um embaixo do outro */
-  .form-row,
+  /* Inputs um embaixo do outro no info-grid */
   .info-grid,
+  .form-row,
   .sk-info-grid {
-    grid-template-columns: 1fr; /* 1 coluna só */
+    grid-template-columns: 1fr;
     gap: 15px;
   }
+
+  .stats-grid {
+    padding: 10px;
+    gap: 5px;
+  }
+
+  .stat strong {
+    font-size: 1rem;
+  }
+
+  .stat span {
+    font-size: 0.65rem;
+  }
+
+  /* Botões sociais empilhados no mobile muito pequeno? 
+     Se quiser, descomente abaixo: */
+  /* .social-buttons { flex-direction: column; } */
 }
