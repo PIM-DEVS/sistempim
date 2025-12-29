@@ -6,7 +6,9 @@ import {
   HostListener,
   ElementRef,
   OnDestroy,
-  NgZone, // <--- IMPORTANTE
+  NgZone,
+  Output,      // <--- IMPORTANTE
+  EventEmitter // <--- IMPORTANTE
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
@@ -24,22 +26,27 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
   styleUrls: ['./topbar.component.css'],
 })
 export class TopbarComponent implements OnInit, OnDestroy {
+  // --- Services ---
   private authService = inject(AuthService);
   private notifService = inject(NotificationService);
   private cdr = inject(ChangeDetectorRef);
   private eRef = inject(ElementRef);
   private router = inject(Router);
-  private zone = inject(NgZone); // <--- INJEÇÃO DA CORREÇÃO
+  private zone = inject(NgZone);
 
+  // --- OUTPUT PARA O LAYOUT (ABRIR MENU) ---
+  @Output() toggleMenu = new EventEmitter<void>();
+
+  // Dados
   dadosUsuario: any = null;
   notificacoes: Notificacao[] = [];
   
-  // Controles de Menu
+  // Controles Dropdown
   menuPerfilAberto = false;
   menuNotificacoesAberto = false;
   dropdownBuscaAberto = false;
 
-  // Busca e Histórico
+  // Busca
   searchTerm = '';
   resultadosBusca: any[] = [];
   pesquisasRecentes: any[] = [];
@@ -54,12 +61,10 @@ export class TopbarComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.carregarHistorico();
 
-    // 1. Dados do Usuário (Com correção de Zone)
+    // Carregar Usuário
     const subUser = this.authService.user$.subscribe(async (user) => {
       if (user) {
         const dados = await this.authService.getDadosUsuario(user.uid);
-        
-        // A MÁGICA: Força a execução dentro do Angular
         this.zone.run(() => {
           this.dadosUsuario = dados;
           this.carregarNotificacoes(user.uid);
@@ -69,36 +74,27 @@ export class TopbarComponent implements OnInit, OnDestroy {
     });
     this.subscricoes.add(subUser);
 
-    // 2. Busca (Com correção de Zone)
+    // Lógica da Busca
     const subSearch = this.searchSubject
       .pipe(debounceTime(400), distinctUntilChanged())
       .subscribe(async (term) => {
         if (term.length >= 2) {
-          this.zone.run(() => { 
-            this.buscando = true; 
-            this.cdr.detectChanges();
-          });
-          
+          this.zone.run(() => { this.buscando = true; this.cdr.detectChanges(); });
           let resultados = [];
           try {
             resultados = await this.authService.buscarUsuariosPorNome(term);
-          } catch (error) {
-            console.error(error);
-          }
+          } catch (error) { console.error(error); }
           
-          // Volta para a zona do Angular para mostrar os resultados
           this.zone.run(() => {
             this.resultadosBusca = resultados;
             this.buscando = false;
             this.dropdownBuscaAberto = true;
             this.cdr.detectChanges();
           });
-
         } else {
           this.zone.run(() => {
             this.resultadosBusca = [];
             this.buscando = false;
-            // Se limpou o texto, mostra o histórico se estiver focado
             this.dropdownBuscaAberto = true;
             this.cdr.detectChanges();
           });
@@ -111,20 +107,22 @@ export class TopbarComponent implements OnInit, OnDestroy {
     this.subscricoes.unsubscribe();
   }
 
-  // --- Histórico e Busca ---
+  // --- AÇÃO DO BOTÃO HAMBÚRGUER ---
+  onMenuClick() {
+    console.log('1. Botão clicado na Topbar');
+    this.toggleMenu.emit();
+  }
 
+  // --- Métodos de Busca e Histórico ---
   carregarHistorico() {
     const salvo = localStorage.getItem('historicoBuscaPim');
-    if (salvo) {
-      this.pesquisasRecentes = JSON.parse(salvo);
-    }
+    if (salvo) this.pesquisasRecentes = JSON.parse(salvo);
   }
 
   salvarNoHistorico(user: any) {
-    // Remove duplicados e adiciona no topo
     this.pesquisasRecentes = this.pesquisasRecentes.filter(u => u.uid !== user.uid);
     this.pesquisasRecentes.unshift(user);
-    if (this.pesquisasRecentes.length > 5) this.pesquisasRecentes.pop(); // Limite de 5
+    if (this.pesquisasRecentes.length > 5) this.pesquisasRecentes.pop();
     localStorage.setItem('historicoBuscaPim', JSON.stringify(this.pesquisasRecentes));
   }
 
@@ -135,18 +133,14 @@ export class TopbarComponent implements OnInit, OnDestroy {
   }
 
   onSearchFocus() {
-    // Fecha outros menus e abre a busca
     this.menuPerfilAberto = false;
     this.menuNotificacoesAberto = false;
     this.dropdownBuscaAberto = true;
-    this.cdr.detectChanges();
   }
 
   onSearchChange() {
     this.searchSubject.next(this.searchTerm);
-    if (this.searchTerm.length === 0) {
-      this.dropdownBuscaAberto = true; // Mantém aberto para ver recentes
-    }
+    if (this.searchTerm.length === 0) this.dropdownBuscaAberto = true;
   }
 
   irParaPerfil(user: any) {
@@ -154,37 +148,24 @@ export class TopbarComponent implements OnInit, OnDestroy {
     this.searchTerm = '';
     this.resultadosBusca = [];
     this.dropdownBuscaAberto = false;
-    
     this.router.navigate(['/profile', user.uid]);
-    this.cdr.detectChanges();
   }
 
-  // --- Toggles ---
+  // --- Toggles de Dropdown ---
   togglePerfil() {
     this.menuPerfilAberto = !this.menuPerfilAberto;
-    if (this.menuPerfilAberto) {
-      this.menuNotificacoesAberto = false;
-      this.dropdownBuscaAberto = false;
-    }
-    this.cdr.detectChanges();
+    if (this.menuPerfilAberto) { this.menuNotificacoesAberto = false; this.dropdownBuscaAberto = false; }
   }
 
   toggleNotificacoes() {
     this.menuNotificacoesAberto = !this.menuNotificacoesAberto;
-    if (this.menuNotificacoesAberto) {
-      this.menuPerfilAberto = false;
-      this.dropdownBuscaAberto = false;
-    }
-    this.cdr.detectChanges();
+    if (this.menuNotificacoesAberto) { this.menuPerfilAberto = false; this.dropdownBuscaAberto = false; }
   }
 
-  // --- Outros ---
+  // --- Notificações ---
   carregarNotificacoes(uid: string) {
     this.notifService.getNotificacoes(uid).subscribe((res) => {
-      this.zone.run(() => {
-        this.notificacoes = res;
-        this.cdr.detectChanges();
-      });
+      this.zone.run(() => { this.notificacoes = res; this.cdr.detectChanges(); });
     });
   }
 
@@ -209,14 +190,13 @@ export class TopbarComponent implements OnInit, OnDestroy {
     await this.authService.logout();
   }
 
+  // Fecha dropdowns ao clicar fora
   @HostListener('document:click', ['$event'])
   clickout(event: any) {
     if (!this.eRef.nativeElement.contains(event.target)) {
-      // Se clicar fora, fecha tudo
       this.menuPerfilAberto = false;
       this.menuNotificacoesAberto = false;
       this.dropdownBuscaAberto = false;
-      this.cdr.detectChanges();
     }
   }
 }

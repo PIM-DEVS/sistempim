@@ -1,5 +1,11 @@
 <div class="topbar-container">
   
+  <div class="mobile-left-controls">
+    <button class="hamburger-btn" (click)="onMenuClick()">
+      <i class="bx bx-menu"></i>
+    </button>
+  </div>
+
   <div class="search-wrapper">
     <div class="search-box">
       <i class="bx bx-search" *ngIf="!buscando"></i>
@@ -42,7 +48,6 @@
           </div>
         </div>
       </ng-container>
-
     </div>
   </div>
 

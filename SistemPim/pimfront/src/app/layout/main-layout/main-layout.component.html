@@ -1,24 +1,21 @@
 <div class="app-container">
-  <div class="mobile-header">
-    <button class="hamburger-btn" (click)="toggleMenu()">
-      <i class="bx bx-menu"></i>
-    </button>
-    <span class="mobile-logo">PimApp</span>
-    <div style="width: 30px"></div>
-  </div>
-
+  
   <app-sidebar
     class="sidebar-wrapper"
-    [isOpen]="true"
     [class.mobile-open]="isMobileMenuOpen"
     (click)="closeMenu()"
   >
   </app-sidebar>
 
-  <div class="overlay" *ngIf="isMobileMenuOpen" (click)="closeMenu()"></div>
+  <div 
+    class="overlay" 
+    *ngIf="isMobileMenuOpen" 
+    (click)="closeMenu()">
+  </div>
 
   <div class="main-content">
-    <app-topbar class="desktop-topbar"></app-topbar>
+    
+    <app-topbar (toggleMenu)="toggleMenu()"></app-topbar>
 
     <div class="page-content">
       <router-outlet></router-outlet>
