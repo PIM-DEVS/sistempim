@@ -70,10 +70,10 @@ export class AuthService {
           nome: result.user.displayName,
           role: 'aluno',
           foto: result.user.photoURL,
-          uid: result.user.uid // Garante o ID salvo
+          uid: result.user.uid 
         });
       } else {
-        // Se já existe, garante que o campo UID esteja atualizado (correção de bug antigo)
+        // Se já existe, garante que o campo UID esteja atualizado
         if (!dadosExistentes.uid) {
            await this.updateProfileData(result.user.uid, { uid: result.user.uid });
         }
