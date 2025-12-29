@@ -1,4 +1,4 @@
-/* --- GERAIS --- */
+/* --- CONFIGURAÇÕES GERAIS --- */
 :root {
   --pim-green: #00a859;
   --pim-green-light: #e6f7ef;
@@ -6,6 +6,7 @@
   --text-gray: #666;
   --bg-hover: #f5f6fa;
   --shadow-dropdown: 0 10px 30px rgba(0, 0, 0, 0.12);
+  --radius-pim: 16px;
 }
 
 .topbar-container {
@@ -16,15 +17,15 @@
   background-color: #ffffff;
   margin-bottom: 20px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-  gap: 20px;
+  gap: 20px; /* Espaço entre os itens */
 }
 
-/* CONTROLES MOBILE */
+/* --- MOBILE CONTROLS (Hambúrguer) --- */
 .mobile-left-controls {
-  display: none;
+  display: none; /* Desktop: esconde */
   align-items: center;
   gap: 15px;
-  flex-shrink: 0;
+  flex-shrink: 0; /* Impede que o botão encolha */
 }
 
 .hamburger-btn {
@@ -33,15 +34,22 @@
   font-size: 28px;
   color: #333;
   cursor: pointer;
-  padding: 0;
   display: flex;
+  padding: 0;
 }
 
-/* BARRA DE PESQUISA */
+.mobile-logo {
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: var(--pim-green);
+}
+
+/* --- BARRA DE PESQUISA --- */
 .search-wrapper {
   position: relative;
   display: flex;
   flex-direction: column;
+  /* Desktop: Largura definida pelo search-box */
 }
 
 .search-box {
@@ -50,7 +58,7 @@
   background: var(--bg-hover);
   padding: 10px 20px;
   border-radius: 30px;
-  width: 380px;
+  width: 380px; /* Largura fixa no Desktop */
   transition: all 0.3s;
 }
 
@@ -60,60 +68,205 @@
   box-shadow: 0 0 0 2px var(--pim-green-light);
 }
 
-.search-box i { color: #8d8d8d; font-size: 1.2rem; margin-right: 10px; }
-.search-box input { border: none; background: transparent; outline: none; width: 100%; color: var(--text-dark); }
+.search-box i {
+  color: #8d8d8d;
+  font-size: 1.2rem;
+  margin-right: 10px;
+}
 
-/* AREA USUARIO */
-.user-area { display: flex; align-items: center; gap: 24px; flex-shrink: 0; }
-.notification-wrapper, .profile-wrapper { position: relative; }
-.notification-icon { cursor: pointer; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.2s; position: relative; }
-.notification-icon:hover { background-color: var(--bg-hover); }
-.notification-icon i { font-size: 1.5rem; color: var(--text-gray); }
-.notification-icon i.active-bell { color: var(--pim-green); }
-.notification-icon .dot { position: absolute; top: 10px; right: 10px; width: 8px; height: 8px; background: #ff4757; border-radius: 50%; border: 2px solid #fff; }
+.search-box input {
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 100%;
+  color: var(--text-dark);
+}
 
-/* DROPDOWNS (Estilos padrão mantidos) */
-.dropdown-panel { position: absolute; top: 55px; right: 0; background: white; border-radius: 16px; box-shadow: var(--shadow-dropdown); z-index: 1000; border: 1px solid #f0f0f0; animation: slideDown 0.2s; overflow: hidden; }
+/* --- ÁREA DO USUÁRIO --- */
+.user-area {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-shrink: 0; /* Impede que os ícones encolham */
+}
+
+.notification-wrapper,
+.profile-wrapper {
+  position: relative;
+}
+
+.notification-icon {
+  position: relative;
+  cursor: pointer;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.notification-icon:hover {
+  background-color: var(--bg-hover);
+}
+
+.notification-icon i {
+  font-size: 1.5rem;
+  color: var(--text-gray);
+}
+
+.notification-icon i.active-bell {
+  color: var(--pim-green);
+}
+
+.notification-icon .dot {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 8px;
+  height: 8px;
+  background: #ff4757;
+  border-radius: 50%;
+  border: 2px solid #fff;
+}
+
+/* --- DROPDOWNS --- */
+.dropdown-panel {
+  position: absolute;
+  top: 55px;
+  right: 0;
+  background: white;
+  border-radius: 16px;
+  box-shadow: var(--shadow-dropdown);
+  z-index: 1000;
+  border: 1px solid #f0f0f0;
+  animation: slideDown 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
+  transform-origin: top right;
+  overflow: hidden;
+}
+
+/* Estilos internos dos Dropdowns (Mantidos iguais) */
 .notification-dropdown { width: 340px; }
-.profile-dropdown { width: 220px; padding: 10px; }
-.search-results-dropdown { top: 50px; width: 100%; left: 0; max-height: 300px; overflow-y: auto; }
-
-/* Elementos internos dos dropdowns (resumido para economizar espaço visual, mas mantenha o seu completo) */
-.dropdown-header-row { display: flex; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid #f0f0f0; }
+.dropdown-header-row { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #f0f0f0; }
+.dd-title { font-weight: 700; color: var(--text-dark); font-size: 0.95rem; }
+.mark-read-link { background: none; border: none; font-size: 0.75rem; color: var(--pim-green); font-weight: 600; cursor: pointer; }
 .notif-list { max-height: 380px; overflow-y: auto; }
-.notif-item { display: flex; gap: 14px; padding: 16px 20px; border-bottom: 1px solid #fbfbfb; cursor: pointer; }
-.notif-item:hover { background: #fcfcfc; }
-.notif-icon-box { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: #eee; }
-.search-item { display: flex; align-items: center; gap: 12px; padding: 12px 20px; cursor: pointer; border-bottom: 1px solid #f8f8f8; }
-.search-item:hover { background: var(--pim-green-light); }
-.profile-display { display: flex; align-items: center; gap: 12px; cursor: pointer; padding: 6px 12px; border-radius: 30px; }
-.profile-display:hover { background: var(--bg-hover); }
-.user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-.dropdown-list-items li { display: flex; align-items: center; gap: 10px; padding: 10px 15px; cursor: pointer; border-radius: 10px; }
-.dropdown-list-items li:hover { background: var(--bg-hover); color: var(--pim-green); }
+.notif-item { display: flex; gap: 14px; padding: 16px 20px; border-bottom: 1px solid #fbfbfb; cursor: pointer; position: relative; transition: background 0.2s; }
+.notif-item:hover { background-color: #fcfcfc; }
+.notif-item.unread { background-color: var(--pim-green-light); }
+.notif-icon-box { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.notif-icon-box.atividade { background: #e3f2fd; color: #2196f3; }
+.notif-icon-box.aviso { background: #fff3e0; color: #ff9800; }
+.notif-icon-box.sistema { background: #f3e5f5; color: #9c27b0; }
+.notif-content { flex: 1; }
+.notif-top-line { display: flex; justify-content: space-between; margin-bottom: 4px; }
+.n-title { font-weight: 600; font-size: 0.85rem; color: var(--text-dark); }
+.n-time { font-size: 0.7rem; color: #999; }
+.n-msg { font-size: 0.8rem; color: var(--text-gray); margin: 0; line-height: 1.4; }
+.status-dot { position: absolute; top: 50%; right: 15px; transform: translateY(-50%); width: 8px; height: 8px; background: var(--pim-green); border-radius: 50%; }
+.dropdown-footer { text-align: center; padding: 12px; background: #fafafa; border-top: 1px solid #f0f0f0; }
+.dropdown-footer a { font-size: 0.85rem; color: var(--text-gray); text-decoration: none; font-weight: 500; }
+.empty-state { text-align: center; padding: 40px 20px; color: #b0b0b0; }
+.empty-state i { font-size: 2rem; margin-bottom: 10px; display: block; }
 
-@keyframes slideDown { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+/* Busca Dropdown */
+.search-results-dropdown { top: 50px; width: 100%; left: 0; max-height: 300px; overflow-y: auto; }
+.search-item { display: flex; align-items: center; gap: 12px; padding: 12px 20px; cursor: pointer; transition: background 0.2s; border-bottom: 1px solid #f8f8f8; }
+.search-item:hover { background-color: var(--pim-green-light); }
+.search-avatar { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; border: 1px solid #eee; }
+.search-info { display: flex; flex-direction: column; }
+.search-name { font-size: 0.85rem; font-weight: 600; color: var(--text-dark); }
+.search-role { font-size: 0.75rem; color: var(--text-gray); text-transform: capitalize; }
+.dropdown-section-title { padding: 10px 20px 5px; font-size: 0.75rem; font-weight: 700; color: #999; text-transform: uppercase; border-bottom: 1px solid #f9f9f9; }
+.history-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; border-bottom: 1px solid #f5f5f5; }
+.dd-title-small { font-size: 0.8rem; font-weight: 700; color: #999; text-transform: uppercase; }
+.clear-history-btn { background: none; border: none; font-size: 0.75rem; color: #ff5b5b; cursor: pointer; padding: 0; }
+.recent-icon { width: 35px; height: 35px; border-radius: 50%; background-color: #f0f2f5; display: flex; align-items: center; justify-content: center; color: #888; font-size: 1.1rem; }
+
+/* Perfil Dropdown */
+.profile-dropdown { width: 220px; padding: 10px; }
+.profile-display { display: flex; align-items: center; gap: 12px; cursor: pointer; padding: 6px 12px; border-radius: 30px; transition: 0.2s; }
+.profile-display:hover, .profile-display.active { background-color: var(--bg-hover); }
+.user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); }
+.user-name { font-weight: 600; font-size: 0.9rem; color: var(--text-dark); max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.profile-header-info { padding: 10px 15px; border-bottom: 1px solid #f0f0f0; margin-bottom: 5px; }
+.label-welcome { display: block; font-size: 0.75rem; color: #999; }
+.label-name { display: block; font-weight: 700; font-size: 0.95rem; color: var(--text-dark); }
+.dropdown-list-items { list-style: none; padding: 0; margin: 0; }
+.dropdown-list-items li { display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: #555; cursor: pointer; border-radius: 10px; transition: 0.2s; font-size: 0.9rem; }
+.dropdown-list-items li:hover { background-color: var(--bg-hover); color: var(--pim-green); }
+.dropdown-list-items li:hover i { color: var(--pim-green); }
+.dropdown-list-items li i { font-size: 1.2rem; color: #888; }
+.divider { height: 1px; background: #f0f0f0; margin: 5px 0; padding: 0 !important; cursor: default !important; }
+.item-logout { color: #ff5b5b !important; }
+.item-logout i { color: #ff5b5b !important; }
+.item-logout:hover { background-color: #fff0f0 !important; }
+
+@keyframes slideDown { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
 
 /* ============================================================
    RESPONSIVIDADE (MOBILE < 992px)
 ============================================================ */
 @media (max-width: 992px) {
-  .topbar-container { padding: 10px 15px; gap: 10px; }
+  .topbar-container {
+    padding: 10px 15px;
+    gap: 10px; /* Reduz gap */
+  }
 
-  /* 1. Botão Menu aparece */
-  .mobile-left-controls { display: flex; }
+  /* 1. Ativa Controles Mobile (Esquerda) */
+  .mobile-left-controls {
+    display: flex;
+  }
+  
+  /* Garante que o texto PimApp suma se ainda estiver no HTML */
+  .mobile-logo {
+    display: none; 
+  }
 
-  /* 2. Barra de Pesquisa ESTICADA */
-  .search-wrapper { display: block !important; flex: 1; }
-  .search-box { width: 100%; padding: 8px 15px; font-size: 0.9rem; }
-  .search-box i { font-size: 1rem; margin-right: 8px; }
+  /* 2. BARRA DE PESQUISA (Agora Visível e Esticada) */
+  .search-wrapper {
+    display: block !important; 
+    flex: 1; /* Faz a barra ocupar todo espaço disponível no meio */
+  }
 
-  /* 3. Área Usuário compacta */
-  .user-area { gap: 12px; }
-  .profile-info { display: none; }
-  .profile-display { padding: 0; }
-  .user-avatar { margin: 0; width: 32px; height: 32px; }
+  .search-box {
+    width: 100%; /* Preenche o search-wrapper */
+    padding: 8px 15px;
+    font-size: 0.9rem;
+  }
+  
+  .search-box i {
+    font-size: 1rem;
+    margin-right: 8px;
+  }
 
-  /* Dropdowns Fixos */
-  .dropdown-panel { position: fixed; top: 60px; left: 10px; right: 10px; width: auto; }
+  /* 3. Ajusta Área Usuário (Direita) */
+  .user-area {
+    gap: 12px;
+  }
+
+  .profile-info {
+    display: none; /* Esconde texto "João..." */
+  }
+  
+  .profile-display {
+    padding: 0;
+  }
+  
+  .user-avatar {
+    margin: 0;
+    width: 32px;
+    height: 32px;
+  }
+
+  /* Dropdowns no Mobile */
+  .dropdown-panel {
+    position: fixed;
+    top: 60px;
+    left: 10px;
+    right: 10px;
+    width: auto;
+    max-width: none;
+  }
 }
