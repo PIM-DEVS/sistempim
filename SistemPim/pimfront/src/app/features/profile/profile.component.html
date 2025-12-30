@@ -1,103 +1,48 @@
-<div class="auth-container">
+<div class="profile-container" *ngIf="!loading; else loadingTpl">
   
-  <div class="auth-banner">
-    <div class="banner-content">
-      <div class="logo-box-decoration">
-        <i class='bx bxs-shapes'></i>
+  <div class="profile-card">
+    <div class="profile-header">
+      <div class="avatar-container">
+        <img [src]="user?.foto || 'assets/images/default-avatar.png'" alt="Foto de perfil">
       </div>
-      <h1>
-        <span *ngIf="isLoginMode">Bem-vindo<br />de volta!</span>
-        <span *ngIf="!isLoginMode">Junte-se ao<br />PIM Online!</span>
-        <span class="hand-wave">👋</span>
-      </h1>
-      <p>Gerencie projetos, conecte-se com professores e automatize sua jornada acadêmica.</p>
+      <h2>{{ user?.nome || 'Usuário sem nome' }} <i class='bx bxs-badge-check verified'></i></h2>
+      <p class="role">Aluno de Análise e Desenvolvimento de Sistemas</p>
+      <p class="email">{{ user?.email }}</p>
     </div>
-    <div class="circle c1"></div>
-    <div class="circle c2"></div>
-    <div class="copyright">© 2025 PIM Online. Todos os direitos reservados.</div>
-  </div>
 
-  <div class="auth-form-wrapper">
-    <div class="form-scroll-container">
-      
-      <div class="mobile-brand">
-        <div class="brand-icon"><i class='bx bxs-graduation'></i></div>
-        <h2>PIM <strong>Online</strong></h2>
+    <div class="stats-row">
+      <div class="stat">
+        <strong>{{ stats.projetos }}</strong>
+        <span>Projetos</span>
       </div>
-
-      <div class="form-box login-box" *ngIf="!showGenderSelect">
-        
-        <div class="header">
-          <h2>{{ isLoginMode ? 'Acesse sua conta' : 'Crie sua conta' }}</h2>
-          <p class="subtitle">
-            {{ isLoginMode ? 'Insira seus dados para continuar.' : 'Preencha os dados abaixo.' }}
-          </p>
-        </div>
-
-        <div class="error-banner" *ngIf="errorMessage">
-          <i class='bx bxs-error-circle'></i>
-          <span>{{ errorMessage }}</span>
-        </div>
-
-        <div class="input-group" *ngIf="!isLoginMode">
-          <label>Nome Completo</label>
-          <input type="text" [(ngModel)]="nome" placeholder="Seu nome" autocomplete="name">
-        </div>
-
-        <div class="input-group">
-          <label>Email Institucional</label>
-          <input type="email" [(ngModel)]="email" placeholder="seu.email@aluno.ifal.edu.br" autocomplete="email">
-        </div>
-
-        <div class="input-group">
-          <label>Senha</label>
-          <input type="password" [(ngModel)]="password" placeholder="Sua senha segura" (keyup.enter)="onSubmit()">
-        </div>
-
-        <div class="actions-row">
-          <button (click)="onSubmit()" class="btn-primary" [disabled]="loading">
-            <span *ngIf="!loading">{{ isLoginMode ? 'Entrar Agora' : 'Criar Conta' }}</span>
-            <span *ngIf="loading"><i class='bx bx-loader-alt bx-spin'></i> Processando...</span>
-          </button>
-        </div>
-
-        <div class="toggle-mode">
-          <p>
-            {{ isLoginMode ? 'Não tem uma conta?' : 'Já tem uma conta?' }}
-            <a (click)="toggleMode()">
-              <strong>{{ isLoginMode ? 'Cadastre-se gratuitamente' : 'Faça Login' }}</strong>
-            </a>
-          </p>
-        </div>
-
-        <div class="divider"><span>ou continue com</span></div>
-
-        <button (click)="loginGoogle()" class="btn-google">
-          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" />
-          <span>Entrar com Google</span>
-        </button>
+      <div class="stat">
+        <strong>{{ stats.seguidores }}</strong>
+        <span>Seguidores</span>
       </div>
-
-      <div class="form-box gender-box" *ngIf="showGenderSelect">
-        <div class="header">
-          <h2>Quase lá!</h2>
-          <p>Escolha um avatar para o seu perfil.</p>
-        </div>
-        <div class="gender-options">
-          <div class="gender-card" (click)="selectGender('Masculino')" [class.selected]="selectedGender === 'Masculino'">
-            <div class="avatar-preview"><img src="assets/images/masculino.jpg" alt="M" /></div>
-            <span>Masculino</span>
-          </div>
-          <div class="gender-card" (click)="selectGender('Feminino')" [class.selected]="selectedGender === 'Feminino'">
-            <div class="avatar-preview"><img src="assets/images/feminino.jpg" alt="F" /></div>
-            <span>Feminino</span>
-          </div>
-        </div>
-        <button class="btn-primary" [disabled]="!selectedGender" (click)="finalizarCadastro()">
-          Continuar
-        </button>
+      <div class="stat">
+        <strong>{{ stats.seguindo }}</strong>
+        <span>Seguindo</span>
       </div>
-      
+    </div>
+
+    <div class="actions">
+      <button class="btn-primary" (click)="editarPerfil()">Editar Perfil</button>
+      <button class="btn-secondary" (click)="logout()">Sair</button>
     </div>
   </div>
+
+  <div class="skills-card">
+    <h3>Competências</h3>
+    <div class="tags">
+      <span *ngFor="let skill of competencias" class="tag">{{ skill }}</span>
+    </div>
+  </div>
+
 </div>
+
+<ng-template #loadingTpl>
+  <div class="loading-screen">
+    <i class='bx bx-loader-alt bx-spin'></i>
+    <p>Carregando seu perfil...</p>
+  </div>
+</ng-template>
