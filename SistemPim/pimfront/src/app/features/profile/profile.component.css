@@ -1,402 +1,552 @@
-/* =========================================
-   ESTRUTURA BASE
-========================================= */
+/* ============================
+   ESTRUTURA GERAL
+============================ */
 .profile-page {
-  background: #f4f7f6;
+  border-radius: 35px 35px 0px 0px;
+  background-color: #f0f2f5;
   min-height: 100vh;
-  font-family: 'Poppins', sans-serif;
   padding-bottom: 50px;
+  font-family: 'Segoe UI', sans-serif;
+  overflow-x: hidden;
+  /* Evita scroll lateral no mobile */
 }
 
-/* Banner */
-.profile-background,
-.sk-banner {
-  height: 250px;
+/* BANNER */
+.profile-banner {
+  height: 280px;
+  width: 100%;
   background-color: #00ce71;
   background-size: cover;
   background-position: center;
   position: relative;
-  border-radius: 0 0 30px 30px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
 .overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(0, 206, 113, 0.2) 0%, rgba(0, 51, 43, 0.6) 100%);
-  border-radius: 0 0 30px 30px;
+  background: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.4) 100%);
 }
 
-/* Layout Grid Principal */
-.profile-content {
+/* GRID PRINCIPAL (Responsável pelo overlap) */
+.layout-grid {
   display: grid;
-  grid-template-columns: 320px 1fr;
-  gap: 30px;
-  max-width: 1200px;
-  margin: -100px auto 0;
+  grid-template-columns: 340px 1fr;
+  gap: 24px;
+  max-width: 1100px;
+  margin: 0 auto;
   padding: 0 20px;
+
+  /* AQUI A MÁGICA: Sobe os cards em cima do banner */
+  margin-top: -80px;
   position: relative;
   z-index: 10;
 }
 
-/* Utils */
-.card-shadow {
+/* CARDS */
+.card {
   background: white;
-  border-radius: 20px;
-  padding: 25px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
-  border: 1px solid rgba(0, 0, 0, 0.02);
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.022);
+  padding: 24px;
+  overflow: hidden;
 }
 
-.mt-20 { margin-top: 20px; }
-.mb-3 { margin-bottom: 1rem; }
-.mb-4 { margin-bottom: 1.5rem; }
-
-/* =========================================
-   COLUNA ESQUERDA (User Card)
-========================================= */
-.avatar-container {
-  position: relative;
-  width: 140px;
-  height: 140px;
-  margin: 0 auto 15px;
+.mt-20 {
+  margin-top: 20px;
 }
 
-.avatar-img {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  border: 5px solid white;
-  object-fit: cover;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-  background: white;
-}
-
-/* Badge de edição foi removido daqui */
-
-.user-main-info h2 {
-  font-size: 1.4rem;
-  color: #2d3436;
-  margin-bottom: 5px;
-  text-align: center;
+/* ============================
+   INPUTS ESTILO LOGIN (MODERNOS)
+============================ */
+.edit-form {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 10px;
 }
 
-.verified { color: #00ce71; font-size: 1.2rem; }
-
-.role {
-  color: #636e72;
-  font-size: 0.95rem;
-  text-align: center;
-  margin-bottom: 25px;
-  font-weight: 500;
-}
-
-/* Stats */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  background: #f8f9fa;
-  padding: 15px;
-  border-radius: 15px;
-  margin-bottom: 25px;
-  text-align: center;
-}
-
-.stat strong {
+.form-group label {
   display: block;
-  font-size: 1.2rem;
-  color: #2d3436;
-  font-weight: 700;
-}
-
-.stat span {
-  font-size: 0.75rem;
-  color: #b2bec3;
-  text-transform: uppercase;
+  font-size: 0.9rem;
   font-weight: 600;
-  letter-spacing: 0.5px;
+  color: #333;
+  margin-bottom: 8px;
+  margin-left: 4px;
+  /* Alinha com a curva do input */
 }
 
-/* Botões */
-.actions-area button {
+/* O Estilo do Input */
+.form-group input,
+.form-group textarea {
   width: 100%;
-  padding: 12px;
+  padding: 12px 16px;
+  /* Mais gordinho */
+  background-color: #f8f9fa;
+  /* Fundo cinza bem claro */
+  border: 2px solid transparent;
+  /* Borda invisível inicialmente */
   border-radius: 12px;
-  border: none;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 0.95rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.btn-edit { background: #004d40; color: white; }
-.btn-edit:hover { background: #00332b; transform: translateY(-2px); }
-
-.btn-edit.cancel-mode { background: #ffebee; color: #c62828; }
-.btn-edit.cancel-mode:hover { background: #ffcdd2; }
-
-.social-buttons { display: flex; gap: 10px; }
-
-.btn-follow { background: #00ce71; color: white; }
-.btn-follow:hover { background: #00ce71; transform: translateY(-2px); }
-
-.btn-unfollow { background: #edf2f7; color: #718096; }
-.btn-unfollow:hover { background: #e53e3e; color: white; }
-
-.btn-msg {
-  background: #e8fcf3;
-  color: #00ce71;
-  border: 1px solid #00ce71 !important;
-}
-.btn-msg:hover { background: #00ce71; color: white; }
-
-/* =========================================
-   COMPETÊNCIAS
-========================================= */
-.skills-card h3 {
-  font-size: 1.1rem;
-  color: #2d3436;
-  margin-bottom: 15px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.add-skill-area {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 15px;
-}
-
-.add-skill-area input {
-  flex: 1;
-  padding: 10px;
-  border: 1px solid #dfe6e9;
-  border-radius: 8px;
-  outline: none;
-}
-
-.add-skill-area button {
-  background: #00ce71;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  width: 40px;
-  cursor: pointer;
-}
-
-.tags { display: flex; flex-wrap: wrap; gap: 8px; }
-
-.tag {
-  background: #e8fcf3;
-  color: #00ce71;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.remove-tag {
-  cursor: pointer;
-  background: rgba(0, 0, 0, 0.05);
-  padding: 2px;
-  border-radius: 50%;
-  font-size: 0.8rem;
-  transition: 0.2s;
-}
-.remove-tag:hover { background: #ff7675; color: white; }
-
-/* =========================================
-   COLUNA DIREITA (Detalhes)
-========================================= */
-.card-header h3 {
-  font-size: 1.25rem;
-  color: #2d3436;
-  border-bottom: 2px solid #f1f2f6;
-  padding-bottom: 15px;
-  margin-bottom: 20px;
-}
-
-.bio-text {
-  line-height: 1.8;
-  color: #636e72;
+  /* Bem arredondado */
   font-size: 1rem;
-  white-space: pre-line;
-}
-
-/* Formulário Edição */
-.edit-form label {
-  display: block;
-  color: #636e72;
-  font-size: 0.85rem;
-  font-weight: 600;
-  margin-bottom: 6px;
-}
-
-.edit-form input,
-.edit-form textarea {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #dfe6e9;
-  border-radius: 10px;
+  color: #333;
   font-family: inherit;
-  font-size: 0.95rem;
-  color: #2d3436;
-  transition: 0.2s;
-  margin-bottom: 15px;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+  /* Garante que padding não quebre o layout */
 }
 
-.edit-form input:focus,
-.edit-form textarea:focus {
+/* Efeito ao clicar (Focus) */
+.form-group input:focus,
+.form-group textarea:focus {
+  background-color: #ffffff;
   border-color: #00ce71;
   outline: none;
-  box-shadow: 0 0 0 3px rgba(0, 206, 113, 0.1);
 }
 
-.form-row {
+.form-group textarea {
+  resize: vertical;
+  /* Permite redimensionar apenas altura */
+  min-height: 100px;
+}
+
+.row-group {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
 }
 
 .btn-save {
+  padding: 14px;
   background: #00ce71;
   color: white;
   border: none;
-  padding: 14px;
-  width: 100%;
-  border-radius: 10px;
+  border-radius: 12px;
+  font-weight: 700;
   font-size: 1rem;
-  font-weight: 600;
   cursor: pointer;
+  transition: background 0.2s;
+  width: 100%;
+  /* Botão salvar largo fica melhor no form */
   margin-top: 10px;
+}
+
+.btn-save:hover {
+  background: #00b060;
+}
+
+/* ============================
+   COLUNA ESQUERDA (PERFIL)
+============================ */
+.profile-card {
+  text-align: center;
+}
+
+.avatar-container {
+  width: 140px;
+  height: 140px;
+  margin: 0 auto 15px;
+  position: relative;
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 5px solid white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  background: white;
+}
+
+/* Texto */
+.user-info h2 {
+  font-size: 1.5rem;
+  margin: 0;
+  color: #1c1e21;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-}
-.btn-save:hover { background: #00b060; }
-
-/* Info Grid */
-.info-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  gap: 5px;
 }
 
-.fake-input {
-  background: #f8f9fa;
-  padding: 12px 16px;
-  border-radius: 10px;
-  color: #2d3436;
-  font-size: 0.95rem;
-  border: 1px solid #dfe6e9;
+.verified {
+  color: #00ce71;
+  font-size: 1.3rem;
+}
+
+.role {
+  color: #65676b;
+  margin-top: 5px;
+  font-size: 1rem;
+}
+
+/* Stats */
+.stats-row {
   display: flex;
-  align-items: center;
+  justify-content: space-around;
+  margin: 20px 0;
+  padding: 15px 0;
+  border-top: 1px solid #ebedf0;
+  border-bottom: 1px solid #ebedf0;
+}
+
+.stat strong {
+  display: block;
+  font-size: 1.1rem;
+  color: #050505;
+}
+
+.stat span {
+  font-size: 0.8rem;
+  color: #65676b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Botões Ação */
+.actions {
+  margin-top: 10px;
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background: #00ce71;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-primary:hover {
+  background: #00b060;
+}
+
+.btn-primary.outline {
+  background: #e7f3ff;
+  color: #1877f2;
+}
+
+.btn-cancel {
+  background: #e0fff7;
+  color: #00ce71;
+}
+
+.btn-cancel:hover {
+  background: #77a697;
+}
+
+.dual-btns {
+  display: flex;
   gap: 10px;
 }
 
-.fake-input i { color: #00ce71; font-size: 1.2rem; }
+.btn-icon {
+  width: 50px;
+  border: none;
+  background: #ebedf0;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+}
 
-/* =========================================
-   SKELETON LOADING
-========================================= */
+/* ============================
+   SKILLS (COMPETÊNCIAS)
+============================ */
+.card-header-simple h3 {
+  font-size: 1.1rem;
+  color: #050505;
+  margin: 0 0 15px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-header-simple i {
+  color: #f59e0b;
+  font-size: 1.2rem;
+}
+
+/* Input Skills */
+.add-skill-box {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.add-skill-box input {
+  flex: 1;
+  padding: 10px 15px;
+  border: 2px solid #f0f2f5;
+  border-radius: 10px;
+  outline: none;
+  transition: 0.3s;
+}
+
+.add-skill-box input:focus {
+  border-color: #00ce71;
+  background: white;
+}
+
+.add-skill-box button {
+  width: 45px;
+  border: none;
+  background: #00ce71;
+  color: white;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+}
+
+/* Tags */
+.skills-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.skill-pill {
+  background-color: #f0f2f5;
+  color: #050505;
+  padding: 8px 16px;
+  border-radius: 50px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: 0.2s;
+}
+
+.skill-pill:hover {
+  background-color: #e4e6eb;
+  transform: translateY(-1px);
+}
+
+.skill-pill i {
+  cursor: pointer;
+  color: #65676b;
+}
+
+.skill-pill i:hover {
+  color: #ff4d4d;
+}
+
+.empty-text {
+  color: #65676b;
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+/* ============================
+   COLUNA DIREITA
+============================ */
+.card-header {
+  border-bottom: 1px solid #ebedf0;
+  padding-bottom: 15px;
+  margin-bottom: 20px;
+}
+
+.card-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #050505;
+}
+
+.bio-text {
+  line-height: 1.6;
+  color: #050505;
+  white-space: pre-wrap;
+  font-size: 1rem;
+}
+
+/* Info List */
+.info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.info-item i {
+  width: 45px;
+  height: 45px;
+  background: #e8fcf3;
+  color: #00ce71;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+}
+
+.info-item small {
+  color: #65676b;
+  font-size: 0.85rem;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.info-item p {
+  margin: 0;
+  font-weight: 600;
+  color: #050505;
+  font-size: 1rem;
+}
+
+/* ============================
+   RESPONSIVIDADE (MEDIA QUERIES)
+============================ */
+
+/* TABLET E TELAS MÉDIAS (até 900px) */
+@media (max-width: 900px) {
+  .layout-grid {
+    grid-template-columns: 1fr;
+    /* Transforma em uma coluna única */
+    margin-top: -60px;
+    /* Ajusta o overlap para não cortar */
+  }
+
+  .left-col {
+    margin-bottom: 20px;
+    /* Espaço entre os cards de cima e os de baixo */
+  }
+
+  .profile-banner {
+    height: 220px;
+    /* Banner um pouco menor */
+  }
+}
+
+/* MOBILE (Celulares até 600px) */
+@media (max-width: 600px) {
+  .layout-grid {
+    padding: 0 15px;
+    /* Menos padding lateral para aproveitar tela */
+    margin-top: -50px;
+  }
+
+  .avatar-container {
+    width: 120px;
+    height: 120px;
+  }
+
+  /* No mobile, os inputs ficam um embaixo do outro, não lado a lado */
+  .row-group {
+    grid-template-columns: 1fr;
+  }
+
+  .card {
+    padding: 20px 15px;
+    /* Menos padding interno no card */
+  }
+}
+
+/* SKELETON (LOADING) - MANTIDO */
 @keyframes pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.4; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+
+  100% {
+    opacity: 1;
+  }
 }
 
 .animate-pulse {
-  animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  background-color: #e2e8f0;
+  animation: pulse 1.5s ease-in-out infinite;
 }
 
-.sk-banner {
-  border-radius: 0 0 30px 30px;
-  height: 250px;
-  background-color: #cbd5e0;
+.sk-bg {
+  background-color: #dddfe2;
 }
-
-.sk-card { min-height: 200px; }
 
 .sk-avatar {
-  width: 140px;
-  height: 140px;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
+  background: #dddfe2;
   border: 5px solid white;
-  margin: -70px auto 15px;
-  position: relative;
-  background-color: #cbd5e0;
 }
 
-.sk-text-center {
+.sk-center {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 10px;
-  margin-bottom: 25px;
+  margin-bottom: 20px;
 }
 
 .sk-line {
   height: 12px;
+  background: #dddfe2;
   border-radius: 6px;
-  background-color: #e2e8f0;
-}
-.sk-line.title { width: 60%; height: 24px; margin-bottom: 5px; }
-.sk-line.subtitle { width: 40%; height: 16px; }
-.sk-stats { height: 60px; border-radius: 12px; margin-bottom: 25px; }
-.sk-btn { height: 45px; border-radius: 12px; width: 100%; }
-.sk-line.title-sm { width: 120px; height: 20px; }
-
-.sk-tags { display: flex; gap: 8px; }
-.sk-tag { width: 80px; height: 32px; border-radius: 20px; }
-
-.sk-line.full { width: 100%; margin-bottom: 12px; }
-.sk-line.half { width: 50%; }
-
-.sk-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-.sk-input-fake { height: 48px; border-radius: 10px; }
-
-/* =========================================
-   RESPONSIVIDADE (MOBILE & TABLET)
-========================================= */
-@media (max-width: 992px) {
-  .profile-content {
-    display: flex;
-    flex-direction: column;
-    margin-top: -60px;
-    gap: 20px;
-  }
-  .profile-background, .sk-banner { height: 180px; }
-  .left-column, .right-column { width: 100%; }
-  
-  .avatar-container, .sk-avatar {
-    width: 120px;
-    height: 120px;
-    margin-top: -60px;
-  }
-  .sk-avatar { margin: -60px auto 15px; }
+  margin-bottom: 8px;
 }
 
-@media (max-width: 576px) {
-  .profile-content { padding: 0 15px; }
-  .info-grid, .form-row, .sk-info-grid {
-    grid-template-columns: 1fr;
-    gap: 15px;
-  }
-  .stats-grid { padding: 10px; gap: 5px; }
-  .stat strong { font-size: 1rem; }
-  .stat span { font-size: 0.65rem; }
+.sk-line.title {
+  width: 60%;
+  height: 22px;
+}
+
+.sk-line.title-sm {
+  width: 100px;
+  height: 18px;
+}
+
+.sk-line.subtitle {
+  width: 40%;
+}
+
+.sk-line.full {
+  width: 100%;
+}
+
+.sk-line.half {
+  width: 50%;
+}
+
+.sk-box {
+  width: 100%;
+  height: 40px;
+  background: #dddfe2;
+  border-radius: 8px;
+}
+
+.sk-btn {
+  width: 100%;
+  height: 42px;
+  background: #dddfe2;
+  border-radius: 8px;
+}
+
+.sk-pill {
+  width: 80px;
+  height: 30px;
+  background: #dddfe2;
+  border-radius: 50px;
+}
+
+.sk-input {
+  width: 100%;
+  height: 50px;
+  background: #dddfe2;
+  border-radius: 12px;
 }

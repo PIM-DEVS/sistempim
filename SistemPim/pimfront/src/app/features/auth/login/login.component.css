@@ -1,34 +1,33 @@
 /* =========================================
-   RESET E ESTRUTURA GLOBAL
+   CONFIGURAÇÕES GERAIS
 ========================================= */
 :host {
   display: block;
   height: 100vh;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', sans-serif; /* Certifique-se de importar essa fonte no index.html */
 }
 
 .split-screen {
   display: flex;
   height: 100vh;
   width: 100%;
-  overflow: hidden;
   background-color: #fff;
+  overflow: hidden;
 }
 
 /* =========================================
-   LADO ESQUERDO (BACKGROUND ORIGINAL)
+   LADO ESQUERDO (VERDE / BANNER)
 ========================================= */
 .banner-section {
-  flex: 1.1;
-  /* O Gradiente original que você enviou */
-  background: linear-gradient(135deg, #0d4429 0%, #00ce71 100%);
+  flex: 1.1; /* Ligeiramente maior que o formulário */
+  background: linear-gradient(135deg, #0d4429 0%, #00ce71 100%); /* Gradiente IFAL Moderno */
   position: relative;
   display: flex;
   flex-direction: column;
   justify-content: center;
   padding: 80px;
   color: white;
-  overflow: hidden; /* Importante para cortar os círculos */
+  overflow: hidden;
 }
 
 .banner-content {
@@ -37,17 +36,17 @@
 }
 
 .logo-badge {
-  width: 60px; height: 60px;
-  background: rgba(255,255,255,0.15);
-  backdrop-filter: blur(5px);
+  width: 50px; height: 50px;
+  background: rgba(255,255,255,0.2);
+  backdrop-filter: blur(10px);
   border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
   margin-bottom: 24px;
 }
-.logo-badge i { font-size: 2rem; color: #fff; }
+.logo-badge i { font-size: 1.8rem; color: #fff; }
 
 .banner-content h1 {
-  font-size: clamp(2.5rem, 4vw, 4rem);
+  font-size: clamp(2.5rem, 4vw, 3.8rem);
   font-weight: 700;
   line-height: 1.1;
   margin-bottom: 20px;
@@ -63,22 +62,18 @@
 
 .copyright {
   position: absolute; bottom: 30px; left: 80px;
-  font-size: 0.8rem; opacity: 0.6;
-  z-index: 2;
+  font-size: 0.8rem; opacity: 0.6; z-index: 2;
 }
 
-/* --- CÍRCULOS (Estilo Original) --- */
+/* Elementos Decorativos (Círculos) */
 .circle {
   position: absolute;
   border-radius: 50%;
-  /* Borda fina e transparente como no original */
-  border: 1px solid rgba(255, 255, 255, 0.08); 
+  border: 1px solid rgba(255, 255, 255, 0.1);
   pointer-events: none;
 }
-
-/* Dimensões originais */
-.c1 { width: 45vw; height: 45vw; top: -10vw; right: -10vw; }
-.c2 { width: 30vw; height: 30vw; bottom: -5vw; right: 20vw; }
+.c1 { width: 50vw; height: 50vw; top: -15vw; right: -15vw; }
+.c2 { width: 35vw; height: 35vw; bottom: -10vw; right: 15vw; }
 
 .hand-wave {
   display: inline-block;
@@ -87,7 +82,7 @@
 }
 
 /* =========================================
-   LADO DIREITO (FORMULÁRIO CLEAN)
+   LADO DIREITO (FORMULÁRIO)
 ========================================= */
 .form-section {
   flex: 1;
@@ -102,81 +97,62 @@
 
 .form-wrapper {
   width: 100%;
-  max-width: 380px; /* Largura contida para elegância */
+  max-width: 400px;
 }
 
-/* Cabeçalho */
-.form-header { margin-bottom: 30px; }
-.form-header h2 { font-size: 2rem; font-weight: 700; color: #111; margin-bottom: 8px; }
-.form-header p { color: #666; font-size: 0.9rem; }
-.form-header a { 
-  color: #00ce71; /* Verde do tema */
-  font-weight: 600; 
-  text-decoration: none; 
-  cursor: pointer; 
-}
-.form-header a:hover { text-decoration: underline; }
+/* Tipografia do Form */
+.form-header { margin-bottom: 32px; }
+.form-header h2 { font-size: 2rem; font-weight: 700; color: #111; margin-bottom: 8px; letter-spacing: -0.5px; }
+.form-header p { color: #666; font-size: 0.95rem; }
 
-/* Inputs (Estilo Cinza Moderno) */
-.input-group { margin-bottom: 18px; }
+/* Inputs */
+.input-group { margin-bottom: 20px; }
 .input-group label {
-  display: block; font-size: 0.85rem; font-weight: 600; color: #333; margin-bottom: 8px;
+  display: block; font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 8px;
 }
-
 .input-field {
-  width: 100%;
-  padding: 16px;
-  background-color: #f3f4f6; /* O Cinza Clean */
-  border: 2px solid transparent; /* Sem borda visível inicialmente */
+  width: 100%; padding: 16px;
+  background-color: #f3f4f6; /* Cinza claro moderno */
+  border: 2px solid transparent;
   border-radius: 12px;
-  font-size: 1rem;
-  color: #1f2937;
+  font-size: 1rem; color: #1f2937;
   transition: all 0.2s ease;
   box-sizing: border-box;
   font-family: inherit;
 }
-
 .input-field:focus {
-  outline: none;
-  background-color: #fff;
-  border-color: #00ce71; /* Borda verde ao focar */
-  box-shadow: 0 4px 12px rgba(0, 206, 113, 0.15);
+  outline: none; background-color: #fff;
+  border-color: #00ce71; /* Foco Verde */
+  box-shadow: 0 4px 12px rgba(0, 206, 113, 0.1);
 }
-
 .input-field::placeholder { color: #9ca3af; }
 
-/* Botão Preto Sólido */
-.btn-black {
-  width: 100%;
-  padding: 16px;
-  background: var(--primary-color);
-  color: white;
-  font-size: 1rem;
-  font-weight: 600;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: transform 0.2s, background 0.2s;
-  margin-top: 10px;
+.hint-text {
+  color: #6b7280; font-size: 0.75rem; margin-top: 6px; display: block;
 }
 
-.btn-black:hover:not([disabled]) {
-  background-color: #000;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+/* Botão Principal */
+.btn-primary {
+  width: 100%; padding: 16px;
+  background: #0d4429; /* Verde escuro institucional */
+  color: white;
+  font-size: 1rem; font-weight: 600;
+  border: none; border-radius: 12px;
+  cursor: pointer; margin-top: 10px;
+  transition: transform 0.2s, background 0.2s;
 }
-.btn-black:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
+.btn-primary:hover:not([disabled]) {
+  background-color: #062e1b; transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(13, 68, 41, 0.3);
 }
+.btn-primary:disabled { background-color: #ccc; cursor: not-allowed; }
 
 /* Divider e Google */
 .divider {
-  margin: 28px 0;
-  display: flex; align-items: center; color: #999; font-size: 0.75rem;
-  text-transform: uppercase; letter-spacing: 1px;
+  margin: 28px 0; display: flex; align-items: center;
+  color: #9ca3af; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;
 }
-.divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #eee; }
+.divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #e5e7eb; }
 .divider span { padding: 0 15px; }
 
 .btn-google {
@@ -184,49 +160,59 @@
   background: white; border: 1px solid #e5e7eb; border-radius: 12px;
   display: flex; align-items: center; justify-content: center; gap: 12px;
   font-weight: 500; color: #374151; cursor: pointer; transition: all 0.2s;
+  font-size: 0.95rem;
 }
 .btn-google:hover { background-color: #f9fafb; border-color: #d1d5db; }
 .btn-google img { width: 20px; height: 20px; }
 
-/* Footer Link */
+/* Links de Rodapé */
 .footer-link {
-  display: block; text-align: center; margin-top: 24px;
-  color: #666; font-size: 0.9rem; text-decoration: none;
+  text-align: center; margin-top: 24px; color: #666; font-size: 0.9rem;
 }
-.footer-link strong { color: #111; }
+.footer-link a {
+  color: #00ce71; font-weight: 600; text-decoration: none; cursor: pointer; margin-left: 5px;
+}
+.footer-link a:hover { text-decoration: underline; }
+
+.link-recover { display: block; margin-top: 20px; }
+.link-recover strong { color: #333; }
 
 /* Erro */
 .error-box {
   background: #fef2f2; color: #ef4444; border: 1px solid #fee2e2;
   padding: 12px; border-radius: 8px; font-size: 0.9rem;
-  margin-bottom: 20px; display: flex; align-items: center; gap: 8px;
+  margin-bottom: 24px; display: flex; align-items: center; gap: 8px;
 }
 
-/* Wizard Cards */
-.gender-grid {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 24px 0;
-}
+/* Wizard de Gênero */
+.gender-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 24px 0; }
 .gender-option {
   border: 2px solid #e5e7eb; border-radius: 12px; padding: 20px;
   text-align: center; cursor: pointer; transition: all 0.2s; background: #fff;
 }
 .gender-option:hover { border-color: #00ce71; background: #f0fdf7; }
-.gender-option.active { 
-  border-color: #00ce71; background: #ecfdf5; 
+.gender-option.active {
+  border-color: #00ce71; background: #ecfdf5;
   box-shadow: 0 0 0 4px rgba(0, 206, 113, 0.1);
 }
-.gender-img { width: 70px; height: 70px; border-radius: 50%; margin-bottom: 12px; object-fit: cover; }
-.gender-option span { display: block; font-weight: 600; color: #333; }
+.gender-img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 12px; }
+.gender-option span { font-weight: 600; color: #333; }
 
-/* RESPONSIVO */
-@media (max-width: 900px) {
-  .banner-section { display: none; }
-  .form-section { padding: 24px; }
-  .form-wrapper { max-width: 100%; }
+/* Animações e Responsividade */
+.fade-in { animation: fadeIn 0.4s ease-in; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes wave {
   0%, 100% { transform: rotate(0deg); }
   25% { transform: rotate(-10deg); }
   75% { transform: rotate(10deg); }
+}
+
+@media (max-width: 900px) {
+  .banner-section { display: none; } /* Esconde o lado verde no mobile */
+  .form-section { padding: 24px; }
 }

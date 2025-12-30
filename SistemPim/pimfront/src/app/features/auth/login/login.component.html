@@ -11,13 +11,13 @@
         <span class="hand-wave">👋</span>
       </h1>
       
-      <p>Gerencie seus projetos, conecte-se com professores e automatize sua jornada acadêmica no IFAL.</p>
+      <p>Gerencie seus exercícios, conecte-se com professores e evolua sua jornada acadêmica no IFAL.</p>
     </div>
 
     <div class="circle c1"></div>
     <div class="circle c2"></div>
     
-    <div class="copyright">© 2025 PIM Online. Todos os direitos reservados.</div>
+    <div class="copyright">© 2025 PIM. Todos os direitos reservados.</div>
   </div>
 
   <div class="form-section">
@@ -25,9 +25,9 @@
 
       <div *ngIf="!showGenderSelect">
         <div class="form-header">
-          <h2>{{ isLoginMode ? 'Acesse sua conta' : 'Crie sua conta' }}</h2>
+          <h2>{{ isLoginMode ? 'Acesse sua conta' : 'Primeiro Acesso' }}</h2>
           <p>
-            {{ isLoginMode ? 'Insira seus dados para continuar.' : 'Preencha os dados abaixo para começar.' }}
+            {{ isLoginMode ? 'Insira suas credenciais para continuar.' : 'Preencha os dados para criar seu acesso.' }}
           </p>
         </div>
 
@@ -52,7 +52,7 @@
             type="email" 
             [(ngModel)]="email" 
             class="input-field" 
-            placeholder="seu.email@aluno.ifal.edu.br" 
+            placeholder="ex: nome@aluno.ifal.edu.br" 
             (keyup.enter)="onSubmit()"
             autocomplete="email"
           >
@@ -64,60 +64,63 @@
             type="password" 
             [(ngModel)]="password" 
             class="input-field" 
-            placeholder="Sua senha segura" 
+            [placeholder]="isLoginMode ? 'Sua senha' : 'Crie uma senha para este site'" 
             (keyup.enter)="onSubmit()"
             autocomplete="current-password"
           >
+          <small class="hint-text" *ngIf="!isLoginMode">
+            <i class='bx bx-info-circle'></i> Crie uma senha exclusiva para o PIM (não precisa ser a do SIGAA).
+          </small>
         </div>
 
-        <button (click)="onSubmit()" class="btn-black" [disabled]="loading">
-          <span *ngIf="!loading">{{ isLoginMode ? 'Entrar Agora' : 'Criar Conta' }}</span>
+        <button (click)="onSubmit()" class="btn-primary" [disabled]="loading">
+          <span *ngIf="!loading">{{ isLoginMode ? 'Entrar Agora' : 'Criar meu Acesso' }}</span>
           <span *ngIf="loading"><i class='bx bx-loader-alt bx-spin'></i> Processando...</span>
         </button>
 
         <div class="footer-link">
           <p>
-            {{ isLoginMode ? 'Não tem uma conta?' : 'Já tem uma conta?' }}
-            <a (click)="toggleMode()">{{ isLoginMode ? 'Cadastre-se gratuitamente' : 'Faça Login' }}</a>
+            {{ isLoginMode ? 'Ainda não tem senha aqui?' : 'Já possui cadastro?' }}
+            <a (click)="toggleMode()">{{ isLoginMode ? 'Criar conta' : 'Fazer Login' }}</a>
           </p>
         </div>
 
         <div class="divider">
-          <span>ou continue com</span>
+          <span>ou acesso rápido</span>
         </div>
 
         <button (click)="loginGoogle()" class="btn-google">
           <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
-          <span>Entrar com Google</span>
+          <span>Entrar com Email Institucional</span>
         </button>
 
-        <a class="footer-link" *ngIf="isLoginMode" href="#">Esqueceu a senha? <strong>Recuperar</strong></a>
+        <a class="footer-link link-recover" *ngIf="isLoginMode" href="#">Esqueceu a senha? <strong>Recuperar</strong></a>
       </div>
 
-      <div *ngIf="showGenderSelect">
+      <div *ngIf="showGenderSelect" class="fade-in">
         <div class="form-header">
           <h2>Quase lá!</h2>
-          <p>Escolha um avatar para o seu perfil.</p>
+          <p>Para personalizar sua experiência, escolha um avatar.</p>
         </div>
 
         <div class="gender-grid">
           <div class="gender-option" [class.active]="selectedGender === 'Masculino'" (click)="selectGender('Masculino')">
             <div class="avatar-preview">
-              <img src="assets/images/masculino.jpg" class="gender-img" alt="Masculino" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3135/3135715.png'">
+              <img src="assets/images/masculino.jpg" class="gender-img" alt="Masculino">
             </div>
             <span>Masculino</span>
           </div>
 
           <div class="gender-option" [class.active]="selectedGender === 'Feminino'" (click)="selectGender('Feminino')">
             <div class="avatar-preview">
-              <img src="assets/images/feminino.jpg" class="gender-img" alt="Feminino" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3135/3135789.png'">
+              <img src="assets/images/feminino.jpg" class="gender-img" alt="Feminino">
             </div>
             <span>Feminino</span>
           </div>
         </div>
 
-        <button class="btn-black" (click)="finalizarCadastro()" [disabled]="!selectedGender">
-          Continuar <i class='bx bx-right-arrow-alt'></i>
+        <button class="btn-primary" (click)="finalizarCadastro()" [disabled]="!selectedGender">
+          Concluir Cadastro <i class='bx bx-right-arrow-alt'></i>
         </button>
       </div>
 

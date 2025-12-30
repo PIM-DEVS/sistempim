@@ -24,6 +24,7 @@ export class ProfileComponent implements OnInit {
   isMeuPerfil = false;
   isFollowing = false; 
 
+  // Objeto para edição
   editForm: any = {};
   novaCompetencia: string = '';
   notificacao: { mensagem: string; tipo: 'sucesso' | 'erro' | null } = { mensagem: '', tipo: null };
@@ -41,18 +42,26 @@ export class ProfileComponent implements OnInit {
           if (userIdUrl && userIdUrl !== this.meuId) {
             // --- PERFIL DE OUTRO ---
             this.isMeuPerfil = false;
-            this.dadosUsuario = await this.authService.getDadosUsuario(userIdUrl);
-
-            const listaSeguidores = this.dadosUsuario?.seguidores || [];
-            this.isFollowing = listaSeguidores.includes(this.meuId);
+            try {
+                this.dadosUsuario = await this.authService.getDadosUsuario(userIdUrl);
+                const listaSeguidores = this.dadosUsuario?.seguidores || [];
+                this.isFollowing = listaSeguidores.includes(this.meuId);
+            } catch(e) {
+                console.error("Erro ao carregar perfil de outro usuário", e);
+            }
 
           } else {
             // --- MEU PERFIL ---
             this.isMeuPerfil = true;
-            this.dadosUsuario = await this.authService.getDadosUsuario(this.meuId);
-            if (!this.dadosUsuario?.genero) {
-              this.isEditing = true;
-              this.initEditForm();
+            try {
+                this.dadosUsuario = await this.authService.getDadosUsuario(this.meuId);
+                // Se faltar algum dado essencial na primeira vez, abre modo edição
+                if (!this.dadosUsuario?.genero) {
+                // this.isEditing = true; // Opcional: abrir edição se for user novo
+                // this.initEditForm();
+                }
+            } catch(e) {
+                console.error("Erro ao carregar meu perfil", e);
             }
           }
           this.loading = false;
@@ -72,14 +81,22 @@ export class ProfileComponent implements OnInit {
       this.isFollowing = false;
       this.dadosUsuario.seguidores = this.dadosUsuario.seguidores.filter((id: string) => id !== this.meuId);
       this.mostrarAviso('Você deixou de seguir.', 'sucesso');
-      await this.authService.unfollowUser(this.meuId, this.dadosUsuario.uid);
+      
+      // Certifique-se que o AuthService tem esse método
+      if(this.authService.unfollowUser) {
+        await this.authService.unfollowUser(this.meuId, this.dadosUsuario.uid);
+      }
 
     } else {
       // --- SEGUIR ---
       this.isFollowing = true;
       this.dadosUsuario.seguidores.push(this.meuId);
       this.mostrarAviso('Seguindo!', 'sucesso');
-      await this.authService.followUser(this.meuId, this.dadosUsuario.uid);
+      
+      // Certifique-se que o AuthService tem esse método
+      if(this.authService.followUser) {
+         await this.authService.followUser(this.meuId, this.dadosUsuario.uid);
+      }
     }
     this.cdr.detectChanges();
   }
@@ -89,6 +106,7 @@ export class ProfileComponent implements OnInit {
   }
 
   initEditForm() {
+    // Clona os dados para não alterar a tela antes de salvar
     this.editForm = { ...this.dadosUsuario, competencias: [...(this.dadosUsuario?.competencias || [])] };
   }
   
@@ -113,11 +131,18 @@ export class ProfileComponent implements OnInit {
 
   async salvarPerfil() {
     try {
+      // Certifique-se que o AuthService tem updateProfileData
       await this.authService.updateProfileData(this.meuId, this.editForm);
+      
+      // Atualiza a visualização local
       this.dadosUsuario = { ...this.dadosUsuario, ...this.editForm };
       this.isEditing = false;
       this.mostrarAviso('Salvo com sucesso!', 'sucesso');
-    } catch (e) { console.error(e); }
+    } catch (e) { 
+        console.error(e); 
+        this.mostrarAviso('Erro ao salvar.', 'erro');
+    }
+    this.cdr.detectChanges();
   }
 
   mostrarAviso(msg: string, tipo: any) {
@@ -128,6 +153,7 @@ export class ProfileComponent implements OnInit {
   
   getMemberSince(date: any): string {
     if (!date) return 'Data desconhecida';
+    // Lida com Timestamp do Firestore ou Date string
     const d = date.seconds ? new Date(date.seconds * 1000) : new Date(date);
     return d.toLocaleDateString('pt-BR');
   }
