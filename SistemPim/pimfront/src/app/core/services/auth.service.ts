@@ -1,6 +1,5 @@
 import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
-// A CORREÇÃO ESTÁ AQUI EMBAIXO (getApp vem de 'firebase/app', não de firestore)
 import { getApp } from 'firebase/app'; 
 import { 
   Auth, 
@@ -17,6 +16,9 @@ import {
   doc, 
   getDoc, 
   setDoc, 
+  updateDoc, // <--- Adicionado
+  arrayUnion, // <--- Adicionado para Seguir
+  arrayRemove, // <--- Adicionado para Deixar de Seguir
   collection, 
   query, 
   where, 
@@ -31,7 +33,6 @@ import { LoginData } from '../models/auth.model';
 export class AuthService {
   private auth = inject(Auth);
   private router = inject(Router);
-  // Inicializa o Firestore corretamente
   private db = getFirestore(getApp()); 
 
   user$ = user(this.auth);
@@ -64,7 +65,9 @@ export class AuthService {
           nome: result.user.displayName,
           role: 'aluno',
           foto: result.user.photoURL,
-          uid: result.user.uid 
+          uid: result.user.uid,
+          seguidores: [], // Inicializa vazio
+          seguindo: []    // Inicializa vazio
         });
       }
       return result.user;
@@ -79,7 +82,7 @@ export class AuthService {
     this.router.navigate(['/login']);
   }
 
-  // --- FIRESTORE ---
+  // --- FIRESTORE (PERFIL) ---
 
   async getDadosUsuario(uid: string): Promise<any> {
     if (!uid) return null;
@@ -103,11 +106,13 @@ export class AuthService {
     }
   }
 
-  // ESTA FUNÇÃO FALTAVA E CAUSAVA O ERRO NA TOPBAR
+  // --- BUSCA (TOPBAR) ---
+  
   async buscarUsuariosPorNome(termo: string) {
     if (!termo || !termo.trim()) return [];
     try {
       const usersRef = collection(this.db, 'users');
+      // O caractere \uf8ff garante que a busca pegue "João", "João Silva", etc.
       const q = query(
         usersRef, 
         where('nome', '>=', termo), 
@@ -119,6 +124,50 @@ export class AuthService {
     } catch (error) {
       console.error("Erro na busca:", error);
       return [];
+    }
+  }
+
+  // --- SISTEMA DE SEGUIR (NOVO) --- 
+
+  async followUser(meuId: string, alvoId: string) {
+    try {
+      const meuRef = doc(this.db, 'users', meuId);
+      const alvoRef = doc(this.db, 'users', alvoId);
+
+      // 1. Eu começo a seguir o alvo (adiciona ID dele na minha lista 'seguindo')
+      await updateDoc(meuRef, {
+        seguindo: arrayUnion(alvoId)
+      });
+
+      // 2. O alvo ganha um seguidor (adiciona meu ID na lista 'seguidores' dele)
+      await updateDoc(alvoRef, {
+        seguidores: arrayUnion(meuId)
+      });
+      
+    } catch (error) {
+      console.error("Erro ao seguir:", error);
+      throw error;
+    }
+  }
+
+  async unfollowUser(meuId: string, alvoId: string) {
+    try {
+      const meuRef = doc(this.db, 'users', meuId);
+      const alvoRef = doc(this.db, 'users', alvoId);
+
+      // 1. Remove ID dele da minha lista 'seguindo'
+      await updateDoc(meuRef, {
+        seguindo: arrayRemove(alvoId)
+      });
+
+      // 2. Remove meu ID da lista 'seguidores' dele
+      await updateDoc(alvoRef, {
+        seguidores: arrayRemove(meuId)
+      });
+
+    } catch (error) {
+      console.error("Erro ao deixar de seguir:", error);
+      throw error;
     }
   }
 }

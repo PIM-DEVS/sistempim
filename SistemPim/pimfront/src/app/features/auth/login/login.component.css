@@ -1,27 +1,26 @@
 /* =========================================
-   ESTRUTURA GERAL
+   RESET E ESTRUTURA GLOBAL
 ========================================= */
 :host {
   display: block;
-  width: 100%;
   height: 100vh;
+  font-family: 'Poppins', sans-serif;
 }
 
-.auth-container {
+.split-screen {
   display: flex;
+  height: 100vh;
   width: 100%;
-  height: 100%;
-  background-color: #fff;
-  font-family: 'Poppins', sans-serif;
   overflow: hidden;
+  background-color: #fff;
 }
 
 /* =========================================
-   LADO ESQUERDO (BANNER)
+   LADO ESQUERDO (BACKGROUND ORIGINAL)
 ========================================= */
-.auth-banner {
-  height: 100vh;
-  flex: 1.3;
+.banner-section {
+  flex: 1.1;
+  /* O Gradiente original que você enviou */
   background: linear-gradient(135deg, #0d4429 0%, #00ce71 100%);
   position: relative;
   display: flex;
@@ -29,13 +28,15 @@
   justify-content: center;
   padding: 80px;
   color: white;
-  overflow: hidden;
-  transition: all 0.5s ease;
+  overflow: hidden; /* Importante para cortar os círculos */
 }
 
-.banner-content { z-index: 2; max-width: 550px; }
+.banner-content {
+  z-index: 2;
+  max-width: 550px;
+}
 
-.logo-box-decoration {
+.logo-badge {
   width: 60px; height: 60px;
   background: rgba(255,255,255,0.15);
   backdrop-filter: blur(5px);
@@ -43,167 +44,187 @@
   display: flex; align-items: center; justify-content: center;
   margin-bottom: 24px;
 }
-.logo-box-decoration i { font-size: 2rem; color: #fff; }
+.logo-badge i { font-size: 2rem; color: #fff; }
 
 .banner-content h1 {
   font-size: clamp(2.5rem, 4vw, 4rem);
-  font-weight: 700; line-height: 1.1; margin-bottom: 20px;
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: 20px;
 }
 
 .banner-content p {
-  font-size: 1.1rem; line-height: 1.6; opacity: 0.9;
-  font-weight: 300; max-width: 90%;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  opacity: 0.9;
+  font-weight: 300;
+  max-width: 90%;
 }
 
 .copyright {
   position: absolute; bottom: 30px; left: 80px;
   font-size: 0.8rem; opacity: 0.6;
+  z-index: 2;
 }
 
-/* Decorativos */
+/* --- CÍRCULOS (Estilo Original) --- */
 .circle {
-  position: absolute; border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.08); pointer-events: none;
+  position: absolute;
+  border-radius: 50%;
+  /* Borda fina e transparente como no original */
+  border: 1px solid rgba(255, 255, 255, 0.08); 
+  pointer-events: none;
 }
+
+/* Dimensões originais */
 .c1 { width: 45vw; height: 45vw; top: -10vw; right: -10vw; }
 .c2 { width: 30vw; height: 30vw; bottom: -5vw; right: 20vw; }
 
 .hand-wave {
-  display: inline-block; animation: wave 2.5s infinite; transform-origin: 70% 70%;
+  display: inline-block;
+  animation: wave 2.5s infinite;
+  transform-origin: 70% 70%;
 }
 
 /* =========================================
-   LADO DIREITO (FORMULÁRIO)
+   LADO DIREITO (FORMULÁRIO CLEAN)
 ========================================= */
-.auth-form-wrapper {
+.form-section {
   flex: 1;
-  background-color: #fff;
-  position: relative;
-  display: flex; flex-direction: column;
-  overflow-y: auto; /* Permite scroll no mobile */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  background: #fff;
+  overflow-y: auto;
 }
 
-.form-scroll-container {
-  min-height: 100%;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  padding: 40px; width: 100%; box-sizing: border-box;
+.form-wrapper {
+  width: 100%;
+  max-width: 380px; /* Largura contida para elegância */
 }
 
-.form-box {
-  width: 100%; max-width: 400px;
-  animation: slideUpFade 0.5s ease-out;
+/* Cabeçalho */
+.form-header { margin-bottom: 30px; }
+.form-header h2 { font-size: 2rem; font-weight: 700; color: #111; margin-bottom: 8px; }
+.form-header p { color: #666; font-size: 0.9rem; }
+.form-header a { 
+  color: #00ce71; /* Verde do tema */
+  font-weight: 600; 
+  text-decoration: none; 
+  cursor: pointer; 
 }
+.form-header a:hover { text-decoration: underline; }
 
-/* Mobile Brand */
-.mobile-brand {
-  display: none; text-align: center; margin-bottom: 30px;
-}
-.brand-icon {
-  background: rgba(0, 206, 113, 0.1); color: #00ce71;
-  width: 50px; height: 50px; border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  margin: 0 auto 10px; font-size: 1.8rem;
-}
-.mobile-brand h2 { font-size: 1.4rem; color: #1a1a1a; margin: 0; }
-
-/* Header & Inputs */
-.header { margin-bottom: 25px; }
-.header h2 { font-size: 1.8rem; font-weight: 700; color: #1a1a1a; margin-bottom: 5px; }
-.subtitle { color: #666; font-size: 0.9rem; }
-
-/* Erro */
-.error-banner {
-  background-color: #fef2f2; border: 1px solid #fee2e2;
-  color: #dc2626; padding: 10px 15px; border-radius: 8px;
-  font-size: 0.85rem; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;
-}
-
+/* Inputs (Estilo Cinza Moderno) */
 .input-group { margin-bottom: 18px; }
 .input-group label {
-  display: block; font-size: 0.85rem; font-weight: 600; color: #333; margin-bottom: 6px;
-}
-.input-group input {
-  width: 100%; padding: 14px 16px;
-  border: 1px solid #e0e0e0; border-radius: 8px;
-  font-size: 1rem; /* 16px evita zoom iOS */
-  background: #fcfcfc; transition: all 0.2s ease;
-  font-family: inherit; box-sizing: border-box;
-}
-.input-group input:focus {
-  outline: none; border-color: #00ce71; background: #fff;
-  box-shadow: 0 0 0 4px rgba(0, 206, 113, 0.1);
+  display: block; font-size: 0.85rem; font-weight: 600; color: #333; margin-bottom: 8px;
 }
 
-/* Botões */
-.btn-primary {
-  width: 100%; padding: 14px;
-  background: #1a1a1a; color: white;
-  border: none; border-radius: 8px;
-  font-size: 1rem; font-weight: 600; cursor: pointer;
-  transition: all 0.2s; margin-top: 10px;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
+.input-field {
+  width: 100%;
+  padding: 16px;
+  background-color: #f3f4f6; /* O Cinza Clean */
+  border: 2px solid transparent; /* Sem borda visível inicialmente */
+  border-radius: 12px;
+  font-size: 1rem;
+  color: #1f2937;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  font-family: inherit;
 }
-.btn-primary:hover:not([disabled]) {
-  background: #000; transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+
+.input-field:focus {
+  outline: none;
+  background-color: #fff;
+  border-color: #00ce71; /* Borda verde ao focar */
+  box-shadow: 0 4px 12px rgba(0, 206, 113, 0.15);
 }
-.btn-primary:disabled { background: #ccc; cursor: not-allowed; }
 
-/* Toggle Mode Link */
-.toggle-mode { text-align: center; margin-top: 15px; font-size: 0.9rem; color: #666; }
-.toggle-mode a { color: #00ce71; cursor: pointer; text-decoration: none; margin-left: 5px; }
-.toggle-mode a:hover { text-decoration: underline; }
+.input-field::placeholder { color: #9ca3af; }
 
+/* Botão Preto Sólido */
+.btn-black {
+  width: 100%;
+  padding: 16px;
+  background: var(--primary-color);
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s;
+  margin-top: 10px;
+}
+
+.btn-black:hover:not([disabled]) {
+  background-color: #000;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+.btn-black:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Divider e Google */
 .divider {
-  margin: 25px 0; display: flex; align-items: center; color: #999; font-size: 0.8rem;
+  margin: 28px 0;
+  display: flex; align-items: center; color: #999; font-size: 0.75rem;
+  text-transform: uppercase; letter-spacing: 1px;
 }
 .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #eee; }
-.divider span { padding: 0 10px; }
+.divider span { padding: 0 15px; }
 
 .btn-google {
-  width: 100%; padding: 12px;
-  border: 1px solid #e0e0e0; background: white;
-  border-radius: 8px; font-size: 0.95rem; font-weight: 600;
-  color: #333; cursor: pointer; display: flex; align-items: center; justify-content: center;
-  gap: 10px; transition: all 0.2s;
+  width: 100%; padding: 14px;
+  background: white; border: 1px solid #e5e7eb; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  font-weight: 500; color: #374151; cursor: pointer; transition: all 0.2s;
 }
-.btn-google:hover { background-color: #f8f9fa; border-color: #ccc; }
+.btn-google:hover { background-color: #f9fafb; border-color: #d1d5db; }
+.btn-google img { width: 20px; height: 20px; }
 
-.footer-links { margin-top: 25px; text-align: center; font-size: 0.85rem; }
-.footer-links a { color: #666; text-decoration: none; }
-.footer-links a strong { color: #1a1a1a; font-weight: 700; }
-
-/* Gender */
-.gender-options { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 25px 0; }
-.gender-card {
-  border: 2px solid #eee; border-radius: 12px; padding: 15px;
-  text-align: center; cursor: pointer; transition: 0.3s;
+/* Footer Link */
+.footer-link {
+  display: block; text-align: center; margin-top: 24px;
+  color: #666; font-size: 0.9rem; text-decoration: none;
 }
-.gender-card:hover, .gender-card.selected { border-color: #00ce71; background: #f0fdf7; }
-.avatar-preview img { width: 70px; height: 70px; border-radius: 50%; margin-bottom: 10px; object-fit: cover; }
+.footer-link strong { color: #111; }
+
+/* Erro */
+.error-box {
+  background: #fef2f2; color: #ef4444; border: 1px solid #fee2e2;
+  padding: 12px; border-radius: 8px; font-size: 0.9rem;
+  margin-bottom: 20px; display: flex; align-items: center; gap: 8px;
+}
+
+/* Wizard Cards */
+.gender-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 24px 0;
+}
+.gender-option {
+  border: 2px solid #e5e7eb; border-radius: 12px; padding: 20px;
+  text-align: center; cursor: pointer; transition: all 0.2s; background: #fff;
+}
+.gender-option:hover { border-color: #00ce71; background: #f0fdf7; }
+.gender-option.active { 
+  border-color: #00ce71; background: #ecfdf5; 
+  box-shadow: 0 0 0 4px rgba(0, 206, 113, 0.1);
+}
+.gender-img { width: 70px; height: 70px; border-radius: 50%; margin-bottom: 12px; object-fit: cover; }
+.gender-option span { display: block; font-weight: 600; color: #333; }
 
 /* RESPONSIVO */
 @media (max-width: 900px) {
-  .auth-banner { display: none; }
-  .form-scroll-container {
-    justify-content: center;
-    padding-top: max(40px, env(safe-area-inset-top)); 
-    padding-bottom: max(20px, env(safe-area-inset-bottom));
-  }
-  .mobile-brand { display: block; }
+  .banner-section { display: none; }
+  .form-section { padding: 24px; }
+  .form-wrapper { max-width: 100%; }
 }
 
-@media (max-width: 480px) {
-  .form-scroll-container { padding: 24px; justify-content: flex-start; padding-top: 40px; }
-  .header h2 { font-size: 1.6rem; }
-  .input-group input { padding: 12px; }
-}
-
-@keyframes slideUpFade {
-  from { opacity: 0; transform: translateY(15px); }
-  to { opacity: 1; transform: translateY(0); }
-}
 @keyframes wave {
   0%, 100% { transform: rotate(0deg); }
   25% { transform: rotate(-10deg); }

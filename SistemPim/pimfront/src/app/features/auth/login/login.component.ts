@@ -1,9 +1,8 @@
 import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common'; 
-import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { Auth, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from '@angular/fire/auth';
-// A CORREÇÃO DO CAMINHO ESTÁ AQUI EMBAIXO:
+import { Auth, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from '@angular/fire/auth'; 
+import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
@@ -24,12 +23,12 @@ export class LoginComponent {
   loading = false;
   errorMessage = '';
 
-  nome = '';
   email = '';
   password = '';
+  nome = '';
 
-  private readonly DOMINIO_ALUNO = '@aluno.ifal.edu.br';
   private readonly DOMINIO_PROFESSOR = '@ifal.edu.br';
+  private readonly DOMINIO_ALUNO = '@aluno.ifal.edu.br';
 
   toggleMode() {
     this.isLoginMode = !this.isLoginMode;
@@ -38,33 +37,33 @@ export class LoginComponent {
 
   async onSubmit() {
     if (!this.email || !this.password) {
-      this.errorMessage = 'Preencha email e senha.';
+      this.errorMessage = 'Preencha todos os campos.';
       return;
     }
-    if (!this.isLoginMode && !this.nome) {
-      this.errorMessage = 'Preencha seu nome.';
-      return;
-    }
-
+    
     this.loading = true;
     this.errorMessage = '';
 
     try {
       let user;
-
       if (this.isLoginMode) {
         const credential = await signInWithEmailAndPassword(this.auth, this.email, this.password);
         user = credential.user;
       } else {
+        if (!this.nome) {
+          this.errorMessage = 'Preencha seu nome.';
+          this.loading = false;
+          return;
+        }
         const credential = await createUserWithEmailAndPassword(this.auth, this.email, this.password);
         user = credential.user;
         await updateProfile(user, { displayName: this.nome });
       }
-      await this.validarEProcessarUsuario(user);
+
+      await this.validarAcesso(user);
 
     } catch (error: any) {
-      console.error('Erro Auth:', error);
-      this.tratarErros(error.code);
+      this.handleAuthError(error.code);
     } finally {
       this.loading = false;
     }
@@ -73,69 +72,37 @@ export class LoginComponent {
   async loginGoogle() {
     try {
       const user = await this.authService.loginGoogle();
-      if (user) {
-        await this.validarEProcessarUsuario(user);
-      }
-    } catch (error: any) {
-      console.error('Erro Google:', error);
-      if (error.code === 'auth/network-request-failed') {
-        this.errorMessage = 'Erro de conexão. Verifique sua internet.';
-      }
+      if (user) await this.validarAcesso(user);
+    } catch (error) {
+      this.errorMessage = 'Erro ao entrar com Google.';
     }
   }
 
-  private async validarEProcessarUsuario(user: any) {
-    if (!user || !user.email) return;
+  private async validarAcesso(user: any) {
+    if (!user.email) return;
 
     const isProfessor = user.email.endsWith(this.DOMINIO_PROFESSOR);
     const isAluno = user.email.endsWith(this.DOMINIO_ALUNO);
 
     if (!isProfessor && !isAluno) {
-      this.errorMessage = `Use um email institucional (${this.DOMINIO_ALUNO}).`;
+      this.errorMessage = 'Email não autorizado. Use seu email institucional.';
       await this.authService.logout();
       return;
     }
 
     const role = isProfessor ? 'PROFESSOR' : 'ALUNO';
-    const dadosExistentes = await this.authService.getDadosUsuario(user.uid);
+    const dadosAntigos = await this.authService.getDadosUsuario(user.uid);
     
-    let dadosParaSalvar: any = {
-      uid: user.uid,
-      email: user.email,
-      role: role
-    };
+    const novosDados: any = { uid: user.uid, email: user.email, role };
+    if (this.nome) novosDados.nome = this.nome;
 
-    if (this.nome || user.displayName) {
-      dadosParaSalvar.nome = this.nome || user.displayName;
-    }
+    await this.authService.updateProfileData(user.uid, novosDados);
 
-    await this.authService.updateProfileData(user.uid, dadosParaSalvar);
-
-    if (dadosExistentes && dadosExistentes['genero']) {
-      this.router.navigate(['/dashboard']); 
+    if (dadosAntigos && dadosAntigos['genero']) {
+      this.router.navigate(['/dashboard']);
     } else {
+      this.loading = false;
       this.showGenderSelect = true;
-    }
-  }
-
-  private tratarErros(code: string) {
-    switch (code) {
-      case 'auth/invalid-credential':
-      case 'auth/wrong-password':
-      case 'auth/user-not-found':
-        this.errorMessage = 'Email ou senha incorretos.';
-        break;
-      case 'auth/email-already-in-use':
-        this.errorMessage = 'Este email já tem conta. Tente entrar.';
-        break;
-      case 'auth/weak-password':
-        this.errorMessage = 'A senha precisa ter pelo menos 6 caracteres.';
-        break;
-      case 'auth/network-request-failed':
-        this.errorMessage = 'Erro de conexão com o servidor.';
-        break;
-      default:
-        this.errorMessage = 'Ocorreu um erro inesperado. Tente novamente.';
     }
   }
 
@@ -149,6 +116,16 @@ export class LoginComponent {
     if (user) {
       await this.authService.updateProfileData(user.uid, { genero: this.selectedGender });
       this.router.navigate(['/dashboard']);
+    }
+  }
+
+  private handleAuthError(code: string) {
+    switch(code) {
+      case 'auth/invalid-credential': this.errorMessage = 'Credenciais inválidas.'; break;
+      case 'auth/user-not-found': this.errorMessage = 'Usuário não encontrado.'; break;
+      case 'auth/wrong-password': this.errorMessage = 'Senha incorreta.'; break;
+      case 'auth/email-already-in-use': this.errorMessage = 'Email já cadastrado.'; break;
+      default: this.errorMessage = 'Ocorreu um erro. Tente novamente.';
     }
   }
 }
