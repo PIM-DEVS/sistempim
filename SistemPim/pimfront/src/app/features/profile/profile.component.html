@@ -1,21 +1,20 @@
 <div class="profile-page">
-  
+
   <ng-container *ngIf="dadosUsuario; else loading">
-    
-    <div class="profile-background" [style.background-image]="dadosUsuario.banner ? 'url(' + dadosUsuario.banner + ')' : 'none'">
+
+    <div class="profile-background"
+      [style.background-image]="dadosUsuario.banner ? 'url(' + dadosUsuario.banner + ')' : 'none'">
       <div class="overlay" *ngIf="dadosUsuario.banner"></div>
     </div>
 
     <div class="profile-content">
-      
+
       <div class="left-column">
         <div class="user-card card-shadow">
           <div class="avatar-container">
-            <img 
-              [src]="dadosUsuario?.foto || (dadosUsuario?.genero === 'masculino' ? 'assets/images/masculino.jpg' : 'assets/images/feminino.jpg')" 
-              class="avatar-img"
-              alt="Foto de Perfil"
-            />
+            <img
+              [src]="dadosUsuario?.foto || (dadosUsuario?.genero === 'masculino' ? 'assets/images/masculino.jpg' : 'assets/images/feminino.jpg')"
+              class="avatar-img" alt="Foto de Perfil" />
             <button class="edit-badge" *ngIf="isEditing" title="Alterar Foto">
               <i class="bx bx-camera"></i>
             </button>
@@ -42,21 +41,15 @@
           </div>
 
           <div class="actions-area">
-            <button
-              class="btn-action btn-edit"
-              (click)="toggleEdit()"
-              *ngIf="isMeuPerfil"
-              [ngClass]="{ 'cancel-mode': isEditing }"
-            >
+
+            <button class="btn-action btn-edit" (click)="toggleEdit()" *ngIf="isMeuPerfil"
+              [ngClass]="{ 'cancel-mode': isEditing }">
               {{ isEditing ? 'Cancelar' : 'Editar Perfil' }}
             </button>
 
             <div *ngIf="!isMeuPerfil" class="social-buttons">
-              <button 
-                class="btn-action" 
-                [ngClass]="isFollowing ? 'btn-unfollow' : 'btn-follow'"
-                (click)="toggleFollow()"
-              >
+              <button class="btn-action" [ngClass]="isFollowing ? 'btn-unfollow' : 'btn-follow'"
+                (click)="toggleFollow()">
                 <i class="bx" [ngClass]="isFollowing ? 'bx-user-check' : 'bx-user-plus'"></i>
                 {{ isFollowing ? 'Seguindo' : 'Seguir' }}
               </button>
@@ -65,23 +58,47 @@
                 <i class="bx bx-message-rounded-dots"></i> Mensagem
               </button>
             </div>
+
+            <div class="dropdown-container">
+              <button class="btn-action btn-more" (click)="toggleMenuAcoes($event)">
+                <i class='bx bx-dots-vertical-rounded'></i>
+              </button>
+
+              <div class="custom-dropdown" [class.show]="menuAcoesAberto" (click)="$event.stopPropagation()">
+                <ng-container *ngIf="isMeuPerfil">
+                  <a (click)="compartilharPerfil()">
+                    <i class='bx bx-share-alt'></i> Compartilhar
+                  </a>
+                  <a (click)="menuAcoesAberto = false"><i class='bx bx-cog'></i> Configurações</a>
+                </ng-container>
+
+                <ng-container *ngIf="!isMeuPerfil">
+                  <a (click)="menuAcoesAberto = false"><i class='bx bx-share-alt'></i> Compartilhar</a>
+                  <a class="danger-option" (click)="menuAcoesAberto = false"><i class='bx bx-block'></i> Bloquear</a>
+                  <a class="danger-option" (click)="menuAcoesAberto = false"><i class='bx bx-flag'></i> Denunciar</a>
+                </ng-container>
+              </div>
+            </div>
           </div>
         </div>
 
         <div class="skills-card card-shadow mt-20">
           <h3><i class="bx bx-code-alt"></i> Competências</h3>
-          
+
           <div class="add-skill-area" *ngIf="isEditing">
-             <input type="text" [(ngModel)]="novaCompetencia" (keyup.enter)="adicionarCompetencia()" placeholder="Add skill...">
-             <button (click)="adicionarCompetencia()"><i class="bx bx-plus"></i></button>
+            <input type="text" [(ngModel)]="novaCompetencia" (keyup.enter)="adicionarCompetencia()"
+              placeholder="Add skill...">
+            <button (click)="adicionarCompetencia()"><i class="bx bx-plus"></i></button>
           </div>
 
           <div class="tags">
-            <span class="tag" *ngFor="let skill of isEditing ? editForm.competencias : dadosUsuario.competencias; let i = index">
+            <span class="tag"
+              *ngFor="let skill of isEditing ? editForm.competencias : dadosUsuario.competencias; let i = index">
               {{ skill }}
               <i *ngIf="isEditing" class="bx bx-x remove-tag" (click)="removerCompetencia(i)"></i>
             </span>
-            <span *ngIf="!isEditing && (!dadosUsuario.competencias || dadosUsuario.competencias.length === 0)" class="no-skills">
+            <span *ngIf="!isEditing && (!dadosUsuario.competencias || dadosUsuario.competencias.length === 0)"
+              class="no-skills">
               Nenhuma competência definida.
             </span>
           </div>
@@ -95,7 +112,8 @@
           </div>
 
           <div *ngIf="!isEditing">
-            <p class="bio-text">{{ dadosUsuario.bio || 'Olá! Sou novo na plataforma e ainda não escrevi minha biografia.' }}</p>
+            <p class="bio-text">{{ dadosUsuario.bio || 'Olá! Sou novo na plataforma e ainda não escrevi minha
+              biografia.' }}</p>
           </div>
 
           <div *ngIf="isEditing" class="edit-form">
@@ -118,18 +136,20 @@
             </button>
           </div>
         </div>
-        
+
         <div class="details-card card-shadow mt-20" *ngIf="!isEditing">
-          <div class="card-header"><h3>Informações de Contato</h3></div>
+          <div class="card-header">
+            <h3>Informações de Contato</h3>
+          </div>
           <div class="info-grid">
-             <div class="info-item">
+            <div class="info-item">
               <label>Email</label>
               <div class="fake-input"><i class="bx bx-envelope"></i> {{dadosUsuario.email}}</div>
-             </div>
-             <div class="info-item">
+            </div>
+            <div class="info-item">
               <label>Membro desde</label>
               <div class="fake-input"><i class="bx bx-calendar"></i> {{ getMemberSince(dadosUsuario.createdAt) }}</div>
-             </div>
+            </div>
           </div>
         </div>
       </div>
@@ -140,19 +160,17 @@
   <ng-template #loading>
     <div class="skeleton-wrapper">
       <div class="sk-banner animate-pulse"></div>
-
       <div class="profile-content">
         <div class="left-column">
           <div class="user-card card-shadow sk-card">
-             <div class="sk-avatar animate-pulse"></div>
-             <div class="sk-text-center">
-               <div class="sk-line title animate-pulse"></div>
-               <div class="sk-line subtitle animate-pulse"></div>
-             </div>
-             <div class="sk-stats animate-pulse"></div>
-             <div class="sk-btn animate-pulse"></div>
+            <div class="sk-avatar animate-pulse"></div>
+            <div class="sk-text-center">
+              <div class="sk-line title animate-pulse"></div>
+              <div class="sk-line subtitle animate-pulse"></div>
+            </div>
+            <div class="sk-stats animate-pulse"></div>
+            <div class="sk-btn animate-pulse"></div>
           </div>
-
           <div class="skills-card card-shadow mt-20 sk-card">
             <div class="sk-line title-sm animate-pulse mb-3"></div>
             <div class="sk-tags">
@@ -162,21 +180,12 @@
             </div>
           </div>
         </div>
-
         <div class="right-column">
           <div class="details-card card-shadow sk-card">
             <div class="sk-line title-sm animate-pulse mb-4"></div>
             <div class="sk-line full animate-pulse"></div>
             <div class="sk-line full animate-pulse"></div>
             <div class="sk-line half animate-pulse"></div>
-          </div>
-
-          <div class="details-card card-shadow mt-20 sk-card">
-            <div class="sk-line title-sm animate-pulse mb-4"></div>
-            <div class="sk-info-grid">
-              <div class="sk-input-fake animate-pulse"></div>
-              <div class="sk-input-fake animate-pulse"></div>
-            </div>
           </div>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -24,11 +24,12 @@ export class ProfileComponent implements OnInit {
   isMeuPerfil = false;
   isFollowing = false; 
 
-  // ... outras variáveis (editForm, novaCompetencia, etc) ...
+  // Variável para controlar o Dropdown de opções
+  menuAcoesAberto: boolean = false;
+
   editForm: any = {};
   novaCompetencia: string = '';
   notificacao: { mensagem: string; tipo: 'sucesso' | 'erro' | null } = { mensagem: '', tipo: null };
-
 
   ngOnInit() {
     this.authService.user$.subscribe(async (user) => {
@@ -37,6 +38,9 @@ export class ProfileComponent implements OnInit {
 
         this.route.params.subscribe(async (params) => {
           this.loading = true;
+          // Reseta o menu ao trocar de perfil
+          this.menuAcoesAberto = false; 
+          
           const userIdUrl = params['id'];
 
           if (userIdUrl && userIdUrl !== this.meuId) {
@@ -44,7 +48,6 @@ export class ProfileComponent implements OnInit {
             this.isMeuPerfil = false;
             this.dadosUsuario = await this.authService.getDadosUsuario(userIdUrl);
 
-            // VERIFICAÇÃO CORRIGIDA: Usa 'seguidores' (Português)
             const listaSeguidores = this.dadosUsuario?.seguidores || [];
             this.isFollowing = listaSeguidores.includes(this.meuId);
 
@@ -64,33 +67,69 @@ export class ProfileComponent implements OnInit {
     });
   }
 
+  // --- LÓGICA DO MENU DROPDOWN ---
+  toggleMenuAcoes(event: Event) {
+    event.stopPropagation(); // Impede que o clique feche imediatamente
+    this.menuAcoesAberto = !this.menuAcoesAberto;
+    this.cdr.detectChanges();
+  }
+
+  // Fecha o menu se clicar em qualquer lugar fora dele
+  @HostListener('document:click', ['$event'])
+  fecharMenusSeClicarFora(event: Event) {
+    if (this.menuAcoesAberto) {
+      this.menuAcoesAberto = false;
+      this.cdr.detectChanges();
+    }
+  }
+  
+  // Adicione essa função dentro da classe ProfileComponent
+
+async compartilharPerfil() {
+  // Fecha o menu para não atrapalhar
+  this.menuAcoesAberto = false;
+  this.cdr.detectChanges();
+
+  const urlPerfil = window.location.href; // Pega a URL atual
+  const textoCompartilhamento = `Confira o perfil de ${this.dadosUsuario.nome} no PIM!`;
+
+  // Tenta usar o compartilhamento nativo do celular (Android/iOS)
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: 'Perfil PIM',
+        text: textoCompartilhamento,
+        url: urlPerfil
+      });
+      // Se deu certo, não precisa fazer mais nada
+    } catch (err) {
+      console.log('Usuário cancelou ou erro no share:', err);
+    }
+  } else {
+    // FALLBACK: Se for PC ou navegador sem suporte, copia o Link
+    try {
+      await navigator.clipboard.writeText(urlPerfil);
+      this.mostrarAviso('Link copiado para a área de transferência!', 'sucesso');
+    } catch (err) {
+      this.mostrarAviso('Erro ao copiar link.', 'erro');
+    }
+  }
+}
+
   async toggleFollow() {
     if (!this.meuId || !this.dadosUsuario?.uid) return;
 
-    // Garante que o array existe localmente
     if (!this.dadosUsuario.seguidores) this.dadosUsuario.seguidores = [];
 
     if (this.isFollowing) {
-      // --- DEIXAR DE SEGUIR ---
       this.isFollowing = false;
-      
-      // Remove meu ID visualmente
       this.dadosUsuario.seguidores = this.dadosUsuario.seguidores.filter((id: string) => id !== this.meuId);
-      
       this.mostrarAviso('Você deixou de seguir.', 'sucesso');
-      
-      // Chama o serviço (que já usa 'seguidores' e 'seguindo')
       await this.authService.unfollowUser(this.meuId, this.dadosUsuario.uid);
-
     } else {
-      // --- SEGUIR ---
       this.isFollowing = true;
-      
-      // Adiciona meu ID visualmente
       this.dadosUsuario.seguidores.push(this.meuId);
-      
       this.mostrarAviso('Seguindo!', 'sucesso');
-      
       await this.authService.followUser(this.meuId, this.dadosUsuario.uid);
     }
     this.cdr.detectChanges();
@@ -100,7 +139,6 @@ export class ProfileComponent implements OnInit {
     this.router.navigate(['/chat'], { queryParams: { with: this.dadosUsuario.uid } });
   }
 
-  // ... Mantenha o restante dos métodos (initEditForm, salvarPerfil, etc) iguais ...
   initEditForm() {
     this.editForm = { ...this.dadosUsuario, competencias: [...(this.dadosUsuario?.competencias || [])] };
   }

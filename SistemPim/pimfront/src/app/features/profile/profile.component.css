@@ -1,70 +1,71 @@
 /* =========================================
    ESTRUTURA BASE
 ========================================= */
+:host {
+  display: block;
+  width: 100%;
+}
+
 .profile-page {
   background: #f4f7f6;
   min-height: 100vh;
   font-family: 'Poppins', sans-serif;
   padding-bottom: 50px;
+  overflow-x: hidden;
 }
 
-/* Banner */
+/* --- BANNER --- */
 .profile-background,
 .sk-banner {
   height: 250px;
   background-color: #00ce71;
-  /* Fallback color */
   background-size: cover;
   background-position: center;
   position: relative;
-  border-radius: 0 0 30px 30px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  /* Borda arredondada removida no mobile via media query */
 }
 
 .overlay {
   position: absolute;
   inset: 0;
   background: linear-gradient(180deg, rgba(0, 206, 113, 0.2) 0%, rgba(0, 51, 43, 0.6) 100%);
-  border-radius: 0 0 30px 30px;
 }
 
-/* Layout Grid Principal */
+/* --- LAYOUT PRINCIPAL (GRID) --- */
 .profile-content {
   display: grid;
-  grid-template-columns: 320px 1fr;
-  gap: 30px;
+  grid-template-columns: 300px 1fr; /* Coluna fixa esquerda, resto fluído */
+  gap: 25px;
   max-width: 1200px;
-  margin: -100px auto 0;
-  /* Puxa o conteúdo para cima do banner */
+  margin: -80px auto 0; /* Sobe o conteúdo sobre o banner */
   padding: 0 20px;
   position: relative;
   z-index: 10;
 }
 
-/* Utils */
+/* --- CARDS (CORREÇÃO DO MENU CORTADO) --- */
 .card-shadow {
   background: white;
-  border-radius: 20px;
+  border-radius: 16px;
   padding: 25px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
   border: 1px solid rgba(0, 0, 0, 0.02);
+  height: fit-content;
+  
+  /* [IMPORTANTE] Permite que o menu dropdown saia da caixa sem ser cortado */
+  overflow: visible !important; 
+  position: relative; /* Contexto para z-index */
 }
 
-.mt-20 {
-  margin-top: 20px;
-}
-
-.mb-3 {
-  margin-bottom: 1rem;
-}
-
-.mb-4 {
-  margin-bottom: 1.5rem;
-}
+/* Utilitários */
+.mt-20 { margin-top: 20px; }
+.mb-3 { margin-bottom: 1rem; }
 
 /* =========================================
-   COLUNA ESQUERDA (User Card)
+   COLUNA ESQUERDA
 ========================================= */
+
+/* Avatar */
 .avatar-container {
   position: relative;
   width: 140px;
@@ -84,9 +85,9 @@
 
 .edit-badge {
   position: absolute;
-  bottom: 8px;
-  right: 8px;
-  background: var(--primary-color);
+  bottom: 5px;
+  right: 5px;
+  background: #00ce71;
   color: white;
   border: 3px solid white;
   border-radius: 50%;
@@ -99,13 +100,11 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
   transition: transform 0.2s;
 }
+.edit-badge:hover { transform: scale(1.1); }
 
-.edit-badge:hover {
-  transform: scale(1.1);
-}
-
+/* Infos do Usuário */
 .user-main-info h2 {
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   color: #2d3436;
   margin-bottom: 5px;
   text-align: center;
@@ -113,187 +112,156 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
-.verified {
-  color: #00ce71;
-  font-size: 1.2rem;
-}
+.verified { color: #00ce71; font-size: 1.2rem; }
 
 .role {
   color: #636e72;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   text-align: center;
-  margin-bottom: 25px;
+  margin-bottom: 20px;
   font-weight: 500;
 }
 
 /* Stats */
 .stats-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
+  justify-content: space-around;
   background: #f8f9fa;
-  padding: 15px;
-  border-radius: 15px;
-  margin-bottom: 25px;
+  padding: 15px 10px;
+  border-radius: 12px;
+  margin-bottom: 20px;
   text-align: center;
 }
 
-.stat strong {
-  display: block;
-  font-size: 1.2rem;
-  color: #2d3436;
-  font-weight: 700;
-}
+.stat { display: flex; flex-direction: column; }
+.stat strong { font-size: 1.1rem; color: #2d3436; font-weight: 700; }
+.stat span { font-size: 0.7rem; color: #b2bec3; text-transform: uppercase; font-weight: 600; }
 
-.stat span {
-  font-size: 0.75rem;
-  color: #b2bec3;
-  text-transform: uppercase;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-}
-
-/* Botões */
-.actions-area button {
-  width: 100%;
-  padding: 12px;
-  border-radius: 12px;
-  border: none;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 0.95rem;
+/* =========================================
+   ÁREA DE AÇÕES (BOTÕES + MENU)
+========================================= */
+.actions-area {
   display: flex;
+  gap: 10px;
+  flex-wrap: wrap; /* Permite quebrar linha se faltar espaço */
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.btn-edit {
-  background: #004d40;
-  color: white;
-}
-
-.btn-edit:hover {
-  background: #00332b;
-  transform: translateY(-2px);
-}
-
-.btn-edit.cancel-mode {
-  background: #ffebee;
-  color: #c62828;
-}
-
-.btn-edit.cancel-mode:hover {
-  background: #ffcdd2;
 }
 
 .social-buttons {
   display: flex;
   gap: 10px;
+  flex: 1; /* Ocupa o espaço restante */
 }
 
-.btn-follow {
-  background: var(--primary-color);
-  color: white;
+.btn-action {
+  flex: 1;
+  padding: 10px 15px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
 }
 
-.btn-follow:hover {
-  background: var(--primary-color);
-  transform: translateY(-2px);
+/* Estilos de Botão */
+.btn-edit { background: #004d40; color: white; width: 100%; }
+.btn-edit:hover { background: #00332b; }
+.btn-edit.cancel-mode { background: #ffebee; color: #c62828; }
+
+.btn-follow { background: #00ce71; color: white; }
+.btn-follow:hover { background: #00b060; }
+
+.btn-unfollow { background: #edf2f7; color: #718096; }
+.btn-unfollow:hover { background: #e53e3e; color: white; }
+
+.btn-msg { background: #e8fcf3; color: #00ce71; border: 1px solid transparent; }
+.btn-msg:hover { border-color: #00ce71; }
+
+/* --- MENU DROPDOWN (CORRIGIDO) --- */
+.dropdown-container {
+  position: relative; /* Âncora para o menu */
+  display: inline-block;
 }
 
-.btn-unfollow {
-  background: #edf2f7;
-  color: #718096;
+.btn-more {
+  background: #f1f2f6;
+  color: #2d3436;
+  width: 44px !important;
+  flex: none !important; /* Não estica */
+  padding: 0 !important;
+  font-size: 1.4rem;
 }
 
-.btn-unfollow:hover {
-  background: #e53e3e;
-  color: white;
+.custom-dropdown {
+  position: absolute;
+  top: 110%; /* Logo abaixo do botão */
+  right: 0;  /* Alinha à DIREITA do botão (impede sair da tela) */
+  left: auto;
+  
+  width: max-content;
+  min-width: 180px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 5px 25px rgba(0,0,0,0.15); /* Sombra mais forte */
+  border: 1px solid #eee;
+  z-index: 9999; /* Garante topo */
+  padding: 8px 0;
+  
+  /* Animação */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.2s ease;
 }
 
-.btn-msg {
-  background: #e8fcf3;
-  color: #00ce71;
-  border: 1px solid #00ce71 !important;
+.custom-dropdown.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
 }
 
-.btn-msg:hover {
-  background: #00ce71;
-  color: white;
+.custom-dropdown a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  color: #636e72;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
 }
+.custom-dropdown a:hover { background: #f8f9fa; color: #00ce71; }
+.danger-option:hover { background: #fff5f5 !important; color: #e53e3e !important; }
 
 /* =========================================
    COMPETÊNCIAS
 ========================================= */
-.skills-card h3 {
-  font-size: 1.1rem;
-  color: #2d3436;
-  margin-bottom: 15px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
+.skills-card h3 { font-size: 1.1rem; color: #2d3436; margin-bottom: 15px; }
+.add-skill-area { display: flex; gap: 8px; margin-bottom: 15px; }
+.add-skill-area input { flex: 1; padding: 8px; border: 1px solid #dfe6e9; border-radius: 8px; width: 100%; }
+.add-skill-area button { background: #00ce71; color: white; border: none; border-radius: 8px; width: 36px; cursor: pointer; }
 
-.add-skill-area {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 15px;
-}
-
-.add-skill-area input {
-  flex: 1;
-  padding: 10px;
-  border: 1px solid #dfe6e9;
-  border-radius: 8px;
-  outline: none;
-}
-
-.add-skill-area button {
-  background: #00ce71;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  width: 40px;
-  cursor: pointer;
-}
-
-.tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
+.tags { display: flex; flex-wrap: wrap; gap: 8px; }
 .tag {
-  background: #e8fcf3;
-  color: #00ce71;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+  background: #e8fcf3; color: #00ce71;
+  padding: 6px 14px; border-radius: 20px;
+  font-size: 0.85rem; font-weight: 600;
+  display: inline-flex; align-items: center; gap: 5px;
 }
-
-.remove-tag {
-  cursor: pointer;
-  background: rgba(0, 0, 0, 0.05);
-  padding: 2px;
-  border-radius: 50%;
-  font-size: 0.8rem;
-  transition: 0.2s;
-}
-
-.remove-tag:hover {
-  background: #ff7675;
-  color: white;
-}
+.remove-tag:hover { background: #ff7675; color: white; border-radius: 50%; }
 
 /* =========================================
-   COLUNA DIREITA (Detalhes)
+   COLUNA DIREITA (CONTEÚDO)
 ========================================= */
 .card-header h3 {
   font-size: 1.25rem;
@@ -306,275 +274,75 @@
 .bio-text {
   line-height: 1.8;
   color: #636e72;
-  font-size: 1rem;
+  font-size: 0.95rem;
   white-space: pre-line;
 }
 
-/* Formulário Edição */
-.edit-form label {
-  display: block;
-  color: #636e72;
-  font-size: 0.85rem;
-  font-weight: 600;
-  margin-bottom: 6px;
+/* Edit Form */
+.edit-form label { display: block; font-size: 0.85rem; font-weight: 600; color: #636e72; margin-bottom: 6px; }
+.edit-form input, .edit-form textarea {
+  width: 100%; padding: 12px; border: 1px solid #dfe6e9; border-radius: 8px;
+  font-family: inherit; font-size: 0.95rem; margin-bottom: 15px; box-sizing: border-box;
 }
-
-.edit-form input,
-.edit-form textarea {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #dfe6e9;
-  border-radius: 10px;
-  font-family: inherit;
-  font-size: 0.95rem;
-  color: #2d3436;
-  transition: 0.2s;
-  margin-bottom: 15px;
-}
-
-.edit-form input:focus,
-.edit-form textarea:focus {
-  border-color: #00ce71;
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(0, 206, 113, 0.1);
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-}
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
 
 .btn-save {
-  background: #00ce71;
-  color: white;
-  border: none;
-  padding: 14px;
-  width: 100%;
-  border-radius: 10px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.btn-save:hover {
-  background: #00b060;
+  background: #00ce71; color: white; border: none; padding: 12px; width: 100%;
+  border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
 }
 
 /* Info Grid */
-.info-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-}
-
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
 .fake-input {
-  background: #f8f9fa;
-  padding: 12px 16px;
-  border-radius: 10px;
-  color: #2d3436;
-  font-size: 0.95rem;
-  border: 1px solid #dfe6e9;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.fake-input i {
-  color: #00ce71;
-  font-size: 1.2rem;
+  background: #f8f9fa; padding: 12px 15px; border-radius: 8px;
+  color: #2d3436; font-size: 0.95rem; border: 1px solid #dfe6e9;
+  display: flex; align-items: center; gap: 10px; overflow: hidden; text-overflow: ellipsis;
 }
 
 /* =========================================
-   SKELETON LOADING (Novo)
-========================================= */
-@keyframes pulse {
-  0% {
-    opacity: 1;
-  }
-
-  50% {
-    opacity: 0.4;
-  }
-
-  100% {
-    opacity: 1;
-  }
-}
-
-.animate-pulse {
-  animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  background-color: #e2e8f0;
-  /* Cor cinza do skeleton */
-}
-
-/* Skeleton Específicos */
-.sk-banner {
-  border-radius: 0 0 30px 30px;
-  height: 250px;
-  background-color: #cbd5e0;
-}
-
-.sk-card {
-  min-height: 200px;
-}
-
-.sk-avatar {
-  width: 140px;
-  height: 140px;
-  border-radius: 50%;
-  border: 5px solid white;
-  margin: -70px auto 15px;
-  position: relative;
-  background-color: #cbd5e0;
-}
-
-.sk-text-center {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 25px;
-}
-
-.sk-line {
-  height: 12px;
-  border-radius: 6px;
-  background-color: #e2e8f0;
-}
-
-.sk-line.title {
-  width: 60%;
-  height: 24px;
-  margin-bottom: 5px;
-}
-
-.sk-line.subtitle {
-  width: 40%;
-  height: 16px;
-}
-
-.sk-stats {
-  height: 60px;
-  border-radius: 12px;
-  margin-bottom: 25px;
-}
-
-.sk-btn {
-  height: 45px;
-  border-radius: 12px;
-  width: 100%;
-}
-
-.sk-line.title-sm {
-  width: 120px;
-  height: 20px;
-}
-
-.sk-tags {
-  display: flex;
-  gap: 8px;
-}
-
-.sk-tag {
-  width: 80px;
-  height: 32px;
-  border-radius: 20px;
-}
-
-.sk-line.full {
-  width: 100%;
-  margin-bottom: 12px;
-}
-
-.sk-line.half {
-  width: 50%;
-}
-
-.sk-info-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-}
-
-.sk-input-fake {
-  height: 48px;
-  border-radius: 10px;
-}
-
-/* =========================================
-   RESPONSIVIDADE (MOBILE & TABLET)
+   MEDIA QUERIES (RESPONSIVIDADE)
 ========================================= */
 
-/* Tablet e Mobile (Abaixo de 992px) */
+/* Tablet (Menor que 992px) */
 @media (max-width: 992px) {
   .profile-content {
-    /* Muda de Grid para Flex Column - Empilha tudo */
     display: flex;
-    flex-direction: column;
+    flex-direction: column; /* Empilha colunas */
     margin-top: -60px;
-    /* Sobe menos no mobile */
     gap: 20px;
   }
 
-  .profile-background,
-  .sk-banner {
-    height: 180px;
-  }
-
-  /* Garante largura total */
-  .left-column,
-  .right-column {
-    width: 100%;
-  }
-
-  .avatar-container,
-  .sk-avatar {
-    width: 120px;
-    height: 120px;
-    margin-top: -60px;
-    /* Puxa o avatar pra cima do card no mobile */
-  }
-
-  /* Ajusta o skeleton do avatar no mobile também */
-  .sk-avatar {
-    margin: -60px auto 15px;
-  }
+  .left-column, .right-column { width: 100%; }
+  .profile-background { height: 200px; }
 }
 
-/* Mobile Pequeno (Abaixo de 576px) */
+/* Mobile (Menor que 576px) */
 @media (max-width: 576px) {
-  .profile-content {
-    padding: 0 15px;
-  }
+  .profile-page { padding-bottom: 20px; }
+  .profile-content { margin-top: -50px; padding: 0 15px; }
+  
+  .avatar-container { width: 110px; height: 110px; }
+  .sk-avatar { width: 110px; height: 110px; margin-top: -55px; }
+  
+  .profile-background { height: 160px; border-radius: 0; }
 
-  /* Inputs um embaixo do outro no info-grid */
-  .info-grid,
-  .form-row,
-  .sk-info-grid {
-    grid-template-columns: 1fr;
-    gap: 15px;
-  }
+  /* Grid vira coluna única nos forms */
+  .form-row, .info-grid { grid-template-columns: 1fr; gap: 10px; }
 
-  .stats-grid {
-    padding: 10px;
-    gap: 5px;
+  /* Ajuste menu flutuante no mobile */
+  .custom-dropdown {
+    right: -10px; /* Leve ajuste se precisar */
+    min-width: 160px;
   }
-
-  .stat strong {
-    font-size: 1rem;
-  }
-
-  .stat span {
-    font-size: 0.65rem;
-  }
-
-  /* Botões sociais empilhados no mobile muito pequeno? 
-     Se quiser, descomente abaixo: */
-  /* .social-buttons { flex-direction: column; } */
 }
+
+/* =========================================
+   SKELETON LOADING
+========================================= */
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+.animate-pulse { animation: pulse 1.5s infinite; background-color: #e2e8f0; }
+
+.sk-banner { height: 250px; border-radius: 0 0 30px 30px; }
+.sk-card { min-height: 200px; background: white; border-radius: 16px; margin-bottom: 20px; }
+.sk-avatar { width: 140px; height: 140px; border-radius: 50%; margin: -70px auto 20px; border: 5px solid white; position: relative; z-index: 20; background: #cbd5e0; }
+.sk-line { height: 12px; border-radius: 6px; background-color: #cbd5e0; margin: 10px auto; width: 80%; }
