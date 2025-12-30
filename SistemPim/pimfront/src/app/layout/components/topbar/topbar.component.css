@@ -1,14 +1,15 @@
-/* --- CONFIGURAÇÕES GERAIS --- */
-:root {
+/* --- VARS --- */
+:host {
   --pim-green: #00a859;
   --pim-green-light: #e6f7ef;
   --text-dark: #333;
   --text-gray: #666;
   --bg-hover: #f5f6fa;
   --shadow-dropdown: 0 10px 30px rgba(0, 0, 0, 0.12);
-  --radius-pim: 16px;
+  display: block;
 }
 
+/* --- CONTAINER --- */
 .topbar-container {
   display: flex;
   justify-content: space-between;
@@ -17,15 +18,17 @@
   background-color: #ffffff;
   margin-bottom: 20px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-  gap: 20px; /* Espaço entre os itens */
+  gap: 20px;
+  position: relative; /* Para z-index funcionar bem */
+  z-index: 50;
 }
 
-/* --- MOBILE CONTROLS (Hambúrguer) --- */
+/* --- MOBILE CONTROLS --- */
 .mobile-left-controls {
-  display: none; /* Desktop: esconde */
+  display: none;
   align-items: center;
   gap: 15px;
-  flex-shrink: 0; /* Impede que o botão encolha */
+  flex-shrink: 0;
 }
 
 .hamburger-btn {
@@ -34,14 +37,8 @@
   font-size: 28px;
   color: #333;
   cursor: pointer;
-  display: flex;
   padding: 0;
-}
-
-.mobile-logo {
-  font-weight: bold;
-  font-size: 1.2rem;
-  color: var(--pim-green);
+  display: flex;
 }
 
 /* --- BARRA DE PESQUISA --- */
@@ -49,7 +46,6 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  /* Desktop: Largura definida pelo search-box */
 }
 
 .search-box {
@@ -58,7 +54,7 @@
   background: var(--bg-hover);
   padding: 10px 20px;
   border-radius: 30px;
-  width: 380px; /* Largura fixa no Desktop */
+  width: 380px;
   transition: all 0.3s;
 }
 
@@ -87,7 +83,7 @@
   display: flex;
   align-items: center;
   gap: 24px;
-  flex-shrink: 0; /* Impede que os ícones encolham */
+  flex-shrink: 0;
 }
 
 .notification-wrapper,
@@ -107,7 +103,7 @@
   transition: all 0.2s;
 }
 
-.notification-icon:hover {
+.notification-icon:hover, .notification-icon:active {
   background-color: var(--bg-hover);
 }
 
@@ -122,20 +118,17 @@
 
 .notification-icon .dot {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 8px;
-  height: 8px;
+  top: 10px; right: 10px;
+  width: 8px; height: 8px;
   background: #ff4757;
   border-radius: 50%;
   border: 2px solid #fff;
 }
 
-/* --- DROPDOWNS --- */
+/* --- DROPDOWNS BASE --- */
 .dropdown-panel {
   position: absolute;
-  top: 55px;
-  right: 0;
+  top: 55px; right: 0;
   background: white;
   border-radius: 16px;
   box-shadow: var(--shadow-dropdown);
@@ -146,11 +139,17 @@
   overflow: hidden;
 }
 
-/* Estilos internos dos Dropdowns (Mantidos iguais) */
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* --- DROPDOWN NOTIFICAÇÕES --- */
 .notification-dropdown { width: 340px; }
 .dropdown-header-row { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #f0f0f0; }
 .dd-title { font-weight: 700; color: var(--text-dark); font-size: 0.95rem; }
 .mark-read-link { background: none; border: none; font-size: 0.75rem; color: var(--pim-green); font-weight: 600; cursor: pointer; }
+
 .notif-list { max-height: 380px; overflow-y: auto; }
 .notif-item { display: flex; gap: 14px; padding: 16px 20px; border-bottom: 1px solid #fbfbfb; cursor: pointer; position: relative; transition: background 0.2s; }
 .notif-item:hover { background-color: #fcfcfc; }
@@ -159,19 +158,23 @@
 .notif-icon-box.atividade { background: #e3f2fd; color: #2196f3; }
 .notif-icon-box.aviso { background: #fff3e0; color: #ff9800; }
 .notif-icon-box.sistema { background: #f3e5f5; color: #9c27b0; }
+.notif-icon-box i { font-size: 1.2rem; }
+
 .notif-content { flex: 1; }
 .notif-top-line { display: flex; justify-content: space-between; margin-bottom: 4px; }
 .n-title { font-weight: 600; font-size: 0.85rem; color: var(--text-dark); }
 .n-time { font-size: 0.7rem; color: #999; }
 .n-msg { font-size: 0.8rem; color: var(--text-gray); margin: 0; line-height: 1.4; }
 .status-dot { position: absolute; top: 50%; right: 15px; transform: translateY(-50%); width: 8px; height: 8px; background: var(--pim-green); border-radius: 50%; }
+
 .dropdown-footer { text-align: center; padding: 12px; background: #fafafa; border-top: 1px solid #f0f0f0; }
 .dropdown-footer a { font-size: 0.85rem; color: var(--text-gray); text-decoration: none; font-weight: 500; }
+
 .empty-state { text-align: center; padding: 40px 20px; color: #b0b0b0; }
 .empty-state i { font-size: 2rem; margin-bottom: 10px; display: block; }
 
-/* Busca Dropdown */
-.search-results-dropdown { top: 50px; width: 100%; left: 0; max-height: 300px; overflow-y: auto; }
+/* --- DROPDOWN BUSCA --- */
+.search-results-dropdown { top: 50px; width: 100%; left: 0; right: auto; max-height: 300px; overflow-y: auto; }
 .search-item { display: flex; align-items: center; gap: 12px; padding: 12px 20px; cursor: pointer; transition: background 0.2s; border-bottom: 1px solid #f8f8f8; }
 .search-item:hover { background-color: var(--pim-green-light); }
 .search-avatar { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; border: 1px solid #eee; }
@@ -184,88 +187,54 @@
 .clear-history-btn { background: none; border: none; font-size: 0.75rem; color: #ff5b5b; cursor: pointer; padding: 0; }
 .recent-icon { width: 35px; height: 35px; border-radius: 50%; background-color: #f0f2f5; display: flex; align-items: center; justify-content: center; color: #888; font-size: 1.1rem; }
 
-/* Perfil Dropdown */
-.profile-dropdown { width: 220px; padding: 10px; }
-.profile-display { display: flex; align-items: center; gap: 12px; cursor: pointer; padding: 6px 12px; border-radius: 30px; transition: 0.2s; }
+/* --- DROPDOWN PERFIL --- */
+.profile-dropdown { width: 240px; padding: 8px; }
+
+.profile-display { display: flex; align-items: center; gap: 12px; cursor: pointer; padding: 6px 12px; border-radius: 30px; transition: 0.2s; user-select: none; }
 .profile-display:hover, .profile-display.active { background-color: var(--bg-hover); }
 .user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); }
 .user-name { font-weight: 600; font-size: 0.9rem; color: var(--text-dark); max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
 .profile-header-info { padding: 10px 15px; border-bottom: 1px solid #f0f0f0; margin-bottom: 5px; }
 .label-welcome { display: block; font-size: 0.75rem; color: #999; }
 .label-name { display: block; font-weight: 700; font-size: 0.95rem; color: var(--text-dark); }
+
 .dropdown-list-items { list-style: none; padding: 0; margin: 0; }
 .dropdown-list-items li { display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: #555; cursor: pointer; border-radius: 10px; transition: 0.2s; font-size: 0.9rem; }
 .dropdown-list-items li:hover { background-color: var(--bg-hover); color: var(--pim-green); }
 .dropdown-list-items li:hover i { color: var(--pim-green); }
-.dropdown-list-items li i { font-size: 1.2rem; color: #888; }
+.dropdown-list-items li i { font-size: 1.2rem; color: #888; transition: color 0.2s; }
+
 .divider { height: 1px; background: #f0f0f0; margin: 5px 0; padding: 0 !important; cursor: default !important; }
 .item-logout { color: #ff5b5b !important; }
 .item-logout i { color: #ff5b5b !important; }
 .item-logout:hover { background-color: #fff0f0 !important; }
 
-@keyframes slideDown { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
-
 /* ============================================================
-   RESPONSIVIDADE (MOBILE < 992px)
+   RESPONSIVIDADE (TABLET/MOBILE < 992px)
 ============================================================ */
 @media (max-width: 992px) {
-  .topbar-container {
-    padding: 10px 15px;
-    gap: 10px; /* Reduz gap */
-  }
+  .topbar-container { padding: 10px 15px; gap: 12px; }
 
-  /* 1. Ativa Controles Mobile (Esquerda) */
-  .mobile-left-controls {
-    display: flex;
-  }
-  
-  /* Garante que o texto PimApp suma se ainda estiver no HTML */
-  .mobile-logo {
-    display: none; 
-  }
+  /* Mostra botão hamburger */
+  .mobile-left-controls { display: flex; }
 
-  /* 2. BARRA DE PESQUISA (Agora Visível e Esticada) */
-  .search-wrapper {
-    display: block !important; 
-    flex: 1; /* Faz a barra ocupar todo espaço disponível no meio */
-  }
+  /* Barra de pesquisa ocupa todo o meio */
+  .search-wrapper { flex: 1; display: block !important; }
+  .search-box { width: 100%; padding: 8px 15px; font-size: 0.9rem; }
+  .search-box i { font-size: 1rem; margin-right: 8px; }
 
-  .search-box {
-    width: 100%; /* Preenche o search-wrapper */
-    padding: 8px 15px;
-    font-size: 0.9rem;
-  }
-  
-  .search-box i {
-    font-size: 1rem;
-    margin-right: 8px;
-  }
+  /* Reduz área do usuário */
+  .user-area { gap: 12px; }
+  .profile-info { display: none; } /* Esconde nome "João" */
+  .profile-display { padding: 0; }
+  .user-avatar { margin: 0; width: 34px; height: 34px; }
 
-  /* 3. Ajusta Área Usuário (Direita) */
-  .user-area {
-    gap: 12px;
-  }
-
-  .profile-info {
-    display: none; /* Esconde texto "João..." */
-  }
-  
-  .profile-display {
-    padding: 0;
-  }
-  
-  .user-avatar {
-    margin: 0;
-    width: 32px;
-    height: 32px;
-  }
-
-  /* Dropdowns no Mobile */
+  /* Dropdowns Full Width ou ajustados */
   .dropdown-panel {
     position: fixed;
     top: 60px;
-    left: 10px;
-    right: 10px;
+    left: 10px; right: 10px;
     width: auto;
     max-width: none;
   }

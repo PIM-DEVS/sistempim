@@ -15,7 +15,7 @@
              [(ngModel)]="searchTerm" 
              (input)="onSearchChange()"
              (focus)="onSearchFocus()"
-             placeholder="Pesquisar..." />
+             placeholder="Pesquisar estudantes, projetos..." />
     </div>
 
     <div class="dropdown-panel search-results-dropdown" 
@@ -54,7 +54,7 @@
   <div class="user-area">
 
     <div class="notification-wrapper">
-      <div class="notification-icon" (click)="toggleNotificacoes()">
+      <div class="notification-icon" (click)="toggleNotificacoes($event)">
         <i class="bx bx-bell" [class.active-bell]="menuNotificacoesAberto"></i>
         <span class="dot" *ngIf="totalNaoLidas > 0"></span>
       </div>
@@ -94,7 +94,7 @@
     </div>
 
     <div class="profile-wrapper">
-      <div class="profile-display" (click)="togglePerfil()" [class.active]="menuPerfilAberto">
+      <div class="profile-display" (click)="togglePerfil($event)" [class.active]="menuPerfilAberto">
         <img [src]="dadosUsuario?.foto || (dadosUsuario?.genero === 'Feminino' ? 'assets/images/feminino.jpg' : 'assets/images/masculino.jpg')" class="user-avatar" />
         <div class="profile-info">
           <span class="user-name">{{ dadosUsuario?.nome?.split(' ')[0] || '...' }}</span>
@@ -108,8 +108,8 @@
           <span class="label-name">{{ dadosUsuario?.nome }}</span>
         </div>
         <ul class="dropdown-list-items">
-          <li routerLink="/profile" (click)="togglePerfil()"><i class="bx bx-user"></i> Meu Perfil</li>
-          <li routerLink="/settings" (click)="togglePerfil()"><i class="bx bx-cog"></i> Configurações</li>
+          <li routerLink="/profile" (click)="menuPerfilAberto = false"><i class="bx bx-user"></i> Meu Perfil</li>
+          <li routerLink="/settings" (click)="menuPerfilAberto = false"><i class="bx bx-cog"></i> Configurações</li>
           <li class="divider"></li>
           <li (click)="logout()" class="item-logout"><i class="bx bx-log-out"></i> Sair</li>
         </ul>
