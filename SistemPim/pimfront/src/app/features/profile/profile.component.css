@@ -13,7 +13,6 @@
 .sk-banner {
   height: 250px;
   background-color: #00ce71;
-  /* Fallback color */
   background-size: cover;
   background-position: center;
   position: relative;
@@ -35,7 +34,6 @@
   gap: 30px;
   max-width: 1200px;
   margin: -100px auto 0;
-  /* Puxa o conteúdo para cima do banner */
   padding: 0 20px;
   position: relative;
   z-index: 10;
@@ -50,17 +48,9 @@
   border: 1px solid rgba(0, 0, 0, 0.02);
 }
 
-.mt-20 {
-  margin-top: 20px;
-}
-
-.mb-3 {
-  margin-bottom: 1rem;
-}
-
-.mb-4 {
-  margin-bottom: 1.5rem;
-}
+.mt-20 { margin-top: 20px; }
+.mb-3 { margin-bottom: 1rem; }
+.mb-4 { margin-bottom: 1.5rem; }
 
 /* =========================================
    COLUNA ESQUERDA (User Card)
@@ -82,27 +72,7 @@
   background: white;
 }
 
-.edit-badge {
-  position: absolute;
-  bottom: 8px;
-  right: 8px;
-  background: var(--primary-color);
-  color: white;
-  border: 3px solid white;
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  transition: transform 0.2s;
-}
-
-.edit-badge:hover {
-  transform: scale(1.1);
-}
+/* Badge de edição foi removido daqui */
 
 .user-main-info h2 {
   font-size: 1.4rem;
@@ -115,10 +85,7 @@
   gap: 8px;
 }
 
-.verified {
-  color: #00ce71;
-  font-size: 1.2rem;
-}
+.verified { color: #00ce71; font-size: 1.2rem; }
 
 .role {
   color: #636e72;
@@ -170,60 +137,26 @@
   gap: 8px;
 }
 
-.btn-edit {
-  background: #004d40;
-  color: white;
-}
+.btn-edit { background: #004d40; color: white; }
+.btn-edit:hover { background: #00332b; transform: translateY(-2px); }
 
-.btn-edit:hover {
-  background: #00332b;
-  transform: translateY(-2px);
-}
+.btn-edit.cancel-mode { background: #ffebee; color: #c62828; }
+.btn-edit.cancel-mode:hover { background: #ffcdd2; }
 
-.btn-edit.cancel-mode {
-  background: #ffebee;
-  color: #c62828;
-}
+.social-buttons { display: flex; gap: 10px; }
 
-.btn-edit.cancel-mode:hover {
-  background: #ffcdd2;
-}
+.btn-follow { background: #00ce71; color: white; }
+.btn-follow:hover { background: #00ce71; transform: translateY(-2px); }
 
-.social-buttons {
-  display: flex;
-  gap: 10px;
-}
-
-.btn-follow {
-  background: var(--primary-color);
-  color: white;
-}
-
-.btn-follow:hover {
-  background: var(--primary-color);
-  transform: translateY(-2px);
-}
-
-.btn-unfollow {
-  background: #edf2f7;
-  color: #718096;
-}
-
-.btn-unfollow:hover {
-  background: #e53e3e;
-  color: white;
-}
+.btn-unfollow { background: #edf2f7; color: #718096; }
+.btn-unfollow:hover { background: #e53e3e; color: white; }
 
 .btn-msg {
   background: #e8fcf3;
   color: #00ce71;
   border: 1px solid #00ce71 !important;
 }
-
-.btn-msg:hover {
-  background: #00ce71;
-  color: white;
-}
+.btn-msg:hover { background: #00ce71; color: white; }
 
 /* =========================================
    COMPETÊNCIAS
@@ -260,11 +193,7 @@
   cursor: pointer;
 }
 
-.tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
+.tags { display: flex; flex-wrap: wrap; gap: 8px; }
 
 .tag {
   background: #e8fcf3;
@@ -286,11 +215,7 @@
   font-size: 0.8rem;
   transition: 0.2s;
 }
-
-.remove-tag:hover {
-  background: #ff7675;
-  color: white;
-}
+.remove-tag:hover { background: #ff7675; color: white; }
 
 /* =========================================
    COLUNA DIREITA (Detalhes)
@@ -361,10 +286,7 @@
   justify-content: center;
   gap: 8px;
 }
-
-.btn-save:hover {
-  background: #00b060;
-}
+.btn-save:hover { background: #00b060; }
 
 /* Info Grid */
 .info-grid {
@@ -385,44 +307,29 @@
   gap: 10px;
 }
 
-.fake-input i {
-  color: #00ce71;
-  font-size: 1.2rem;
-}
+.fake-input i { color: #00ce71; font-size: 1.2rem; }
 
 /* =========================================
-   SKELETON LOADING (Novo)
+   SKELETON LOADING
 ========================================= */
 @keyframes pulse {
-  0% {
-    opacity: 1;
-  }
-
-  50% {
-    opacity: 0.4;
-  }
-
-  100% {
-    opacity: 1;
-  }
+  0% { opacity: 1; }
+  50% { opacity: 0.4; }
+  100% { opacity: 1; }
 }
 
 .animate-pulse {
   animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   background-color: #e2e8f0;
-  /* Cor cinza do skeleton */
 }
 
-/* Skeleton Específicos */
 .sk-banner {
   border-radius: 0 0 30px 30px;
   height: 250px;
   background-color: #cbd5e0;
 }
 
-.sk-card {
-  min-height: 200px;
-}
+.sk-card { min-height: 200px; }
 
 .sk-avatar {
   width: 140px;
@@ -447,134 +354,49 @@
   border-radius: 6px;
   background-color: #e2e8f0;
 }
+.sk-line.title { width: 60%; height: 24px; margin-bottom: 5px; }
+.sk-line.subtitle { width: 40%; height: 16px; }
+.sk-stats { height: 60px; border-radius: 12px; margin-bottom: 25px; }
+.sk-btn { height: 45px; border-radius: 12px; width: 100%; }
+.sk-line.title-sm { width: 120px; height: 20px; }
 
-.sk-line.title {
-  width: 60%;
-  height: 24px;
-  margin-bottom: 5px;
-}
+.sk-tags { display: flex; gap: 8px; }
+.sk-tag { width: 80px; height: 32px; border-radius: 20px; }
 
-.sk-line.subtitle {
-  width: 40%;
-  height: 16px;
-}
+.sk-line.full { width: 100%; margin-bottom: 12px; }
+.sk-line.half { width: 50%; }
 
-.sk-stats {
-  height: 60px;
-  border-radius: 12px;
-  margin-bottom: 25px;
-}
-
-.sk-btn {
-  height: 45px;
-  border-radius: 12px;
-  width: 100%;
-}
-
-.sk-line.title-sm {
-  width: 120px;
-  height: 20px;
-}
-
-.sk-tags {
-  display: flex;
-  gap: 8px;
-}
-
-.sk-tag {
-  width: 80px;
-  height: 32px;
-  border-radius: 20px;
-}
-
-.sk-line.full {
-  width: 100%;
-  margin-bottom: 12px;
-}
-
-.sk-line.half {
-  width: 50%;
-}
-
-.sk-info-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-}
-
-.sk-input-fake {
-  height: 48px;
-  border-radius: 10px;
-}
+.sk-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.sk-input-fake { height: 48px; border-radius: 10px; }
 
 /* =========================================
    RESPONSIVIDADE (MOBILE & TABLET)
 ========================================= */
-
-/* Tablet e Mobile (Abaixo de 992px) */
 @media (max-width: 992px) {
   .profile-content {
-    /* Muda de Grid para Flex Column - Empilha tudo */
     display: flex;
     flex-direction: column;
     margin-top: -60px;
-    /* Sobe menos no mobile */
     gap: 20px;
   }
-
-  .profile-background,
-  .sk-banner {
-    height: 180px;
-  }
-
-  /* Garante largura total */
-  .left-column,
-  .right-column {
-    width: 100%;
-  }
-
-  .avatar-container,
-  .sk-avatar {
+  .profile-background, .sk-banner { height: 180px; }
+  .left-column, .right-column { width: 100%; }
+  
+  .avatar-container, .sk-avatar {
     width: 120px;
     height: 120px;
     margin-top: -60px;
-    /* Puxa o avatar pra cima do card no mobile */
   }
-
-  /* Ajusta o skeleton do avatar no mobile também */
-  .sk-avatar {
-    margin: -60px auto 15px;
-  }
+  .sk-avatar { margin: -60px auto 15px; }
 }
 
-/* Mobile Pequeno (Abaixo de 576px) */
 @media (max-width: 576px) {
-  .profile-content {
-    padding: 0 15px;
-  }
-
-  /* Inputs um embaixo do outro no info-grid */
-  .info-grid,
-  .form-row,
-  .sk-info-grid {
+  .profile-content { padding: 0 15px; }
+  .info-grid, .form-row, .sk-info-grid {
     grid-template-columns: 1fr;
     gap: 15px;
   }
-
-  .stats-grid {
-    padding: 10px;
-    gap: 5px;
-  }
-
-  .stat strong {
-    font-size: 1rem;
-  }
-
-  .stat span {
-    font-size: 0.65rem;
-  }
-
-  /* Botões sociais empilhados no mobile muito pequeno? 
-     Se quiser, descomente abaixo: */
-  /* .social-buttons { flex-direction: column; } */
+  .stats-grid { padding: 10px; gap: 5px; }
+  .stat strong { font-size: 1rem; }
+  .stat span { font-size: 0.65rem; }
 }

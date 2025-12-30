@@ -1,186 +1,103 @@
-<div class="profile-page">
+<div class="auth-container">
   
-  <ng-container *ngIf="dadosUsuario; else loading">
-    
-    <div class="profile-background" [style.background-image]="dadosUsuario.banner ? 'url(' + dadosUsuario.banner + ')' : 'none'">
-      <div class="overlay" *ngIf="dadosUsuario.banner"></div>
+  <div class="auth-banner">
+    <div class="banner-content">
+      <div class="logo-box-decoration">
+        <i class='bx bxs-shapes'></i>
+      </div>
+      <h1>
+        <span *ngIf="isLoginMode">Bem-vindo<br />de volta!</span>
+        <span *ngIf="!isLoginMode">Junte-se ao<br />PIM Online!</span>
+        <span class="hand-wave">👋</span>
+      </h1>
+      <p>Gerencie projetos, conecte-se com professores e automatize sua jornada acadêmica.</p>
     </div>
+    <div class="circle c1"></div>
+    <div class="circle c2"></div>
+    <div class="copyright">© 2025 PIM Online. Todos os direitos reservados.</div>
+  </div>
 
-    <div class="profile-content">
+  <div class="auth-form-wrapper">
+    <div class="form-scroll-container">
       
-      <div class="left-column">
-        <div class="user-card card-shadow">
-          <div class="avatar-container">
-            <img 
-              [src]="dadosUsuario?.foto || (dadosUsuario?.genero === 'masculino' ? 'assets/images/masculino.jpg' : 'assets/images/feminino.jpg')" 
-              class="avatar-img"
-              alt="Foto de Perfil"
-            />
-            <button class="edit-badge" *ngIf="isEditing" title="Alterar Foto">
-              <i class="bx bx-camera"></i>
-            </button>
-          </div>
-
-          <div class="user-main-info">
-            <h2>{{ dadosUsuario.nome }} <i class="bx bxs-badge-check verified"></i></h2>
-            <p class="role">{{ dadosUsuario.cargo || 'Membro do PIM' }}</p>
-          </div>
-
-          <div class="stats-grid">
-            <div class="stat">
-              <strong>{{ dadosUsuario.seguidores?.length || 0 }}</strong>
-              <span>Seguidores</span>
-            </div>
-            <div class="stat">
-              <strong>{{ dadosUsuario.seguindo?.length || 0 }}</strong>
-              <span>Seguindo</span>
-            </div>
-            <div class="stat">
-              <strong>{{ dadosUsuario.posts || 0 }}</strong>
-              <span>Posts</span>
-            </div>
-          </div>
-
-          <div class="actions-area">
-            <button
-              class="btn-action btn-edit"
-              (click)="toggleEdit()"
-              *ngIf="isMeuPerfil"
-              [ngClass]="{ 'cancel-mode': isEditing }"
-            >
-              {{ isEditing ? 'Cancelar' : 'Editar Perfil' }}
-            </button>
-
-            <div *ngIf="!isMeuPerfil" class="social-buttons">
-              <button 
-                class="btn-action" 
-                [ngClass]="isFollowing ? 'btn-unfollow' : 'btn-follow'"
-                (click)="toggleFollow()"
-              >
-                <i class="bx" [ngClass]="isFollowing ? 'bx-user-check' : 'bx-user-plus'"></i>
-                {{ isFollowing ? 'Seguindo' : 'Seguir' }}
-              </button>
-
-              <button *ngIf="isFollowing" class="btn-action btn-msg" (click)="irParaChat()">
-                <i class="bx bx-message-rounded-dots"></i> Mensagem
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div class="skills-card card-shadow mt-20">
-          <h3><i class="bx bx-code-alt"></i> Competências</h3>
-          
-          <div class="add-skill-area" *ngIf="isEditing">
-             <input type="text" [(ngModel)]="novaCompetencia" (keyup.enter)="adicionarCompetencia()" placeholder="Add skill...">
-             <button (click)="adicionarCompetencia()"><i class="bx bx-plus"></i></button>
-          </div>
-
-          <div class="tags">
-            <span class="tag" *ngFor="let skill of isEditing ? editForm.competencias : dadosUsuario.competencias; let i = index">
-              {{ skill }}
-              <i *ngIf="isEditing" class="bx bx-x remove-tag" (click)="removerCompetencia(i)"></i>
-            </span>
-            <span *ngIf="!isEditing && (!dadosUsuario.competencias || dadosUsuario.competencias.length === 0)" class="no-skills">
-              Nenhuma competência definida.
-            </span>
-          </div>
-        </div>
+      <div class="mobile-brand">
+        <div class="brand-icon"><i class='bx bxs-graduation'></i></div>
+        <h2>PIM <strong>Online</strong></h2>
       </div>
 
-      <div class="right-column">
-        <div class="details-card card-shadow">
-          <div class="card-header">
-            <h3>{{ isEditing ? 'Editando Informações' : 'Sobre Mim' }}</h3>
-          </div>
-
-          <div *ngIf="!isEditing">
-            <p class="bio-text">{{ dadosUsuario.bio || 'Olá! Sou novo na plataforma e ainda não escrevi minha biografia.' }}</p>
-          </div>
-
-          <div *ngIf="isEditing" class="edit-form">
-            <div class="form-row">
-              <div class="form-group">
-                <label>Nome Completo</label>
-                <input [(ngModel)]="editForm.nome" placeholder="Seu nome">
-              </div>
-              <div class="form-group">
-                <label>Cargo / Profissão</label>
-                <input [(ngModel)]="editForm.cargo" placeholder="Ex: Desenvolvedor">
-              </div>
-            </div>
-            <div class="form-group">
-              <label>Biografia</label>
-              <textarea rows="4" [(ngModel)]="editForm.bio" placeholder="Conte um pouco sobre você..."></textarea>
-            </div>
-            <button class="btn-save" (click)="salvarPerfil()">
-              <i class="bx bx-save"></i> Salvar Alterações
-            </button>
-          </div>
-        </div>
+      <div class="form-box login-box" *ngIf="!showGenderSelect">
         
-        <div class="details-card card-shadow mt-20" *ngIf="!isEditing">
-          <div class="card-header"><h3>Informações de Contato</h3></div>
-          <div class="info-grid">
-             <div class="info-item">
-              <label>Email</label>
-              <div class="fake-input"><i class="bx bx-envelope"></i> {{dadosUsuario.email}}</div>
-             </div>
-             <div class="info-item">
-              <label>Membro desde</label>
-              <div class="fake-input"><i class="bx bx-calendar"></i> {{ getMemberSince(dadosUsuario.createdAt) }}</div>
-             </div>
-          </div>
+        <div class="header">
+          <h2>{{ isLoginMode ? 'Acesse sua conta' : 'Crie sua conta' }}</h2>
+          <p class="subtitle">
+            {{ isLoginMode ? 'Insira seus dados para continuar.' : 'Preencha os dados abaixo.' }}
+          </p>
         </div>
+
+        <div class="error-banner" *ngIf="errorMessage">
+          <i class='bx bxs-error-circle'></i>
+          <span>{{ errorMessage }}</span>
+        </div>
+
+        <div class="input-group" *ngIf="!isLoginMode">
+          <label>Nome Completo</label>
+          <input type="text" [(ngModel)]="nome" placeholder="Seu nome" autocomplete="name">
+        </div>
+
+        <div class="input-group">
+          <label>Email Institucional</label>
+          <input type="email" [(ngModel)]="email" placeholder="seu.email@aluno.ifal.edu.br" autocomplete="email">
+        </div>
+
+        <div class="input-group">
+          <label>Senha</label>
+          <input type="password" [(ngModel)]="password" placeholder="Sua senha segura" (keyup.enter)="onSubmit()">
+        </div>
+
+        <div class="actions-row">
+          <button (click)="onSubmit()" class="btn-primary" [disabled]="loading">
+            <span *ngIf="!loading">{{ isLoginMode ? 'Entrar Agora' : 'Criar Conta' }}</span>
+            <span *ngIf="loading"><i class='bx bx-loader-alt bx-spin'></i> Processando...</span>
+          </button>
+        </div>
+
+        <div class="toggle-mode">
+          <p>
+            {{ isLoginMode ? 'Não tem uma conta?' : 'Já tem uma conta?' }}
+            <a (click)="toggleMode()">
+              <strong>{{ isLoginMode ? 'Cadastre-se gratuitamente' : 'Faça Login' }}</strong>
+            </a>
+          </p>
+        </div>
+
+        <div class="divider"><span>ou continue com</span></div>
+
+        <button (click)="loginGoogle()" class="btn-google">
+          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" />
+          <span>Entrar com Google</span>
+        </button>
       </div>
 
-    </div>
-  </ng-container>
-
-  <ng-template #loading>
-    <div class="skeleton-wrapper">
-      <div class="sk-banner animate-pulse"></div>
-
-      <div class="profile-content">
-        <div class="left-column">
-          <div class="user-card card-shadow sk-card">
-             <div class="sk-avatar animate-pulse"></div>
-             <div class="sk-text-center">
-               <div class="sk-line title animate-pulse"></div>
-               <div class="sk-line subtitle animate-pulse"></div>
-             </div>
-             <div class="sk-stats animate-pulse"></div>
-             <div class="sk-btn animate-pulse"></div>
+      <div class="form-box gender-box" *ngIf="showGenderSelect">
+        <div class="header">
+          <h2>Quase lá!</h2>
+          <p>Escolha um avatar para o seu perfil.</p>
+        </div>
+        <div class="gender-options">
+          <div class="gender-card" (click)="selectGender('Masculino')" [class.selected]="selectedGender === 'Masculino'">
+            <div class="avatar-preview"><img src="assets/images/masculino.jpg" alt="M" /></div>
+            <span>Masculino</span>
           </div>
-
-          <div class="skills-card card-shadow mt-20 sk-card">
-            <div class="sk-line title-sm animate-pulse mb-3"></div>
-            <div class="sk-tags">
-              <div class="sk-tag animate-pulse"></div>
-              <div class="sk-tag animate-pulse"></div>
-              <div class="sk-tag animate-pulse"></div>
-            </div>
+          <div class="gender-card" (click)="selectGender('Feminino')" [class.selected]="selectedGender === 'Feminino'">
+            <div class="avatar-preview"><img src="assets/images/feminino.jpg" alt="F" /></div>
+            <span>Feminino</span>
           </div>
         </div>
-
-        <div class="right-column">
-          <div class="details-card card-shadow sk-card">
-            <div class="sk-line title-sm animate-pulse mb-4"></div>
-            <div class="sk-line full animate-pulse"></div>
-            <div class="sk-line full animate-pulse"></div>
-            <div class="sk-line half animate-pulse"></div>
-          </div>
-
-          <div class="details-card card-shadow mt-20 sk-card">
-            <div class="sk-line title-sm animate-pulse mb-4"></div>
-            <div class="sk-info-grid">
-              <div class="sk-input-fake animate-pulse"></div>
-              <div class="sk-input-fake animate-pulse"></div>
-            </div>
-          </div>
-        </div>
+        <button class="btn-primary" [disabled]="!selectedGender" (click)="finalizarCadastro()">
+          Continuar
+        </button>
       </div>
+      
     </div>
-  </ng-template>
-
+  </div>
 </div>

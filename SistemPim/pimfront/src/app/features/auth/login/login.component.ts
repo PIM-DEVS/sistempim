@@ -1,13 +1,15 @@
 import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common'; 
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Auth } from '@angular/fire/auth';
-import { AuthService } from '../../../core/services/auth.service';
+import { Auth, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from '@angular/fire/auth';
+// A CORREÇÃO DO CAMINHO ESTÁ AQUI EMBAIXO:
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css'],
 })
@@ -16,55 +18,124 @@ export class LoginComponent {
   private auth = inject(Auth);
   private router = inject(Router);
 
+  isLoginMode = true;
   showGenderSelect = false;
   selectedGender = '';
+  loading = false;
+  errorMessage = '';
 
-  // Definição dos domínios permitidos
-  private readonly DOMINIO_PROFESSOR = '@ifal.edu.br';
+  nome = '';
+  email = '';
+  password = '';
+
   private readonly DOMINIO_ALUNO = '@aluno.ifal.edu.br';
+  private readonly DOMINIO_PROFESSOR = '@ifal.edu.br';
 
-  async login() {
+  toggleMode() {
+    this.isLoginMode = !this.isLoginMode;
+    this.errorMessage = '';
+  }
+
+  async onSubmit() {
+    if (!this.email || !this.password) {
+      this.errorMessage = 'Preencha email e senha.';
+      return;
+    }
+    if (!this.isLoginMode && !this.nome) {
+      this.errorMessage = 'Preencha seu nome.';
+      return;
+    }
+
+    this.loading = true;
+    this.errorMessage = '';
+
     try {
-      // 1. Faz o login com Google
-      const user = await this.authService.loginGoogle();
+      let user;
 
-      if (user && user.email) {
-        // 2. VERIFICAÇÃO DE DOMÍNIO (SEGURANÇA)
-        const isProfessor = user.email.endsWith(this.DOMINIO_PROFESSOR);
-        const isAluno = user.email.endsWith(this.DOMINIO_ALUNO);
-
-        if (!isProfessor && !isAluno) {
-          // Se não for nenhum dos dois, expulsa o usuário
-          alert(`Acesso negado! Apenas e-mails institucionais (${this.DOMINIO_ALUNO} ou ${this.DOMINIO_PROFESSOR}) são permitidos.`);
-          await this.authService.logout();
-          return;
-        }
-
-        // 3. Define qual é o papel (role) do usuário
-        const roleUsuario = isProfessor ? 'PROFESSOR' : 'ALUNO';
-
-        // 4. Busca dados existentes no banco
-        const dados: any = await this.authService.getDadosUsuario(user.uid);
-
-        // Se o usuário ainda não tem o papel salvo no banco, salvamos agora
-        if (!dados || !dados['role']) {
-          await this.authService.updateProfileData(user.uid, { 
-            role: roleUsuario,
-            email: user.email 
-          });
-        }
-
-        // 5. Verifica se já tem gênero cadastrado
-        if (dados && dados['genero']) {
-          this.router.navigate(['/dashboard']);
-        } else {
-          // Se não tiver gênero, mostra a tela de seleção
-          this.showGenderSelect = true;
-        }
+      if (this.isLoginMode) {
+        const credential = await signInWithEmailAndPassword(this.auth, this.email, this.password);
+        user = credential.user;
+      } else {
+        const credential = await createUserWithEmailAndPassword(this.auth, this.email, this.password);
+        user = credential.user;
+        await updateProfile(user, { displayName: this.nome });
       }
-    } catch (error) {
-      console.error('Erro no login:', error);
-      alert('Erro ao tentar fazer login. Tente novamente.');
+      await this.validarEProcessarUsuario(user);
+
+    } catch (error: any) {
+      console.error('Erro Auth:', error);
+      this.tratarErros(error.code);
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  async loginGoogle() {
+    try {
+      const user = await this.authService.loginGoogle();
+      if (user) {
+        await this.validarEProcessarUsuario(user);
+      }
+    } catch (error: any) {
+      console.error('Erro Google:', error);
+      if (error.code === 'auth/network-request-failed') {
+        this.errorMessage = 'Erro de conexão. Verifique sua internet.';
+      }
+    }
+  }
+
+  private async validarEProcessarUsuario(user: any) {
+    if (!user || !user.email) return;
+
+    const isProfessor = user.email.endsWith(this.DOMINIO_PROFESSOR);
+    const isAluno = user.email.endsWith(this.DOMINIO_ALUNO);
+
+    if (!isProfessor && !isAluno) {
+      this.errorMessage = `Use um email institucional (${this.DOMINIO_ALUNO}).`;
+      await this.authService.logout();
+      return;
+    }
+
+    const role = isProfessor ? 'PROFESSOR' : 'ALUNO';
+    const dadosExistentes = await this.authService.getDadosUsuario(user.uid);
+    
+    let dadosParaSalvar: any = {
+      uid: user.uid,
+      email: user.email,
+      role: role
+    };
+
+    if (this.nome || user.displayName) {
+      dadosParaSalvar.nome = this.nome || user.displayName;
+    }
+
+    await this.authService.updateProfileData(user.uid, dadosParaSalvar);
+
+    if (dadosExistentes && dadosExistentes['genero']) {
+      this.router.navigate(['/dashboard']); 
+    } else {
+      this.showGenderSelect = true;
+    }
+  }
+
+  private tratarErros(code: string) {
+    switch (code) {
+      case 'auth/invalid-credential':
+      case 'auth/wrong-password':
+      case 'auth/user-not-found':
+        this.errorMessage = 'Email ou senha incorretos.';
+        break;
+      case 'auth/email-already-in-use':
+        this.errorMessage = 'Este email já tem conta. Tente entrar.';
+        break;
+      case 'auth/weak-password':
+        this.errorMessage = 'A senha precisa ter pelo menos 6 caracteres.';
+        break;
+      case 'auth/network-request-failed':
+        this.errorMessage = 'Erro de conexão com o servidor.';
+        break;
+      default:
+        this.errorMessage = 'Ocorreu um erro inesperado. Tente novamente.';
     }
   }
 
@@ -74,22 +145,10 @@ export class LoginComponent {
 
   async finalizarCadastro() {
     if (!this.selectedGender) return;
-
     const user = this.auth.currentUser;
-
     if (user) {
-      try {
-        // Salvamos o gênero. O "role" já foi garantido no passo anterior (login)
-        await this.authService.updateProfileData(user.uid, {
-          genero: this.selectedGender,
-        });
-
-        this.router.navigate(['/dashboard']);
-      } catch (error) {
-        console.error('Erro ao salvar gênero:', error);
-      }
-    } else {
-      console.error('Usuário não encontrado. Tente logar novamente.');
+      await this.authService.updateProfileData(user.uid, { genero: this.selectedGender });
+      this.router.navigate(['/dashboard']);
     }
   }
 }

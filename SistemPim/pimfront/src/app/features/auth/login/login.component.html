@@ -1,82 +1,99 @@
 <div class="auth-container">
   <div class="auth-banner">
     <div class="banner-content">
-      <h1>Bem-vindo ao <br /><strong>PIM Online</strong></h1>
-      <p>Sua jornada de aprendizado começa aqui.</p>
+      <div class="logo-box-decoration">
+        <i class='bx bxs-shapes'></i>
+      </div>
+      <h1>
+        <span *ngIf="isLoginMode">Bem-vindo<br />de volta!</span>
+        <span *ngIf="!isLoginMode">Junte-se ao<br />PIM Online!</span>
+        <span class="hand-wave">👋</span>
+      </h1>
+      <p>Gerencie projetos, conecte-se com professores e automatize sua jornada acadêmica.</p>
     </div>
     <div class="circle c1"></div>
     <div class="circle c2"></div>
+    <div class="copyright">© 2025 PIM Online. Todos os direitos reservados.</div>
   </div>
 
   <div class="auth-form-wrapper">
-    <div class="form-box login-box" *ngIf="!showGenderSelect">
-      <div class="header">
-        <img src="assets/images/pim.png" alt="Logo" class="logo-img" />
-        <h2>Acesse sua conta</h2>
-        <p>Utilize sua conta Google institucional.</p>
+    <div class="form-scroll-container">
+      <div class="mobile-brand">
+        <div class="brand-icon"><i class='bx bxs-graduation'></i></div>
+        <h2>PIM <strong>Online</strong></h2>
       </div>
 
-      <button (click)="login()" class="btn-google">
-        <img
-          src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-          alt="Google"
-        />
-        <span>Entrar com Google</span>
-      </button>
-
-      <div class="footer-links">
-        <p>Problemas com acesso? <a href="#">Ajuda</a></p>
-      </div>
-    </div>
-
-    <div class="form-box gender-box" *ngIf="showGenderSelect">
-      <div class="header">
-        <h2>Quase lá!</h2>
-        <p>Escolha um avatar para o seu perfil.</p>
-      </div>
-
-      <button
-        class="btn-continue"
-        [disabled]="!selectedGender"
-        (click)="finalizarCadastro()"
-        style="
-          margin-top: 20px;
-          padding: 10px 30px;
-          background: #00ce71;
-          color: white;
-          border: none;
-          border-radius: 20px;
-          cursor: pointer;
-        "
-      >
-        Continuar <i class="bx bx-right-arrow-alt"></i>
-      </button>
-
-      <div class="gender-options">
-        <div
-          class="gender-card"
-          (click)="selectGender('Masculino')"
-          [class.selected]="selectedGender === 'Masculino'"
-        >
-          <div class="avatar-preview">
-            <img src="assets/images/masculino.jpg" alt="Masculino" />
-          </div>
-          <span>Masculino</span>
+      <div class="form-box login-box" *ngIf="!showGenderSelect">
+        <div class="header">
+          <h2>{{ isLoginMode ? 'Acesse sua conta' : 'Crie sua conta' }}</h2>
+          <p class="subtitle">
+            {{ isLoginMode ? 'Insira seus dados para continuar.' : 'Preencha os dados abaixo.' }}
+          </p>
         </div>
 
-        <div
-          class="gender-card"
-          (click)="selectGender('Feminino')"
-          [class.selected]="selectedGender === 'Feminino'"
-        >
-          <div class="avatar-preview">
-            <img src="assets/images/feminino.jpg" alt="Feminino" />
-          </div>
-          <span>Feminino</span>
+        <div class="error-banner" *ngIf="errorMessage">
+          <i class='bx bxs-error-circle'></i>
+          <span>{{ errorMessage }}</span>
         </div>
+
+        <div class="input-group" *ngIf="!isLoginMode">
+          <label>Nome Completo</label>
+          <input type="text" [(ngModel)]="nome" placeholder="Seu nome" autocomplete="name">
+        </div>
+
+        <div class="input-group">
+          <label>Email Institucional</label>
+          <input type="email" [(ngModel)]="email" placeholder="seu.email@aluno.ifal.edu.br" autocomplete="email">
+        </div>
+
+        <div class="input-group">
+          <label>Senha</label>
+          <input type="password" [(ngModel)]="password" placeholder="Sua senha segura" (keyup.enter)="onSubmit()">
+        </div>
+
+        <div class="actions-row">
+          <button (click)="onSubmit()" class="btn-primary" [disabled]="loading">
+            <span *ngIf="!loading">{{ isLoginMode ? 'Entrar Agora' : 'Criar Conta' }}</span>
+            <span *ngIf="loading"><i class='bx bx-loader-alt bx-spin'></i> Processando...</span>
+          </button>
+        </div>
+
+        <div class="toggle-mode">
+          <p>
+            {{ isLoginMode ? 'Não tem uma conta?' : 'Já tem uma conta?' }}
+            <a (click)="toggleMode()">
+              <strong>{{ isLoginMode ? 'Cadastre-se gratuitamente' : 'Faça Login' }}</strong>
+            </a>
+          </p>
+        </div>
+
+        <div class="divider"><span>ou continue com</span></div>
+
+        <button (click)="loginGoogle()" class="btn-google">
+          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" />
+          <span>Entrar com Google</span>
+        </button>
       </div>
 
-      <p class="note">*Isso define sua foto padrão, mas você pode mudar depois.</p>
+      <div class="form-box gender-box" *ngIf="showGenderSelect">
+        <div class="header">
+          <h2>Quase lá!</h2>
+          <p>Escolha um avatar para o seu perfil.</p>
+        </div>
+        <div class="gender-options">
+          <div class="gender-card" (click)="selectGender('Masculino')" [class.selected]="selectedGender === 'Masculino'">
+            <div class="avatar-preview"><img src="assets/images/masculino.jpg" alt="M" /></div>
+            <span>Masculino</span>
+          </div>
+          <div class="gender-card" (click)="selectGender('Feminino')" [class.selected]="selectedGender === 'Feminino'">
+            <div class="avatar-preview"><img src="assets/images/feminino.jpg" alt="F" /></div>
+            <span>Feminino</span>
+          </div>
+        </div>
+        <button class="btn-primary" [disabled]="!selectedGender" (click)="finalizarCadastro()">
+          Continuar
+        </button>
+      </div>
     </div>
   </div>
 </div>
