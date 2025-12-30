@@ -80,7 +80,7 @@ export class TopbarComponent implements OnInit, OnDestroy {
       .subscribe(async (term) => {
         if (term.length >= 2) {
           this.zone.run(() => { this.buscando = true; this.cdr.detectChanges(); });
-          let resultados = [];
+          let resultados: any[] = [];
           try {
             resultados = await this.authService.buscarUsuariosPorNome(term);
           } catch (error) { console.error(error); }

@@ -1,5 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
+// A CORREÇÃO ESTÁ AQUI EMBAIXO (getApp vem de 'firebase/app', não de firestore)
+import { getApp } from 'firebase/app'; 
 import { 
   Auth, 
   user, 
@@ -15,17 +17,13 @@ import {
   doc, 
   getDoc, 
   setDoc, 
-  updateDoc, 
-  arrayUnion, 
-  arrayRemove, 
   collection, 
   query, 
   where, 
   getDocs, 
-  limit,
-  getApp 
+  limit
 } from 'firebase/firestore';
-import { LoginData, RegisterData } from '../models/auth.model';
+import { LoginData } from '../models/auth.model';
 
 @Injectable({
   providedIn: 'root',
@@ -33,7 +31,8 @@ import { LoginData, RegisterData } from '../models/auth.model';
 export class AuthService {
   private auth = inject(Auth);
   private router = inject(Router);
-  private db = getFirestore(getApp());
+  // Inicializa o Firestore corretamente
+  private db = getFirestore(getApp()); 
 
   user$ = user(this.auth);
 
@@ -45,7 +44,7 @@ export class AuthService {
     try {
       const result = await signInWithEmailAndPassword(this.auth, data.email, data.password);
       await this.getDadosUsuario(result.user.uid);
-      this.router.navigate(['/dashboard']); // Mudei para dashboard
+      this.router.navigate(['/dashboard']);
     } catch (error) {
       console.error("Erro no login:", error);
       throw error;
@@ -67,10 +66,6 @@ export class AuthService {
           foto: result.user.photoURL,
           uid: result.user.uid 
         });
-      } else {
-        if (!dadosExistentes['uid']) {
-           await this.updateProfileData(result.user.uid, { uid: result.user.uid });
-        }
       }
       return result.user;
     } catch (error) {
@@ -105,6 +100,25 @@ export class AuthService {
     } catch (error) {
       console.error("Erro ao atualizar perfil:", error);
       throw error;
+    }
+  }
+
+  // ESTA FUNÇÃO FALTAVA E CAUSAVA O ERRO NA TOPBAR
+  async buscarUsuariosPorNome(termo: string) {
+    if (!termo || !termo.trim()) return [];
+    try {
+      const usersRef = collection(this.db, 'users');
+      const q = query(
+        usersRef, 
+        where('nome', '>=', termo), 
+        where('nome', '<=', termo + '\uf8ff'),
+        limit(5)
+      );
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => doc.data());
+    } catch (error) {
+      console.error("Erro na busca:", error);
+      return [];
     }
   }
 }
