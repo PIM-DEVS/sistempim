@@ -83,7 +83,6 @@
             {{ isLoginMode ? 'Ainda não tem senha aqui?' : 'Já possui cadastro?' }}
             <a (click)="toggleMode()">{{ isLoginMode ? 'Criar conta' : 'Fazer Login' }}</a>
           </p>
-          <a class="footer-link link-recover" *ngIf="isLoginMode" href="#">Esqueceu a senha? <strong>Recuperar</strong></a>
         </div>
 
         <div class="divider">
@@ -94,6 +93,8 @@
           <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
           <span>Entrar com Email Institucional</span>
         </button>
+
+        <a class="footer-link link-recover" *ngIf="isLoginMode" href="#">Esqueceu a senha? <strong>Recuperar</strong></a>
       </div>
 
       <div *ngIf="showGenderSelect" class="fade-in">
