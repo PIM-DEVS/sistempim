@@ -1,20 +1,22 @@
-import { Controller, Get, Post, Body } from '@nestjs/common';
+import { Body, Controller, Post, HttpCode, HttpStatus } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
+// Pode usar 'Record<string, any>' se não quiser criar o DTO agora
+import { CreateAuthDto } from './dto/create-auth.dto'; 
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private authService: AuthService) {}
 
-  // Rota para CRIAR usuário (POST /auth)
-  @Post()
-  create(@Body() createAuthDto: CreateAuthDto) {
-    return this.authService.create(createAuthDto);
+  @HttpCode(HttpStatus.OK)
+  @Post('login')
+  signIn(@Body() signInDto: Record<string, any>) {
+    // Chama o novo método 'login' do Service
+    return this.authService.login(signInDto.email, signInDto.password);
   }
 
-  // Rota para LISTAR usuários (GET /auth)
-  @Get()
-  findAll() {
-    return this.authService.findAll();
+  @Post('register')
+  signUp(@Body() signUpDto: CreateAuthDto) {
+    // Chama o novo método 'register' do Service
+    return this.authService.register(signUpDto);
   }
 }

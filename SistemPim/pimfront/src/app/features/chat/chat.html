@@ -1,99 +1,110 @@
-<div class="chat-container">
+<div class="chat-layout">
   
-  <div class="chat-sidebar">
+  <aside class="sidebar">
     <div class="sidebar-header">
       <h2>Mensagens</h2>
-      <div class="search-box">
+      <div class="search-bar">
         <i class="bx bx-search"></i>
-        <input type="text" placeholder="Buscar conversas..." />
+        <input type="text" placeholder="Buscar conversa..." [(ngModel)]="termoBusca">
       </div>
     </div>
 
     <div class="contacts-list">
-      <div *ngIf="loadingContatos" style="padding: 20px; text-align: center;">
-        <i class="bx bx-loader-alt bx-spin"></i> Carregando contatos...
+      <div *ngIf="loadingContatos" class="loading-spinner">
+        <i class="bx bx-loader-alt bx-spin"></i>
       </div>
 
-      <div *ngIf="!loadingContatos && contatos.length === 0" style="padding: 20px; text-align: center; color: #999; font-size: 0.9rem;">
-        Você precisa seguir alguém para iniciar uma conversa.
+      <div *ngIf="!loadingContatos && contatos.length === 0" class="empty-list">
+        <p>Nenhum contato encontrado.</p>
       </div>
 
       <div 
         class="contact-item" 
-        *ngFor="let contato of contatos" 
+        *ngFor="let contato of contatosFiltrados" 
         [class.active]="contato.uid === chatAtivo?.uid"
         (click)="selecionarChat(contato)"
       >
-        <div class="contact-avatar">
-          <img [src]="contato.fotoPerfil || contato.photoURL || 'assets/images/avatar-default.png'" alt="">
+        <div class="avatar-wrapper">
+          <img 
+            [src]="contato.foto ? contato.foto : 'assets/images/user-placeholder.png'" 
+            (error)="tratarErroImagem($event)"
+            alt="Foto"
+          >
         </div>
-        <div class="contact-info">
-          <div class="ci-top">
-            <span class="name">{{ contato.nome || contato.displayName }}</span>
-          </div>
-          <p class="last-msg">Clique para conversar</p>
+        <div class="info">
+          <span class="name">{{ contato.nome }}</span>
+          <span class="role">{{ contato.cargo }}</span>
         </div>
       </div>
     </div>
-  </div>
+  </aside>
 
-  <div class="chat-main" *ngIf="chatAtivo; else emptyState">
+  <main class="chat-main">
     
-    <div class="chat-header">
-      <div class="user-info">
-        <img [src]="chatAtivo.fotoPerfil || chatAtivo.photoURL || 'assets/images/avatar-default.png'" class="header-avatar">
+    <header class="chat-header" *ngIf="chatAtivo">
+      <div class="header-profile">
+        <img 
+          [src]="chatAtivo.foto ? chatAtivo.foto : 'assets/images/user-placeholder.png'" 
+          (error)="tratarErroImagem($event)"
+        >
         <div>
-          <h3>{{ chatAtivo.nome || chatAtivo.displayName }}</h3>
-          <span class="status-text">{{ chatAtivo.email }}</span> </div>
+          <h3>{{ chatAtivo.nome }}</h3>
+          <span class="email-sub">{{ chatAtivo.email }}</span>
+        </div>
       </div>
-      <div class="header-actions">
-        <i class="bx bx-dots-vertical-rounded"></i>
-      </div>
-    </div>
+    </header>
 
-    <div class="messages-area" #scrollContainer>
+    <div class="messages-container" #scrollContainer *ngIf="chatAtivo; else emptyState">
       
+      <div *ngIf="erroPermissao" class="error-banner">
+        <i class="bx bx-error"></i>
+        <span>Erro de conexão com o chat. Verifique suas permissões.</span>
+      </div>
+
       <ng-container *ngIf="mensagens$ | async as mensagens">
         
-        <div *ngIf="mensagens.length === 0" style="text-align: center; padding: 20px; color: #ccc;">
-          <small>Nenhuma mensagem ainda. Diga olá!</small>
+        <div *ngIf="mensagens.length === 0" class="start-msg">
+          <div class="icon-start">👋</div>
+          <p>Inicie a conversa com {{ chatAtivo.nome }}</p>
         </div>
 
         <div 
-          class="msg-bubble" 
+          class="msg-row" 
           *ngFor="let msg of mensagens"
-          [ngClass]="{'sent': msg.senderId === currentUser.uid, 'received': msg.senderId !== currentUser.uid}"
+          [ngClass]="{'msg-me': msg.senderId === currentUser.uid, 'msg-other': msg.senderId !== currentUser.uid}"
         >
-          <p>{{ msg.text }}</p>
-          <span class="msg-time">{{ formatarData(msg.timestamp) | date:'HH:mm' }}</span>
+          <div class="msg-bubble">
+            <p>{{ msg.text }}</p>
+            <span class="time">{{ formatarData(msg.timestamp) | date:'HH:mm' }}</span>
+          </div>
         </div>
-
       </ng-container>
-
     </div>
 
-    <div class="chat-input-area">
-      <input 
-        type="text" 
-        placeholder="Digite sua mensagem..." 
-        [(ngModel)]="mensagemAtual" 
-        (keyup.enter)="enviarMensagem()"
-      >
-      <button class="btn-send" (click)="enviarMensagem()" [disabled]="!mensagemAtual.trim()">
-        <i class="bx bx-send"></i>
-      </button>
-    </div>
-
-  </div>
-
-  <ng-template #emptyState>
-    <div class="empty-chat">
-      <div class="empty-icon">
-        <i class="bx bx-message-square-dots"></i>
+    <div class="input-area" *ngIf="chatAtivo">
+      <div class="input-wrapper">
+        <input 
+          type="text" 
+          placeholder="Digite sua mensagem..." 
+          [(ngModel)]="mensagemAtual" 
+          (keyup.enter)="enviarMensagem()"
+          [disabled]="enviando"
+        >
+        <button (click)="enviarMensagem()" [disabled]="!mensagemAtual.trim()">
+          <i class="bx bx-send"></i>
+        </button>
       </div>
-      <h2>Suas Mensagens</h2>
-      <p>Selecione um contato da lista para começar a conversar.</p>
     </div>
-  </ng-template>
 
+    <ng-template #emptyState>
+      <div class="welcome-view">
+        <div class="welcome-content">
+          <i class="bx bx-message-square-dots"></i>
+          <h2>PIM Chat</h2>
+          <p>Selecione um contato para começar.</p>
+        </div>
+      </div>
+    </ng-template>
+
+  </main>
 </div>

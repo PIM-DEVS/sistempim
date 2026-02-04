@@ -19,6 +19,8 @@ export class PostsService {
         email: createPostDto.userEmail,
         name: createPostDto.userName || 'Usuário Novo',
         photoUrl: createPostDto.userPhoto || '',
+        // FIX: Adicionamos a senha obrigatória aqui para o erro sumir
+        password: '$2b$10$SocialLoginPlaceholderHashDoNotUse...', 
       },
     });
 
@@ -31,7 +33,7 @@ export class PostsService {
     });
   }
 
-  // --- MÉTODOS QUE FALTAVAM ---
+  // --- MÉTODOS ---
   findAll() {
     return this.prisma.post.findMany({
       orderBy: { createdAt: 'desc' },

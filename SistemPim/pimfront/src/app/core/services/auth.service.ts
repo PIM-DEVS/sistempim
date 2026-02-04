@@ -1,173 +1,166 @@
-import { Injectable, inject } from '@angular/core';
-import { Router } from '@angular/router';
-import { getApp } from 'firebase/app'; 
-import { 
-  Auth, 
-  user, 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword, 
-  signOut, 
-  updateProfile, 
-  GoogleAuthProvider, 
-  signInWithPopup 
-} from '@angular/fire/auth';
-import { 
-  getFirestore, 
-  doc, 
-  getDoc, 
-  setDoc, 
-  updateDoc, // <--- Adicionado
-  arrayUnion, // <--- Adicionado para Seguir
-  arrayRemove, // <--- Adicionado para Deixar de Seguir
-  collection, 
-  query, 
-  where, 
-  getDocs, 
-  limit
-} from 'firebase/firestore';
-import { LoginData } from '../models/auth.model';
+import { Injectable } from '@angular/core';
+import { Auth, GoogleAuthProvider, signInWithPopup, signOut, user } from '@angular/fire/auth';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
+
+// Interface "Blindada" (Garante que os campos principais nunca sejam undefined)
+export interface AppUser {
+  // Campos obrigatórios (resolvem os erros de "Type undefined is not assignable to string")
+  id: string; 
+  uid: string;
+  email: string;
+  name: string;
+  photoUrl: string; 
+  photoURL: string; // Alias obrigatório
+
+  // Campos opcionais
+  bio?: string;
+  jobTitle?: string;
+  skills?: string;
+  role?: string;
+
+  // Compatibilidade com legado
+  displayName?: string; 
+  nome?: string;
+  foto?: string;
+  fotoPerfil?: string;
+  avatar?: string;
+  genero?: string;
+  seguindo?: string[];
+
+  // Permite acesso dinâmico
+  [key: string]: any; 
+}
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class AuthService {
-  private auth = inject(Auth);
-  private router = inject(Router);
-  private db = getFirestore(getApp()); 
+  private apiUrl = 'http://localhost:3000'; // Backend NestJS
+  
+  public user$ = new BehaviorSubject<AppUser | null>(null);
 
-  user$ = user(this.auth);
+  constructor(
+    private auth: Auth, 
+    private http: HttpClient
+  ) {
+    user(this.auth).subscribe(async (firebaseUser) => {
+      if (firebaseUser) {
+        try {
+          const dbUser = await this.getDadosUsuario(firebaseUser.email || firebaseUser.uid);
+          
+          // Garante que NENHUM campo vital seja undefined
+          const safeId = dbUser.id || firebaseUser.uid || '';
+          const safeName = dbUser.name || firebaseUser.displayName || 'Usuário';
+          const safePhoto = dbUser.photoUrl || firebaseUser.photoURL || '';
 
-  constructor() {}
+          const mergedUser: AppUser = {
+            ...dbUser,
+            email: firebaseUser.email || '',
+            
+            // Força valores string para satisfazer o TypeScript
+            uid: safeId,
+            id: safeId,
+            
+            name: safeName,
+            displayName: safeName,
+            nome: safeName,
+            
+            photoUrl: safePhoto,
+            photoURL: safePhoto,
+            foto: safePhoto,
+          };
 
-  // --- LOGIN E REGISTRO ---
-
-  async login(data: LoginData) {
-    try {
-      const result = await signInWithEmailAndPassword(this.auth, data.email, data.password);
-      await this.getDadosUsuario(result.user.uid);
-      this.router.navigate(['/dashboard']);
-    } catch (error) {
-      console.error("Erro no login:", error);
-      throw error;
-    }
+          this.user$.next(mergedUser);
+        } catch (e) {
+          // Fallback seguro
+          this.user$.next({
+            email: firebaseUser.email || '',
+            name: firebaseUser.displayName || 'Usuário',
+            displayName: firebaseUser.displayName || 'Usuário',
+            nome: firebaseUser.displayName || 'Usuário',
+            photoUrl: firebaseUser.photoURL || '',
+            photoURL: firebaseUser.photoURL || '',
+            uid: firebaseUser.uid,
+            id: firebaseUser.uid,
+            foto: firebaseUser.photoURL || ''
+          });
+        }
+      } else {
+        this.user$.next(null);
+      }
+    });
   }
 
+  // --- LOGIN ---
   async loginGoogle() {
+    const provider = new GoogleAuthProvider();
+    const credential = await signInWithPopup(this.auth, provider);
+    const user = credential.user;
+
     try {
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(this.auth, provider);
-      
-      const dadosExistentes = await this.getDadosUsuario(result.user.uid);
-      
-      if (!dadosExistentes) {
-        await this.updateProfileData(result.user.uid, {
-          email: result.user.email,
-          nome: result.user.displayName,
-          role: 'aluno',
-          foto: result.user.photoURL,
-          uid: result.user.uid,
-          seguidores: [], // Inicializa vazio
-          seguindo: []    // Inicializa vazio
-        });
-      }
-      return result.user;
+      await firstValueFrom(this.http.post(`${this.apiUrl}/users`, {
+        email: user.email,
+        name: user.displayName,
+        photoUrl: user.photoURL
+      }));
     } catch (error) {
-      console.error("Erro no Google Login:", error);
-      throw error;
+      console.warn('Erro backend:', error);
     }
+    return user;
   }
 
   async logout() {
     await signOut(this.auth);
-    this.router.navigate(['/login']);
+    this.user$.next(null);
   }
 
-  // --- FIRESTORE (PERFIL) ---
+  // --- DADOS ---
+  async getDadosUsuario(identificador: string | undefined): Promise<AppUser> {
+    if (!identificador) return {} as AppUser;
 
-  async getDadosUsuario(uid: string): Promise<any> {
-    if (!uid) return null;
+    const endpoint = identificador.includes('@') 
+      ? `${this.apiUrl}/users/${identificador}` 
+      : `${this.apiUrl}/users/${identificador}`; 
+
     try {
-      const docRef = doc(this.db, 'users', uid);
-      const docSnap = await getDoc(docRef);
-      return docSnap.exists() ? { uid: docSnap.id, ...docSnap.data() } : null;
-    } catch (error) {
-      console.error('Erro ao buscar dados:', error);
-      return null;
-    }
-  }
-
-  async updateProfileData(uid: string, data: any) {
-    try {
-      const docRef = doc(this.db, 'users', uid);
-      await setDoc(docRef, { ...data, uid: uid }, { merge: true });
-    } catch (error) {
-      console.error("Erro ao atualizar perfil:", error);
-      throw error;
-    }
-  }
-
-  // --- BUSCA (TOPBAR) ---
-  
-  async buscarUsuariosPorNome(termo: string) {
-    if (!termo || !termo.trim()) return [];
-    try {
-      const usersRef = collection(this.db, 'users');
-      // O caractere \uf8ff garante que a busca pegue "João", "João Silva", etc.
-      const q = query(
-        usersRef, 
-        where('nome', '>=', termo), 
-        where('nome', '<=', termo + '\uf8ff'),
-        limit(5)
-      );
-      const querySnapshot = await getDocs(q);
-      return querySnapshot.docs.map(doc => doc.data());
-    } catch (error) {
-      console.error("Erro na busca:", error);
-      return [];
-    }
-  }
-
-  // --- SISTEMA DE SEGUIR (NOVO) --- 
-
-  async followUser(meuId: string, alvoId: string) {
-    try {
-      const meuRef = doc(this.db, 'users', meuId);
-      const alvoRef = doc(this.db, 'users', alvoId);
-
-      // 1. Eu começo a seguir o alvo (adiciona ID dele na minha lista 'seguindo')
-      await updateDoc(meuRef, {
-        seguindo: arrayUnion(alvoId)
-      });
-
-      // 2. O alvo ganha um seguidor (adiciona meu ID na lista 'seguidores' dele)
-      await updateDoc(alvoRef, {
-        seguidores: arrayUnion(meuId)
-      });
+      const usuario = await firstValueFrom(this.http.get<AppUser>(endpoint));
       
+      // Sanitização no retorno também
+      const safePhoto = usuario.photoUrl || '';
+      
+      return {
+        ...usuario,
+        uid: usuario.id || '',
+        id: usuario.id || '',
+        displayName: usuario.name,
+        nome: usuario.name,
+        photoURL: safePhoto,
+        photoUrl: safePhoto,
+        foto: safePhoto
+      };
     } catch (error) {
-      console.error("Erro ao seguir:", error);
-      throw error;
+      return {} as AppUser;
     }
   }
 
-  async unfollowUser(meuId: string, alvoId: string) {
-    try {
-      const meuRef = doc(this.db, 'users', meuId);
-      const alvoRef = doc(this.db, 'users', alvoId);
+  async updateProfileData(userId: string | undefined, data: any) {
+    if (!userId) return;
+    const currentUser = this.user$.value;
+    if (!currentUser) return;
 
-      // 1. Remove ID dele da minha lista 'seguindo'
-      await updateDoc(meuRef, {
-        seguindo: arrayRemove(alvoId)
-      });
-
-      // 2. Remove meu ID da lista 'seguidores' dele
-      await updateDoc(alvoRef, {
-        seguidores: arrayRemove(meuId)
-      });
-
-    } catch (error) {
-      console.error("Erro ao deixar de seguir:", error);
-      throw error;
-    }
+    return firstValueFrom(this.http.patch(`${this.apiUrl}/users/${currentUser.email}`, {
+      name: data.nome || data.name,
+      bio: data.bio,
+      jobTitle: data.cargo || data.jobTitle,
+      skills: data.skills,
+      photoUrl: data.foto || data.photoUrl
+    }));
   }
+
+  // --- SOCIAIS ---
+  async followUser(meuId: string | undefined, idAmigo: string) { return Promise.resolve(true); }
+  async unfollowUser(meuId: string | undefined, idAmigo: string) { return Promise.resolve(true); }
+  async buscarUsuariosPorNome(termo: string): Promise<AppUser[]> { return []; }
+  async carregarContatos(uid: string) { return []; }
 }

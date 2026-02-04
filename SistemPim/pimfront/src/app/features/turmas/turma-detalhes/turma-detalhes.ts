@@ -122,7 +122,7 @@ export class TurmaDetalhesComponent implements OnInit, OnDestroy {
     for (const uid of this.turma.alunos) {
       const idAluno = typeof uid === 'string' ? uid : (uid as any).uid;
       const dados = await this.authService.getDadosUsuario(idAluno);
-      if (dados) this.alunosDetalhes.push({ uid: idAluno, ...dados });
+      if (dados) this.alunosDetalhes.push({ ...dados, uid: idAluno });
     }
     this.cdr.detectChanges();
   }
