@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { 
   Firestore, 
   collection, 
@@ -44,28 +44,16 @@ export class SocialService {
   private firestore = inject(Firestore);
 
   getPosts(): Observable<Post[]> {
-    return new Observable((observer) => {
-      const postsRef = collection(this.firestore, 'posts');
-      const q = query(postsRef, orderBy('createdAt', 'desc'));
-
-      const unsubscribe = onSnapshot(q,
-        (snapshot) => {
-          const posts = snapshot.docs.map((d) => ({
-            id: d.id,
-            ...(d.data() as Omit<Post, 'id'>),
-            likes: (d.data() as any).likes || [],
-            salvos: (d.data() as any).salvos || [],
-            comentariosCount: (d.data() as any).comentariosCount || 0,
-          })) as Post[];
-          observer.next(posts);
-        },
-        (error) => {
-          console.error('Erro no Listener:', error);
-          observer.error(error);
-        }
-      );
-      return () => unsubscribe();
-    });
+    const postsRef = collection(this.firestore, 'posts');
+    // Removendo orderBy para evitar erro de índice ausente
+    return collectionData(postsRef, { idField: 'id' }).pipe(
+      map(docs => docs.map(d => ({
+        ...d,
+        likes: (d as any).likes || [],
+        salvos: (d as any).salvos || [],
+        comentariosCount: (d as any).comentariosCount || 0,
+      } as Post)))
+    );
   }
 
   async criarPost(content: string, user: any, mediaUrl: string = '') {
@@ -99,23 +87,33 @@ export class SocialService {
 
   // COMENTÁRIOS
   getComentarios(postId: string): Observable<Comentario[]> {
-    return new Observable((observer) => {
-      const ref = collection(this.firestore, 'posts', postId, 'comentarios');
-      const q = query(ref, orderBy('criadoEm', 'asc'));
-      const unsub = onSnapshot(q, (snap) => {
-        observer.next(snap.docs.map(d => ({ id: d.id, ...d.data() }) as Comentario));
-      }, (err) => observer.error(err));
-      return () => unsub();
-    });
+    const ref = collection(this.firestore, 'posts', postId, 'comentarios');
+    const q = query(ref, orderBy('criadoEm', 'asc'));
+    return collectionData(q, { idField: 'id' }) as Observable<Comentario[]>;
   }
 
   async addComentario(postId: string, comentario: Omit<Comentario, 'id'>) {
     const ref = collection(this.firestore, 'posts', postId, 'comentarios');
     await addDoc(ref, { ...comentario, criadoEm: serverTimestamp() });
+    
     // Incrementa contador
-    await updateDoc(doc(this.firestore, 'posts', postId), {
-      comentariosCount: (await getDoc(doc(this.firestore, 'posts', postId))).data()?.['comentariosCount'] + 1 || 1
-    });
+    const postRef = doc(this.firestore, 'posts', postId);
+    const snap = await getDoc(postRef);
+    const atual = snap.data()?.['comentariosCount'] || 0;
+    await updateDoc(postRef, { comentariosCount: atual + 1 });
+  }
+
+  async excluirComentario(postId: string, comentarioId: string) {
+    const ref = doc(this.firestore, 'posts', postId, 'comentarios', comentarioId);
+    await deleteDoc(ref);
+
+    // Decrementa contador
+    const postRef = doc(this.firestore, 'posts', postId);
+    const snap = await getDoc(postRef);
+    const atual = snap.data()?.['comentariosCount'] || 0;
+    if (atual > 0) {
+      await updateDoc(postRef, { comentariosCount: atual - 1 });
+    }
   }
 
   async excluirPost(postId: string) {

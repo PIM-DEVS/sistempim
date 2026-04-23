@@ -100,7 +100,12 @@
         <img [src]="c.autorFoto || 'assets/images/masculino.jpg'" class="comment-avatar"
              onerror="this.src='assets/images/masculino.jpg'" alt="">
         <div class="comment-bubble">
-          <strong>{{ c.autorNome }}</strong>
+          <div class="comment-bubble-header">
+            <strong>{{ c.autorNome }}</strong>
+            <button class="btn-delete-comment" *ngIf="podeApagarComentario(post, c)" (click)="excluirComentario(post.id, c)">
+              <i class="bx bx-trash"></i>
+            </button>
+          </div>
           <p>{{ c.texto }}</p>
         </div>
       </div>

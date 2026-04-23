@@ -59,9 +59,10 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
     this.loadingUsers = true;
     try {
       const snap = await getDocs(collection(this.firestore, 'users'));
+      const followedIds = this.currentUser.seguindo || [];
       this.todos = snap.docs
         .map(d => ({ uid: d.id, ...d.data() }))
-        .filter((u: any) => u.uid !== meuUid);
+        .filter((u: any) => u.uid !== meuUid && followedIds.includes(u.uid));
       this.todosFiltered = this.todos;
     } catch (e) {
       this.toast.error('Erro ao carregar usuários.');
@@ -78,19 +79,35 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
       : this.todos;
   }
 
-  selecionarChat(contato: any) {
+  async selecionarChat(contato: any) {
     if (this.chatAtivo?.uid === contato.uid) return;
+
     this.chatAtivo = contato;
-    this.chatIdAtivo = this.chatService.getChatId(this.currentUser.uid, contato.uid);
+    this.mensagens$ = of([]); // reset imediato
     this.mensagesSub?.unsubscribe();
 
-    this.chatService.criarChatSeNaoExistir(this.chatIdAtivo).then(() => {
-      this.mensagens$ = this.chatService.getMensagens(this.chatIdAtivo).pipe(
-        tap(() => setTimeout(() => this.scrollToBottom(), 50)),
-        catchError(() => { this.toast.error('Erro ao carregar mensagens.'); return of([]); })
-      );
-    }).catch(() => this.toast.error('Não foi possível abrir o chat.'));
+    const chatId = this.chatService.getChatId(this.currentUser.uid, contato.uid);
+    this.chatIdAtivo = chatId;
     this.cdr.detectChanges();
+
+    try {
+      // 1. Garante que o documento do chat existe no Firestore
+      await this.chatService.criarChatSeNaoExistir(chatId);
+
+      // 2. Só então ativa o listener de mensagens
+      this.mensagens$ = this.chatService.getMensagens(chatId).pipe(
+        tap(() => setTimeout(() => this.scrollToBottom(), 50)),
+        catchError((err) => {
+          console.error('Erro no listener de mensagens:', err);
+          this.toast.error('Erro ao carregar mensagens: ' + (err?.message || ''));
+          return of([]);
+        })
+      );
+      this.cdr.detectChanges();
+    } catch (err: any) {
+      console.error('Erro ao criar/abrir chat:', err);
+      this.toast.error('Não foi possível abrir o chat: ' + (err?.message || err?.code || ''));
+    }
   }
 
   async enviarMensagem() {
@@ -100,9 +117,13 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
     this.enviando = true;
     try {
       await this.chatService.enviarMensagem(this.chatIdAtivo, texto, this.currentUser.uid, this.chatAtivo.uid);
-    } catch {
+    } catch (e: any) {
       this.mensagemAtual = texto;
-      this.toast.error('Falha ao enviar mensagem.');
+      const msg = e?.message || 'Erro desconhecido';
+      this.toast.error('Falha ao enviar: ' + msg);
+      if (msg.includes('permission')) {
+        this.toast.error('Dica: Verifique se suas Regras do Firestore foram publicadas.');
+      }
     } finally {
       this.enviando = false;
     }

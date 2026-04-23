@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone, inject } from '@angular/core';
 import { Auth, GoogleAuthProvider, signInWithPopup, signOut, user } from '@angular/fire/auth';
 import {
   Firestore,
@@ -15,7 +15,8 @@ import {
   arrayRemove
 } from '@angular/fire/firestore';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, of, from } from 'rxjs';
+import { switchMap, map, catchError } from 'rxjs/operators';
 
 export interface AppUser {
   id: string;
@@ -40,56 +41,58 @@ export interface AppUser {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private apiUrl = 'http://localhost:3000';
+  private auth = inject(Auth);
+  private firestore = inject(Firestore);
+  private http = inject(HttpClient);
+  private zone = inject(NgZone);
 
   public user$ = new BehaviorSubject<AppUser | null>(null);
 
-  constructor(
-    private auth: Auth,
-    private firestore: Firestore,
-    private http: HttpClient
-  ) {
-    user(this.auth).subscribe(async (firebaseUser) => {
-      if (firebaseUser) {
-        try {
-          // Busca o perfil com a estratégia inteligente (uid → email → cria novo)
-          const perfil = await this.buscarPerfilCompleto(
-            firebaseUser.uid,
-            firebaseUser.email || ''
-          );
-          const nome = perfil?.nome || perfil?.name || firebaseUser.displayName || 'Usuário';
-          const foto = perfil?.foto || perfil?.photoUrl || firebaseUser.photoURL || '';
-
-          const merged: AppUser = {
-            ...(perfil || {}),
-            uid: firebaseUser.uid,
-            id: firebaseUser.uid,
-            email: firebaseUser.email || '',
-            name: nome,
-            displayName: nome,
-            nome: nome,
-            photoUrl: foto,
-            photoURL: foto,
-            foto: foto,
-          };
-          this.user$.next(merged);
-        } catch (e) {
-          const nome = firebaseUser.displayName || 'Usuário';
-          const foto = firebaseUser.photoURL || '';
-          this.user$.next({
-            uid: firebaseUser.uid,
-            id: firebaseUser.uid,
-            email: firebaseUser.email || '',
-            name: nome,
-            displayName: nome,
-            nome: nome,
-            photoUrl: foto,
-            photoURL: foto,
-            foto: foto,
-          });
-        }
-      } else {
-        this.user$.next(null);
-      }
+  constructor() {
+    // Abordagem Reativa: Evita 'Outside Injection Context'
+    user(this.auth).pipe(
+      switchMap(firebaseUser => {
+        if (!firebaseUser) return of(null);
+        
+        // Converte a busca de perfil em um Observable para a corrente
+        return from(this.buscarPerfilCompleto(firebaseUser.uid, firebaseUser.email || '')).pipe(
+          map(perfil => {
+            const nome = perfil?.nome || perfil?.name || firebaseUser.displayName || 'Usuário';
+            const foto = perfil?.foto || perfil?.photoUrl || firebaseUser.photoURL || '';
+            return {
+              ...(perfil || {}),
+              uid: firebaseUser.uid,
+              id: firebaseUser.uid,
+              email: firebaseUser.email || '',
+              name: nome,
+              displayName: nome,
+              nome: nome,
+              photoUrl: foto,
+              photoURL: foto,
+              foto: foto,
+            } as AppUser;
+          }),
+          catchError(() => {
+            const nome = firebaseUser.displayName || 'Usuário';
+            const foto = firebaseUser.photoURL || '';
+            return of({
+              uid: firebaseUser.uid,
+              id: firebaseUser.uid,
+              email: firebaseUser.email || '',
+              name: nome,
+              displayName: nome,
+              nome: nome,
+              photoUrl: foto,
+              photoURL: foto,
+              foto: foto,
+            } as AppUser);
+          })
+        );
+      })
+    ).subscribe(appUser => {
+      this.zone.run(() => {
+        this.user$.next(appUser);
+      });
     });
   }
 

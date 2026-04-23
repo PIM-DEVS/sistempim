@@ -13,13 +13,20 @@ import { TurmaService, PostMural, Atividade } from '../../../core/services/turma
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { Turma } from '../../../core/models/turma.model';
-import {
-  onSnapshot,
-  Unsubscribe,
-  QuerySnapshot,
-  DocumentData,
+import { 
+  Firestore, 
+  collection, 
+  query, 
+  orderBy, 
+  collectionData, 
   Timestamp,
-} from 'firebase/firestore';
+  doc,
+  deleteDoc,
+  addDoc,
+  serverTimestamp,
+  where
+} from '@angular/fire/firestore';
+import { Observable, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-turma-detalhes',
@@ -55,8 +62,7 @@ export class TurmaDetalhesComponent implements OnInit, OnDestroy {
   atividadeSelecionada: Atividade | null = null;
   respostaAtividade = '';
   entregasAtividade: any[] = [];
-  subEntregas: Unsubscribe | null = null;
-  private subs: Unsubscribe[] = [];
+  private subscriptions = new Subscription();
   criandoAtividade = false;
 
   // Fecha menus ao clicar fora
@@ -96,31 +102,24 @@ export class TurmaDetalhesComponent implements OnInit, OnDestroy {
     }
   }
 
+  private subscriptions = new Subscription();
+
   iniciarListeners(turmaId: string) {
-    const subPosts = onSnapshot(
-      this.turmaService.getPostsRef(turmaId),
-      (snap: QuerySnapshot<DocumentData>) => {
-        this.posts = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as PostMural);
-        // Ordenação por data (decrescente)
-        this.posts.sort((a, b) => {
-          const dA = a.data instanceof Timestamp ? a.data.toDate() : new Date(a.data);
-          const dB = b.data instanceof Timestamp ? b.data.toDate() : new Date(b.data);
-          return dB.getTime() - dA.getTime();
-        });
-        this.loading = false;
-        this.cdr.detectChanges();
-      },
-    );
+    const postsQuery = this.turmaService.getPostsRef(turmaId);
+    const subPosts = collectionData(postsQuery, { idField: 'id' }).subscribe((res: any[]) => {
+      this.posts = res;
+      this.loading = false;
+      this.cdr.detectChanges();
+    });
 
-    const subAtiv = onSnapshot(
-      this.turmaService.getAtividadesRef(turmaId),
-      (snap: QuerySnapshot<DocumentData>) => {
-        this.atividades = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Atividade);
-        this.cdr.detectChanges();
-      },
-    );
+    const ativQuery = this.turmaService.getAtividadesRef(turmaId);
+    const subAtiv = collectionData(ativQuery, { idField: 'id' }).subscribe((res: any[]) => {
+      this.atividades = res;
+      this.cdr.detectChanges();
+    });
 
-    this.subs.push(subPosts, subAtiv);
+    this.subscriptions.add(subPosts);
+    this.subscriptions.add(subAtiv);
   }
 
   async carregarDetalhesAlunos() {
@@ -182,19 +181,17 @@ export class TurmaDetalhesComponent implements OnInit, OnDestroy {
     this.atividadeSelecionada = ativ;
     if (this.turma?.id && ativ.id) {
        const q = this.turmaService.getEntregasRef(this.turma.id, ativ.id);
-       this.subEntregas = onSnapshot(q, snap => {
-         this.entregasAtividade = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-         this.cdr.detectChanges();
-       });
+       this.subscriptions.add(
+         collectionData(q, { idField: 'id' }).subscribe(res => {
+           this.entregasAtividade = res;
+           this.cdr.detectChanges();
+         })
+       );
     }
   }
 
   voltarListaAtividades() {
     this.atividadeSelecionada = null;
-    if (this.subEntregas) {
-      this.subEntregas();
-      this.subEntregas = null;
-    }
     this.entregasAtividade = [];
     this.respostaAtividade = '';
   }
@@ -243,9 +240,6 @@ export class TurmaDetalhesComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.subs.forEach((s) => s());
-    if (this.subEntregas) {
-      this.subEntregas();
-    }
+    this.subscriptions.unsubscribe();
   }
 }

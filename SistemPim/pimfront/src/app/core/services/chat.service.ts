@@ -34,34 +34,43 @@ export class ChatService {
   // Escuta as mensagens em tempo real
   getMensagens(chatId: string): Observable<any[]> {
     const messagesRef = collection(this.firestore, 'chats', chatId, 'messages');
-    // Ordena por data de envio (ascendente: mais antiga -> mais nova)
-    const q = query(messagesRef, orderBy('timestamp', 'asc'));
-    return collectionData(q, { idField: 'id' });
+    // Removendo orderBy temporariamente para evitar erro de índice ausente
+    return collectionData(messagesRef, { idField: 'id' });
   }
 
   // Envia a mensagem para o banco e cria uma notificação para o destinatário
   async enviarMensagem(chatId: string, texto: string, senderId: string, recipientId: string) {
-    if (!texto.trim()) return;
+    if (!texto?.trim() || !chatId || !senderId || !recipientId) {
+      console.warn('Dados insuficientes para enviar mensagem:', { chatId, senderId, recipientId });
+      throw new Error('Dados do chat incompletos.');
+    }
 
-    const messagesRef = collection(this.firestore, 'chats', chatId, 'messages');
-    await addDoc(messagesRef, {
-      texto: texto,
-      senderId: senderId,
-      timestamp: serverTimestamp()
-    });
-
-    // Criar notificação para o destinatário
     try {
-      await addDoc(collection(this.firestore, 'notificacoes'), {
+      const messagesRef = collection(this.firestore, 'chats', chatId, 'messages');
+      await addDoc(messagesRef, {
+        texto: texto.trim(),
+        senderId: senderId,
+        timestamp: serverTimestamp()
+      });
+      console.log('✅ Mensagem enviada para o Firestore');
+    } catch (error) {
+      console.error('❌ Erro crítico ao gravar mensagem:', error);
+      throw error;
+    }
+
+    // Criar notificação (não bloqueia o envio da mensagem se falhar)
+    try {
+      const notifRef = collection(this.firestore, 'notificacoes');
+      await addDoc(notifRef, {
         uidDestinatario: recipientId,
-        titulo: 'Nova mensagem no chat',
+        titulo: 'Nova mensagem',
         mensagem: texto.length > 50 ? texto.substring(0, 50) + '...' : texto,
         data: serverTimestamp(),
         lida: false,
-        tipo: 'sistema' // Chat entra como sistema/mensagem
+        tipo: 'sistema'
       });
     } catch (e) {
-      console.error('Erro ao enviar notificação de chat:', e);
+      console.warn('⚠️ Falha ao criar notificação, mas a mensagem foi enviada.');
     }
   }
 }

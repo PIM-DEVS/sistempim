@@ -128,6 +128,24 @@ export class SocialComponent implements OnInit {
     } catch { this.toast.error('Erro ao comentar.'); }
   }
 
+  async excluirComentario(postId: string, comentario: Comentario) {
+    if (!comentario.id || !this.dadosUsuario?.uid) return;
+    if (confirm('Excluir este comentário?')) {
+      try {
+        await this.socialService.excluirComentario(postId, comentario.id);
+        this.toast.success('Comentário removido.');
+      } catch {
+        this.toast.error('Erro ao remover comentário.');
+      }
+    }
+  }
+
+  podeApagarComentario(post: Post, comentario: Comentario): boolean {
+    if (!this.dadosUsuario?.uid) return false;
+    // Pode apagar se: for o autor do comentário OU for o autor do post
+    return comentario.autorId === this.dadosUsuario.uid || post.userId === this.dadosUsuario.uid;
+  }
+
   async excluir(id: string) {
     if (confirm('Excluir este post?')) {
       await this.socialService.excluirPost(id);

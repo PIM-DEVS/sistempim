@@ -1,3 +1,29 @@
+.comment-bubble-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-delete-comment {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 2px;
+  font-size: 0.85rem;
+  opacity: 0;
+  transition: all 0.2s ease;
+}
+
+.comment-item:hover .btn-delete-comment {
+  opacity: 1;
+}
+
+.btn-delete-comment:hover {
+  color: #ef4444;
+}
+
 .social-page {
   padding: 24px;
   max-width: 680px;
