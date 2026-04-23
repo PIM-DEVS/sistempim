@@ -1,7 +1,49 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.sandbox-banner {
+  background: linear-gradient(90deg, #ff9d42 0%, #ff7b00 100%);
+  color: white;
+  padding: 8px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'Fustat', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  z-index: 10001;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.banner-mid {
+  opacity: 0.9;
+}
+
+.banner-right {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(4px);
+}
+
+.banner-right:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
 /* --- DESKTOP PADRÃO --- */
 .app-container {
   display: flex;
-  height: 100vh;
+  flex: 1;
   background-color: #f5f6fa;
   overflow: hidden;
   position: relative;

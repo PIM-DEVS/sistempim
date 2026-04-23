@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { SidebarComponent } from '../components/sidebar/sidebar.component';
 import { TopbarComponent } from '../components/topbar/topbar.component';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-main-layout',
@@ -12,6 +13,7 @@ import { TopbarComponent } from '../components/topbar/topbar.component';
   styleUrls: ['./main-layout.component.css'],
 })
 export class MainLayoutComponent {
+  isSandbox = environment.sandbox;
   
   // Injete o detector
   private cdr = inject(ChangeDetectorRef); 

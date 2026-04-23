@@ -1,5 +1,6 @@
 export const environment = {
   production: false,
+  sandbox: true,
   firebase: {
     apiKey: "AIzaSyD0IEmPvhbTPkPu_0mss9Ssac1eD3iGXyI",
     authDomain: "pimclass.firebaseapp.com",

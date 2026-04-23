@@ -1,5 +1,6 @@
 export const environment = {
-  production: false, // Pode deixar false por enquanto para evitar erros
+  production: false,
+  sandbox: true, // Habilita a barra de fase demo
   firebase: {
     apiKey: "AIzaSyD0IEmPvhbTPkPu_0mss9Ssac1eD3iGXyI",
     authDomain: "pimclass.firebaseapp.com",
