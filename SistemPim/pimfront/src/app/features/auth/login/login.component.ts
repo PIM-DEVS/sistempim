@@ -1,12 +1,13 @@
-import { Component, inject, NgZone } from '@angular/core';
+import { Component, inject, NgZone, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { 
-  Auth, 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword, 
-  updateProfile 
+import {
+  Auth,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  updateProfile,
+  user
 } from '@angular/fire/auth';
 import { AuthService } from '../../../core/services/auth.service';
 
@@ -17,28 +18,43 @@ import { AuthService } from '../../../core/services/auth.service';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css'],
 })
-export class LoginComponent {
-  // Injeções
+export class LoginComponent implements OnInit {
   private authService = inject(AuthService);
   private auth = inject(Auth);
   private router = inject(Router);
   private ngZone = inject(NgZone);
+  private cdr = inject(ChangeDetectorRef);
 
-  // Variáveis
   isLoginMode = true;
   showGenderSelect = false;
   selectedGender = '';
+  nomePersonalizado = '';
+  showPassword = false;
   loading = false;
   errorMessage = '';
 
-  // Modelo
   nome = '';
   email = '';
   password = '';
 
-  // Domínios
   private readonly DOMINIO_ALUNO = 'aluno.ifal.edu.br';
   private readonly DOMINIO_DOCENTE = 'ifal.edu.br';
+
+  // ─── Marca se o usuário veio de um cadastro NOVO nesta sessão ────────────────
+  private isNovoCadastro = false;
+
+  async ngOnInit() {
+    this.loading = true;
+    user(this.auth).subscribe(async (u) => {
+      if (u) {
+        // Usuário já autenticado: verifica se é novo ou existente
+        await this.decidirDestino(u, false);
+      } else {
+        this.loading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
 
   toggleMode() {
     this.isLoginMode = !this.isLoginMode;
@@ -48,8 +64,6 @@ export class LoginComponent {
 
   async onSubmit() {
     this.errorMessage = '';
-    
-    // CORREÇÃO 1: Limpeza de espaços (Resolve o erro 400)
     const emailLimpo = this.email.trim();
     const senhaLimpa = this.password;
 
@@ -57,13 +71,6 @@ export class LoginComponent {
       this.errorMessage = 'Por favor, preencha todos os campos.';
       return;
     }
-
-    // CORREÇÃO 2: Logs para Debug (Olhe o console F12 se der erro)
-    console.log('Tentando autenticar:', { 
-      mode: this.isLoginMode ? 'Login' : 'Cadastro', 
-      email: emailLimpo,
-      tamSenha: senhaLimpa.length 
-    });
 
     if (!this.validarDominio(emailLimpo)) {
       this.errorMessage = 'Utilize seu email institucional (@ifal ou @aluno.ifal).';
@@ -73,44 +80,34 @@ export class LoginComponent {
     this.loading = true;
 
     try {
-      let userCredential;
-
       if (this.isLoginMode) {
-        // --- LOGIN ---
-        userCredential = await signInWithEmailAndPassword(this.auth, emailLimpo, senhaLimpa);
+        // ─── LOGIN: usuário existente → vai direto para o dashboard ──────────
+        const cred = await signInWithEmailAndPassword(this.auth, emailLimpo, senhaLimpa);
+        await this.decidirDestino(cred.user, false);
       } else {
-        // --- CADASTRO ---
+        // ─── CADASTRO: novo usuário → mostra seleção de gênero ───────────────
         if (!this.nome) {
           this.errorMessage = 'Por favor, informe seu nome.';
           this.loading = false;
           return;
         }
-        userCredential = await createUserWithEmailAndPassword(this.auth, emailLimpo, senhaLimpa);
-        
-        // Atualiza o nome no Firebase Auth
-        if (userCredential.user) {
-            await updateProfile(userCredential.user, { displayName: this.nome });
+        const cred = await createUserWithEmailAndPassword(this.auth, emailLimpo, senhaLimpa);
+        if (cred.user) {
+          await updateProfile(cred.user, { displayName: this.nome });
         }
+        this.isNovoCadastro = true;
+        await this.decidirDestino(cred.user, true);
       }
-
-      console.log('Sucesso no Auth, verificando perfil...');
-      await this.verificarPerfilUsuario(userCredential.user);
-
     } catch (error: any) {
       console.error('Erro Firebase:', error);
-      
-      // CORREÇÃO 3: Forçar a atualização da UI dentro do Zone
-      // Isso resolve o bug de "ter que trocar a aba para aparecer o erro"
       this.ngZone.run(() => {
         this.loading = false;
         this.tratarErrosFirebase(error.code);
+        this.cdr.detectChanges();
       });
     }
-    // Nota: Não usamos 'finally' aqui para o loading=false porque 
-    // se der sucesso, o loading deve continuar até o redirecionamento.
   }
 
-  // Validação separada para reutilizar
   private validarDominio(email: string): boolean {
     return email.includes(this.DOMINIO_ALUNO) || email.includes(this.DOMINIO_DOCENTE);
   }
@@ -120,52 +117,63 @@ export class LoginComponent {
     this.errorMessage = '';
 
     try {
-      const user = await this.authService.loginGoogle();
-      
-      if (user) {
-        const email = user.email || '';
+      const fu = await this.authService.loginGoogle();
+
+      if (fu) {
+        const email = fu.email || '';
         if (!this.validarDominio(email)) {
           this.errorMessage = 'Este email não pertence à instituição IFAL.';
           await this.authService.logout();
           this.loading = false;
           return;
         }
-        await this.verificarPerfilUsuario(user);
+
+        // Para Google: determina se é novo pelo tempo de criação da conta
+        const isNovo = this.isContaNova(fu);
+        await this.decidirDestino(fu, isNovo);
       } else {
         this.loading = false;
       }
     } catch (error) {
       console.error('Erro Google:', error);
       this.ngZone.run(() => {
-        this.errorMessage = 'Erro ao conectar com Google.';
+        this.errorMessage = 'Erro ao conectar com Google. Tente novamente.';
         this.loading = false;
+        this.cdr.detectChanges();
       });
     }
   }
 
-  private async verificarPerfilUsuario(user: any) {
-    try {
-        const dadosUsuario = await this.authService.getDadosUsuario(user.uid);
+  // ─── LÓGICA PRINCIPAL DE DESTINO ─────────────────────────────────────────────
+  // isNovoUsuario = true → mostra tela de gênero (primeiro acesso)
+  // isNovoUsuario = false → vai direto para o dashboard
+  private async decidirDestino(user: any, isNovoUsuario: boolean) {
+    this.ngZone.run(() => {
+      this.loading = false;
 
-        // CORREÇÃO 4: Navegação segura dentro do Zone
-        this.ngZone.run(() => {
-          this.loading = false;
-          
-          if (dadosUsuario && dadosUsuario['genero']) {
-            this.router.navigate(['/dashboard']);
-          } else {
-            this.showGenderSelect = true;
-            if (!this.nome && user.displayName) {
-              this.nome = user.displayName;
-            }
-          }
-        });
-    } catch (e) {
-        this.ngZone.run(() => {
-            this.loading = false;
-            this.errorMessage = "Erro ao buscar dados do usuário.";
-        });
-    }
+      if (isNovoUsuario) {
+        // Novo usuário: precisa escolher o avatar/gênero
+        this.showGenderSelect = true;
+        if (!this.nome) {
+          this.nome = user.displayName || '';
+        }
+      } else {
+        // Usuário existente: vai direto para o dashboard
+        this.router.navigate(['/dashboard']);
+      }
+      this.cdr.detectChanges();
+    });
+  }
+
+  // ─── Determina se é um cadastro novo pela diferença de tempo ─────────────────
+  // Conta criada há menos de 2 minutos = novo usuário
+  private isContaNova(user: any): boolean {
+    const creationTime = user?.metadata?.creationTime;
+    if (!creationTime) return false;
+    const created = new Date(creationTime).getTime();
+    const agora = Date.now();
+    const diffMinutos = (agora - created) / 1000 / 60;
+    return diffMinutos < 2; // menos de 2 minutos = acabou de criar
   }
 
   selectGender(gender: string) {
@@ -173,57 +181,82 @@ export class LoginComponent {
   }
 
   async finalizarCadastro() {
-    if (!this.selectedGender) return;
+    if (!this.selectedGender) {
+      this.errorMessage = 'Por favor, selecione um avatar para continuar.';
+      return;
+    }
     this.loading = true;
+    this.errorMessage = '';
 
-    const user = this.auth.currentUser;
-    
-    if (user) {
-      try {
-          await this.authService.updateProfileData(user.uid, {
-            nome: this.nome || user.displayName,
-            email: user.email,
-            genero: this.selectedGender,
-            role: user.email?.includes(this.DOMINIO_DOCENTE) ? 'PROFESSOR' : 'ALUNO'
-          });
+    const firebaseUser = this.auth.currentUser;
 
-          this.ngZone.run(() => {
-            this.loading = false;
-            this.router.navigate(['/dashboard']);
-          });
-      } catch (error) {
-          this.ngZone.run(() => {
-            this.loading = false;
-            this.errorMessage = "Erro ao salvar perfil.";
-          });
-      }
+    if (!firebaseUser) {
+      this.ngZone.run(() => {
+        this.loading = false;
+        this.errorMessage = 'Sessão expirada. Faça login novamente.';
+        this.cdr.detectChanges();
+      });
+      return;
+    }
+
+    try {
+      const nomeUsado = this.selectedGender === 'Outro' && this.nomePersonalizado.trim()
+        ? this.nomePersonalizado.trim()
+        : (this.nome || firebaseUser.displayName || '');
+        
+      const role = this.authService.getRoleByEmail(firebaseUser.email || '');
+
+      await this.authService.updateProfileData(firebaseUser.uid, {
+        nome: nomeUsado,
+        email: firebaseUser.email,
+        genero: this.selectedGender,
+        role
+      });
+
+      this.ngZone.run(() => {
+        this.loading = false;
+        this.router.navigate(['/dashboard']);
+        this.cdr.detectChanges();
+      });
+    } catch (error: any) {
+      console.error('[finalizarCadastro] Erro:', error);
+      this.ngZone.run(() => {
+        this.loading = false;
+        if (error?.code === 'permission-denied') {
+          this.errorMessage = 'Permissão negada. Configure as Regras do Firestore no console.firebase.google.com';
+        } else {
+          this.errorMessage = `Erro ao salvar: ${error?.message || 'Tente novamente.'}`;
+        }
+        this.cdr.detectChanges();
+      });
     }
   }
 
   private tratarErrosFirebase(code: string) {
-    switch(code) {
+    switch (code) {
       case 'auth/invalid-credential':
       case 'auth/wrong-password':
         this.errorMessage = 'Email ou senha incorretos.';
         break;
       case 'auth/user-not-found':
-        this.errorMessage = 'Conta não encontrada. Cadastre-se.';
+        this.errorMessage = 'Conta não encontrada. Cadastre-se primeiro.';
+        this.isLoginMode = false;
         break;
       case 'auth/email-already-in-use':
         this.errorMessage = 'Email já cadastrado. Faça login.';
-        this.isLoginMode = true; // Joga o usuário para o login automaticamente
+        this.isLoginMode = true;
         break;
       case 'auth/weak-password':
         this.errorMessage = 'Senha fraca (mínimo 6 caracteres).';
         break;
       case 'auth/network-request-failed':
-        this.errorMessage = 'Funcionalidade em desenvolvimento ( Entre com o Google ).';
+        this.errorMessage = 'Sem conexão. Verifique sua internet.';
         break;
       case 'auth/invalid-email':
-        this.errorMessage = 'O formato do email é inválido.';
+        this.errorMessage = 'Formato de email inválido.';
         break;
       default:
-        this.errorMessage = `Erro desconhecido: ${code}`;
+        this.errorMessage = `Erro: ${code}`;
     }
   }
 }

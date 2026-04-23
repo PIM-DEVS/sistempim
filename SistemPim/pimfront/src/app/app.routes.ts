@@ -34,9 +34,14 @@ export const routes: Routes = [
           import('./features/profile/profile.component').then((m) => m.ProfileComponent),
       },
       {
-        path: 'home',
+        path: 'social',
         loadComponent: () =>
           import('./features/social/social.component').then((m) => m.SocialComponent),
+      },
+      {
+        path: 'exercise',
+        loadComponent: () =>
+          import('./features/exercise/exercise.component').then((m) => m.ExerciseComponent),
       },
 
       // --- SEÇÃO DE TURMAS (Agora com Lazy Loading) ---

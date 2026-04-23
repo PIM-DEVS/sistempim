@@ -11,11 +11,11 @@ import {
   EventEmitter
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService, Notificacao } from '../../../core/services/notification.service';
-import { Subscription, Subject } from 'rxjs';
+import { Subscription, Subject, filter } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
@@ -27,7 +27,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 })
 export class TopbarComponent implements OnInit, OnDestroy {
   // Services
-  private authService = inject(AuthService);
+  public authService = inject(AuthService);
   private notifService = inject(NotificationService);
   private cdr = inject(ChangeDetectorRef);
   private eRef = inject(ElementRef);
@@ -58,6 +58,31 @@ export class TopbarComponent implements OnInit, OnDestroy {
 
   get totalNaoLidas(): number {
     return this.notificacoes.filter((n) => !n.lida).length;
+  }
+
+  get primeiroNome(): string {
+    const nome = this.dadosUsuario?.nome || this.dadosUsuario?.name || this.dadosUsuario?.displayName || 'Usuário';
+    return nome.split(' ')[0];
+  }
+
+  getDefaultAvatar(): string {
+    const genero = this.dadosUsuario?.genero;
+    return genero === 'Feminino' ? 'assets/images/feminino.jpg' : 'assets/images/masculino.jpg';
+  }
+
+  get pageTitle(): string {
+    const url = this.router.url;
+    const map: Record<string, string> = {
+      '/dashboard': 'Dashboard',
+      '/home': 'Mural Social',
+      '/turmas': 'Turmas',
+      '/social': 'Mural Social',
+      '/chat': 'Chat',
+      '/exercise': 'Exercícios',
+      '/profile': 'Meu Perfil',
+    };
+    const key = Object.keys(map).find(k => url.startsWith(k));
+    return key ? map[key] : 'PIM';
   }
 
   ngOnInit() {

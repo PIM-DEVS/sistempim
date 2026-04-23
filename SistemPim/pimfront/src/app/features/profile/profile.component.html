@@ -113,6 +113,12 @@
     </div>
   </ng-container>
 
+  <!-- Toast de aviso -->
+  <div class="toast-aviso" *ngIf="notificacao.tipo" [class.sucesso]="notificacao.tipo === 'sucesso'" [class.erro]="notificacao.tipo === 'erro'">
+    <i class="bx" [class.bx-check-circle]="notificacao.tipo === 'sucesso'" [class.bx-error-circle]="notificacao.tipo === 'erro'"></i>
+    {{ notificacao.mensagem }}
+  </div>
+
 
   <ng-template #loadingTemplate>
     

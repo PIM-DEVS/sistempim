@@ -1,12 +1,12 @@
 export const environment = {
   production: false, // Pode deixar false por enquanto para evitar erros
   firebase: {
-    apiKey: 'AIzaSyA62NmG-zcW54y8cKgCBKxFIWX-L2ESNYc',
-    authDomain: 'pimappif.firebaseapp.com',
-    projectId: 'pimappif',
-    storageBucket: 'pimappif.firebasestorage.app',
-    messagingSenderId: '947410344814',
-    appId: '1:947410344814:web:c567a69f9573d4151a7f7f',
-    measurementId: 'G-J3EG6KNTWT',
+    apiKey: "AIzaSyD0IEmPvhbTPkPu_0mss9Ssac1eD3iGXyI",
+    authDomain: "pimclass.firebaseapp.com",
+    projectId: "pimclass",
+    storageBucket: "pimclass.firebasestorage.app",
+    messagingSenderId: "195326633223",
+    appId: "1:195326633223:web:e578d3d065eed381ac11a2",
+    measurementId: "G-5TH1905YPZ"
   },
 };

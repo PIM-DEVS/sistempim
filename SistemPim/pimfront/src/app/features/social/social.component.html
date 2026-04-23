@@ -1,117 +1,121 @@
-<div class="container-social">
-  <div class="feed-col">
-    <div class="card box-criacao">
-      <div class="input-row">
-        <img
-          [src]="dadosUsuario?.foto || 'assets/avatar-placeholder.png'"
-          class="avatar"
-          (error)="dadosUsuario.foto = 'assets/avatar-placeholder.png'"
-        />
-        <textarea [(ngModel)]="novoPostTexto" placeholder="Comece uma publicação..."></textarea>
-      </div>
+<div class="social-page">
 
-      <div class="preview-img" *ngIf="imagemPreview">
-        <img [src]="imagemPreview" />
-        <button (click)="imagemPreview = null" class="btn-remove"><i class="bx bx-x"></i></button>
+  <!-- BOX DE CRIAÇÃO (Inspirado no design minimalista) -->
+  <div class="create-card card">
+    <div class="create-header">
+      <img [src]="dadosUsuario?.foto || dadosUsuario?.photoUrl || 'assets/images/masculino.jpg'"
+           class="user-avatar" alt="Avatar"
+           onerror="this.src='assets/images/masculino.jpg'">
+      <div class="create-input-area">
+        <textarea
+          [(ngModel)]="novoPostTexto"
+          placeholder="No que você está pensando?"
+          rows="2"
+          (input)="$any($event.target).style.height = 'auto'; $any($event.target).style.height = $any($event.target).scrollHeight + 'px'"
+        ></textarea>
       </div>
+    </div>
 
-      <div class="footer-criacao">
-        <label class="btn-midia" [class.disabled]="loadingPost">
-          <i class="bx bx-image-add"></i> Adicionar Mídia
-          <input
-            type="file"
-            (change)="selecionarImagem($event)"
-            hidden
-            accept="image/*"
-            [disabled]="loadingPost"
-          />
+    <div class="img-preview" *ngIf="imagemPreview">
+      <img [src]="imagemPreview" alt="Preview">
+      <button class="btn-remove-img" (click)="imagemPreview = null"><i class="bx bx-x"></i></button>
+    </div>
+
+    <div class="create-footer">
+      <div class="create-actions">
+        <label class="action-btn" title="Adicionar imagem">
+          <i class="bx bx-image-add"></i>
+          <input type="file" accept="image/*" (change)="selecionarImagem($event)" hidden>
         </label>
-        <button
-          class="btn-postar"
-          [disabled]="loadingPost || (!novoPostTexto.trim() && !imagemPreview)"
-          (click)="publicar()"
-        >
-          {{ loadingPost ? 'Publicando...' : 'Publicar' }}
-        </button>
       </div>
-    </div>
-
-    <div *ngIf="initialLoading" class="skeleton-container">
-      <div class="card skeleton-card" *ngFor="let i of [1, 2, 3]">
-        <div class="skeleton-header">
-          <div class="skeleton-avatar shim"></div>
-          <div class="skeleton-lines">
-            <div class="line shim" style="width: 60%"></div>
-            <div class="line shim" style="width: 40%"></div>
-          </div>
-        </div>
-        <div class="skeleton-body shim"></div>
-      </div>
-    </div>
-
-    <div *ngIf="!initialLoading && posts.length === 0" class="empty-state">
-      <i class="bx bx-news"></i>
-      <h3>O feed está silencioso</h3>
-      <p>Seja o primeiro a compartilhar algo interessante hoje!</p>
-    </div>
-
-    <div class="card post-item" *ngFor="let post of posts">
-      <div class="post-header">
-        <img
-          [src]="post.userPhoto || 'assets/avatar-placeholder.png'"
-          class="avatar-sm"
-          (error)="post.userPhoto = 'assets/avatar-placeholder.png'"
-        />
-        <div class="meta">
-          <strong>{{ post.userName }}</strong>
-          <small>{{ post.createdAt?.toDate() | date: "dd 'de' MMM 'às' HH:mm" }}</small>
-        </div>
-        <button
-          *ngIf="post.userId === dadosUsuario?.uid"
-          (click)="excluir(post.id)"
-          class="btn-opcoes"
-        >
-          <i class="bx bx-trash"></i>
-        </button>
-      </div>
-
-      <div class="post-content">
-        <p>{{ post.content }}</p>
-        <img *ngIf="post.mediaUrl" [src]="post.mediaUrl" class="img-post" />
-      </div>
-
-      <div class="post-footer">
-        <button (click)="curtir(post)" [class.active]="post.likes.includes(dadosUsuario?.uid)">
-          <i
-            class="bx"
-            [ngClass]="post.likes.includes(dadosUsuario?.uid) ? 'bxs-heart' : 'bx-heart'"
-          ></i>
-          <span>{{ post.likes.length }} curtidas</span>
-        </button>
-      </div>
+      <button class="btn-publish" (click)="publicar()" [disabled]="!novoPostTexto.trim() || loadingPost">
+        <i class="bx" [ngClass]="loadingPost ? 'bx-loader-alt bx-spin' : 'bx-send'"></i>
+        {{ loadingPost ? 'Publicando...' : 'Publicar' }}
+      </button>
     </div>
   </div>
 
-  <aside class="sidebar-perfil">
-    <div class="card card-mini-perfil">
-      <div class="capa"></div>
-      <div class="detalhes">
-        <img
-          [src]="dadosUsuario?.foto"
-          class="avatar-lg"
-          (error)="dadosUsuario.foto = 'assets/avatar-placeholder.png'"
-        />
-        <h3>{{ dadosUsuario?.nome || 'Carregando...' }}</h3>
-        <p>{{ dadosUsuario?.cargo }}</p>
-        <div class="stats">
-          <div class="stat">
-            <strong>{{ posts.length }}</strong> <small>Feed</small>
-          </div>
-          <div class="stat">
-            <strong>{{ dadosUsuario?.certificados || 0 }}</strong> <small>Certificados</small>
-          </div>
+  <!-- SKELETON LOADER -->
+  <div *ngIf="initialLoading">
+    <div class="card skeleton-card" *ngFor="let i of [1,2,3]">
+      <div class="sk-header">
+        <div class="sk-circle shim"></div>
+        <div class="sk-lines">
+          <div class="sk-line shim"></div>
+          <div class="sk-line short shim"></div>
+        </div>
+      </div>
+      <div class="sk-body shim"></div>
+    </div>
+  </div>
+
+  <!-- EMPTY STATE -->
+  <div class="empty-card card" *ngIf="!initialLoading && posts.length === 0">
+    <i class="bx bx-news"></i>
+    <p>O mural está vazio. Seja o primeiro a publicar!</p>
+  </div>
+
+  <!-- POSTS -->
+  <div class="post-card card" *ngFor="let post of posts">
+    
+    <!-- Header do Post -->
+    <div class="post-header">
+      <img [src]="post.userPhoto || 'assets/images/masculino.jpg'" class="post-avatar"
+           onerror="this.src='assets/images/masculino.jpg'" alt="Avatar">
+      <div class="post-meta">
+        <strong>{{ post.userName }}</strong>
+        <span>{{ formatTime(post.createdAt) }}</span>
+      </div>
+      <button class="btn-options" *ngIf="post.userId === dadosUsuario?.uid" (click)="excluir(post.id)">
+        <i class="bx bx-trash"></i>
+      </button>
+    </div>
+
+    <!-- Conteúdo -->
+    <div class="post-body">
+      <p>{{ post.content }}</p>
+      <img *ngIf="post.mediaUrl" [src]="post.mediaUrl" class="post-media" alt="Mídia">
+    </div>
+
+    <!-- Actions -->
+    <div class="post-actions">
+      <button class="action-btn" [class.liked]="getMeuLike(post)" (click)="curtir(post)">
+        <i class="bx" [ngClass]="getMeuLike(post) ? 'bxs-heart' : 'bx-heart'"></i>
+        <span>{{ post.likes.length }}</span>
+      </button>
+
+      <button class="action-btn" [class.commented]="comentariosAbertos[post.id]" (click)="toggleComentarios(post.id)">
+        <i class="bx bx-comment"></i>
+        <span>{{ post.comentariosCount || 0 }}</span>
+      </button>
+
+      <button class="action-btn" [class.saved]="getMeuSalvo(post)" (click)="salvar(post)">
+        <i class="bx" [ngClass]="getMeuSalvo(post) ? 'bxs-bookmark' : 'bx-bookmark'"></i>
+      </button>
+    </div>
+
+    <!-- Seção de Comentários -->
+    <div class="comments-section" *ngIf="comentariosAbertos[post.id]">
+      <div class="comment-item" *ngFor="let c of comentariosCache[post.id]">
+        <img [src]="c.autorFoto || 'assets/images/masculino.jpg'" class="comment-avatar"
+             onerror="this.src='assets/images/masculino.jpg'" alt="">
+        <div class="comment-bubble">
+          <strong>{{ c.autorNome }}</strong>
+          <p>{{ c.texto }}</p>
+        </div>
+      </div>
+
+      <div class="comment-input-row">
+        <img [src]="dadosUsuario?.foto || 'assets/images/masculino.jpg'" class="comment-avatar"
+             onerror="this.src='assets/images/masculino.jpg'" alt="">
+        <div class="comment-input-wrap">
+          <input type="text" [(ngModel)]="novoComentario[post.id]"
+                 placeholder="Escreva um comentário..."
+                 (keyup.enter)="enviarComentario(post.id)">
+          <button (click)="enviarComentario(post.id)"><i class="bx bx-send"></i></button>
         </div>
       </div>
     </div>
-  </aside>
+
+  </div>
 </div>

@@ -5,6 +5,8 @@ import { Observable, of, Subscription } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { AuthService } from '../../core/services/auth.service';
 import { ChatService } from '../../core/services/chat.service';
+import { ToastService } from '../../core/services/toast.service';
+import { Firestore, collection, getDocs } from '@angular/fire/firestore';
 
 @Component({
   selector: 'app-chat',
@@ -16,30 +18,31 @@ import { ChatService } from '../../core/services/chat.service';
 export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
   private authService = inject(AuthService);
   private chatService = inject(ChatService);
+  private toast = inject(ToastService);
   private cdr = inject(ChangeDetectorRef);
+  private firestore = inject(Firestore);
 
-  @ViewChild('scrollContainer') private scrollContainer!: ElementRef;
+  @ViewChild('messagesEnd') private messagesEnd!: ElementRef;
 
   currentUser: any = null;
-  contatos: any[] = [];
-  loadingContatos = true;
-  
-  // Chat
+  todos: any[] = [];
+  todosFiltered: any[] = [];
+  loadingUsers = true;
+  termoBusca = '';
+
   chatAtivo: any = null;
-  chatIdAtivo: string = '';
+  chatIdAtivo = '';
   mensagens$: Observable<any[]> = of([]);
-  mensagensSubscription: Subscription | null = null;
-  
-  mensagemAtual: string = '';
-  termoBusca: string = '';
+  private mensagesSub: Subscription | null = null;
+
+  mensagemAtual = '';
   enviando = false;
-  erroPermissao = false; // Controla a faixa vermelha
 
   ngOnInit() {
     this.authService.user$.subscribe(async (user) => {
       if (user) {
         this.currentUser = user;
-        await this.carregarContatos(user.uid);
+        await this.carregarTodosUsuarios(user.uid);
       }
     });
   }
@@ -49,121 +52,87 @@ export class ChatComponent implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   ngOnDestroy() {
-    if (this.mensagensSubscription) this.mensagensSubscription.unsubscribe();
+    this.mensagesSub?.unsubscribe();
   }
 
-  // --- LÓGICA ROBUSTA PARA CONTATOS E IMAGENS ---
-  async carregarContatos(uid: string) {
-    this.loadingContatos = true;
+  async carregarTodosUsuarios(meuUid: string) {
+    this.loadingUsers = true;
     try {
-      const userData = await this.authService.getDadosUsuario(uid);
-      
-      if (userData && userData['seguindo']) {
-        const listaIds = userData['seguindo'];
-        
-        const promises = listaIds.map(async (amigoId: any) => {
-          const idLimpo = typeof amigoId === 'object' ? amigoId.uid : amigoId;
-          if (!idLimpo) return null;
-          
-          const amigoData = await this.authService.getDadosUsuario(idLimpo);
-          if (!amigoData) return null;
-
-          // Tenta encontrar a foto em QUALQUER campo possível
-          const fotoReal = amigoData['photoURL'] || amigoData['fotoPerfil'] || amigoData['foto'] || amigoData['avatar'] || null;
-
-          return {
-            uid: idLimpo,
-            nome: amigoData['nome'] || amigoData['displayName'] || 'Usuário',
-            // Define a foto. O HTML vai decidir o que fazer se for null.
-            foto: fotoReal, 
-            email: amigoData['email'],
-            cargo: amigoData['role'] || 'Estudante'
-          };
-        });
-
-        const resultados = await Promise.all(promises);
-        this.contatos = resultados.filter(u => u !== null && u.uid !== uid);
-      }
-    } catch (error) {
-      console.error('Erro ao carregar contatos:', error);
+      const snap = await getDocs(collection(this.firestore, 'users'));
+      this.todos = snap.docs
+        .map(d => ({ uid: d.id, ...d.data() }))
+        .filter((u: any) => u.uid !== meuUid);
+      this.todosFiltered = this.todos;
+    } catch (e) {
+      this.toast.error('Erro ao carregar usuários.');
     } finally {
-      this.loadingContatos = false;
+      this.loadingUsers = false;
       this.cdr.detectChanges();
     }
   }
 
-  get contatosFiltrados() {
-    if (!this.termoBusca.trim()) return this.contatos;
-    const termo = this.termoBusca.toLowerCase();
-    return this.contatos.filter(c => c.nome.toLowerCase().includes(termo));
+  filtrarUsuarios() {
+    const termo = this.termoBusca.toLowerCase().trim();
+    this.todosFiltered = termo
+      ? this.todos.filter(u => (u.nome || u.name || '').toLowerCase().includes(termo))
+      : this.todos;
   }
 
-  // --- SELEÇÃO DE CHAT ---
   selecionarChat(contato: any) {
     if (this.chatAtivo?.uid === contato.uid) return;
-
     this.chatAtivo = contato;
     this.chatIdAtivo = this.chatService.getChatId(this.currentUser.uid, contato.uid);
-    this.erroPermissao = false;
-    
-    // 1. Garante que o chat existe
-    this.chatService.criarChatSeNaoExistir(this.chatIdAtivo).then(() => {
-      // 2. Carrega mensagens
-      this.carregarMensagens();
-    }).catch(err => {
-      console.error("Erro ao criar sala:", err);
-      // Se der erro aqui, geralmente é permissão
-      this.erroPermissao = true;
-    });
-  }
+    this.mensagesSub?.unsubscribe();
 
-  carregarMensagens() {
-    this.mensagens$ = this.chatService.getMensagens(this.chatIdAtivo).pipe(
-      tap(() => {
-        setTimeout(() => this.scrollToBottom(), 100);
-        this.erroPermissao = false; // Se carregou, a permissão está ok
-      }),
-      catchError(error => {
-        console.error('ERRO DE PERMISSÃO:', error);
-        this.erroPermissao = true;
-        return of([]);
-      })
-    );
+    this.chatService.criarChatSeNaoExistir(this.chatIdAtivo).then(() => {
+      this.mensagens$ = this.chatService.getMensagens(this.chatIdAtivo).pipe(
+        tap(() => setTimeout(() => this.scrollToBottom(), 50)),
+        catchError(() => { this.toast.error('Erro ao carregar mensagens.'); return of([]); })
+      );
+    }).catch(() => this.toast.error('Não foi possível abrir o chat.'));
+    this.cdr.detectChanges();
   }
 
   async enviarMensagem() {
     if (!this.mensagemAtual.trim() || !this.chatIdAtivo || this.enviando) return;
-    
     const texto = this.mensagemAtual;
-    this.mensagemAtual = ''; 
+    this.mensagemAtual = '';
     this.enviando = true;
-
     try {
-      await this.chatService.enviarMensagem(this.chatIdAtivo, texto, this.currentUser.uid);
-    } catch (error) {
-      console.error('Erro envio:', error);
-      this.mensagemAtual = texto; // Devolve o texto pro input
-      this.erroPermissao = true; // Mostra o banner vermelho
+      await this.chatService.enviarMensagem(this.chatIdAtivo, texto, this.currentUser.uid, this.chatAtivo.uid);
+    } catch {
+      this.mensagemAtual = texto;
+      this.toast.error('Falha ao enviar mensagem.');
     } finally {
       this.enviando = false;
     }
   }
 
-  // Se a imagem REAL (URL) quebrar (404), usamos um placeholder
-  tratarErroImagem(event: any) {
-    event.target.src = 'assets/images/user-placeholder.png'; // Garanta que essa imagem existe na pasta assets
+  getNome(u: any): string {
+    return u.nome || u.name || u.displayName || 'Usuário';
   }
 
-  scrollToBottom(): void {
+  getFoto(u: any): string {
+    return u.foto || u.photoUrl || u.photoURL || '';
+  }
+
+  getInitial(u: any): string {
+    return this.getNome(u).charAt(0).toUpperCase();
+  }
+
+  isMyMessage(msg: any): boolean {
+    return msg.senderId === this.currentUser?.uid;
+  }
+
+  formatTime(ts: any): string {
+    if (!ts) return '';
     try {
-      if (this.scrollContainer) {
-        this.scrollContainer.nativeElement.scrollTop = this.scrollContainer.nativeElement.scrollHeight;
-      }
-    } catch(err) { }
+      const d = ts.toDate ? ts.toDate() : new Date(ts);
+      return d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    } catch { return ''; }
   }
 
-  formatarData(timestamp: any): Date | null {
-    if (!timestamp) return null;
-    return timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+  scrollToBottom() {
+    try { this.messagesEnd?.nativeElement.scrollIntoView({ behavior: 'smooth' }); } catch {}
   }
 }

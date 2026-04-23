@@ -1,0 +1,184 @@
+.exercise-container {
+  padding: 30px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 24px;
+}
+
+.header-titles h1 {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: #111;
+}
+
+.header-titles p {
+  color: #666;
+  margin: 0;
+  font-size: 15px;
+}
+
+.btn-primary {
+  background: #00ce71;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-primary:hover:not([disabled]) {
+  background: #00b060;
+}
+.btn-primary[disabled] {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: #666;
+  border: 1px solid #ccc;
+  padding: 12px 20px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-outline {
+  width: 100%;
+  background: transparent;
+  border: 1px solid #00ce71;
+  color: #00ce71;
+  font-weight: 600;
+  padding: 8px 0;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.btn-outline:hover {
+  background: #00ce71;
+  color: #fff;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  background: #fff;
+}
+
+.empty-state i {
+  font-size: 48px;
+  color: #ccc;
+  margin-bottom: 16px;
+}
+
+/* Lista Grid */
+.exercises-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.class-card {
+  background: #fff;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-status {
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-orange {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-green {
+  background: #d4edda;
+  color: #155724;
+}
+
+.card-body {
+  padding: 20px;
+  flex: 1;
+}
+
+.card-body h3 {
+  margin: 0 0 12px 0;
+  font-size: 18px;
+  color: #111;
+}
+
+.card-body p {
+  margin: 4px 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.card-footer {
+  padding: 15px 20px;
+  border-top: 1px solid #f0f0f0;
+}
+
+/* Modais */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.4);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000;
+}
+
+.modal-card {
+  background: #fff;
+  width: 90%; max-width: 500px;
+  display: flex; flex-direction: column;
+}
+
+.modal-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 20px; border-bottom: 1px solid #f0f0f0;
+}
+.modal-header h2 { margin: 0; font-size: 20px; }
+.btn-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #666; }
+
+.modal-body {
+  padding: 20px;
+  display: flex; flex-direction: column; gap: 15px;
+}
+
+.modal-body label {
+  font-weight: 600; font-size: 14px; color: #333; margin-bottom: -10px;
+}
+
+.input-field {
+  width: 100%;
+  padding: 12px;
+  background: #f9f9f9;
+  outline: none;
+}
+.input-field:focus {
+  border-color: #00ce71;
+}
+
+.modal-footer {
+  padding: 20px; border-top: 1px solid #f0f0f0;
+  display: flex; justify-content: flex-end; gap: 10px;
+}

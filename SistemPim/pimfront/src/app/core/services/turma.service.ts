@@ -1,23 +1,8 @@
 import { Injectable } from '@angular/core';
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  query,
-  where,
-  getDocs,
-  updateDoc,
-  arrayUnion,
-  doc,
-  deleteDoc,
-  getDoc,
-  orderBy,
-  Timestamp,
-  Query,
-  DocumentData,
-} from 'firebase/firestore';
-import { getApp } from 'firebase/app';
+import { Firestore, collection, addDoc, query, where, getDocs, updateDoc, arrayUnion, doc, deleteDoc, getDoc, orderBy, Timestamp, Query, DocumentData, setDoc } from '@angular/fire/firestore';
 import { Turma } from '../models/turma.model';
+import { NotificationService } from './notification.service';
+import { inject } from '@angular/core';
 
 export interface PostMural {
   id?: string;
@@ -37,14 +22,24 @@ export interface Atividade {
   dataCriacao: any;
 }
 
+export interface EntregaAtividade {
+  id?: string;
+  alunoId: string;
+  nome: string;
+  conteudo: string;
+  dataEntrega?: any;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class TurmaService {
-  private db = getFirestore(getApp());
-  private turmasRef = collection(this.db, 'turmas');
+  private notificationService = inject(NotificationService);
+  private turmasRef;
 
-  constructor() {}
+  constructor(private db: Firestore) {
+    this.turmasRef = collection(this.db, 'turmas');
+  }
 
   async criarTurma(dados: Partial<Turma>) {
     const randomCode = 'PIM-' + Math.floor(100000 + Math.random() * 900000);
@@ -89,11 +84,36 @@ export class TurmaService {
     return query(collection(this.db, 'turmas', turmaId, 'posts'), orderBy('data', 'desc'));
   }
 
-  async adicionarPost(turmaId: string, post: PostMural) {
-    return addDoc(collection(this.db, 'turmas', turmaId, 'posts'), {
+  async adicionarPost(turmaId: string, post: PostMural, postByDocente: boolean = false) {
+    const postRef = await addDoc(collection(this.db, 'turmas', turmaId, 'posts'), {
       ...post,
       data: Timestamp.now(),
     });
+
+    if (postByDocente) {
+      const turma = await this.getTurmaById(turmaId);
+      if (turma?.alunosIds) {
+        for (const alunoId of turma.alunosIds) {
+          await this.enviarNotificacao(alunoId, `Novo aviso em ${turma.disciplina}`, post.conteudo.substring(0, 50) + '...', 'aviso');
+        }
+      }
+    }
+    return postRef;
+  }
+
+  private async enviarNotificacao(uid: string, titulo: string, mensagem: string, tipo: 'aviso' | 'atividade' | 'sistema') {
+    try {
+      await addDoc(collection(this.db, 'notificacoes'), {
+        uidDestinatario: uid,
+        titulo,
+        mensagem,
+        data: Timestamp.now(),
+        lida: false,
+        tipo
+      });
+    } catch (e) {
+      console.error('Erro ao enviar notificação:', e);
+    }
   }
 
   async excluirPost(turmaId: string, postId: string) {
@@ -108,14 +128,38 @@ export class TurmaService {
   }
 
   async criarAtividade(turmaId: string, atividade: Atividade) {
-    return addDoc(collection(this.db, 'turmas', turmaId, 'atividades'), {
+    const ativRef = await addDoc(collection(this.db, 'turmas', turmaId, 'atividades'), {
       ...atividade,
       dataCriacao: Timestamp.now(),
     });
+
+    const turma = await this.getTurmaById(turmaId);
+    if (turma?.alunosIds) {
+      for (const alunoId of turma.alunosIds) {
+        await this.enviarNotificacao(alunoId, `Nova atividade: ${atividade.titulo}`, `Turma: ${turma.disciplina}`, 'atividade');
+      }
+    }
+    return ativRef;
   }
 
   async excluirAtividade(turmaId: string, ativId: string) {
     return deleteDoc(doc(this.db, 'turmas', turmaId, 'atividades', ativId));
+  }
+
+  async entregarAtividade(turmaId: string, ativId: string, entrega: EntregaAtividade) {
+    // Usa o ID do aluno como doc ID para manter uma única entrega por aluno
+    const ref = doc(this.db, 'turmas', turmaId, 'atividades', ativId, 'entregas', entrega.alunoId);
+    return setDoc(ref, {
+      ...entrega,
+      dataEntrega: Timestamp.now()
+    });
+  }
+
+  getEntregasRef(turmaId: string, ativId: string): Query<DocumentData> {
+    return query(
+      collection(this.db, 'turmas', turmaId, 'atividades', ativId, 'entregas'), 
+      orderBy('dataEntrega', 'desc')
+    );
   }
 
   async removerAluno(turmaId: string, alunoId: string) {

@@ -1,110 +1,88 @@
-<div class="chat-layout">
-  
-  <aside class="sidebar">
-    <div class="sidebar-header">
+<div class="chat-page">
+
+  <!-- SIDEBAR: Lista de Usuários -->
+  <div class="contacts-panel">
+    <div class="contacts-header">
       <h2>Mensagens</h2>
-      <div class="search-bar">
-        <i class="bx bx-search"></i>
-        <input type="text" placeholder="Buscar conversa..." [(ngModel)]="termoBusca">
-      </div>
     </div>
 
-    <div class="contacts-list">
-      <div *ngIf="loadingContatos" class="loading-spinner">
-        <i class="bx bx-loader-alt bx-spin"></i>
+    <div class="search-bar">
+      <i class="bx bx-search"></i>
+      <input type="text" [(ngModel)]="termoBusca" (input)="filtrarUsuarios()" placeholder="Buscar usuário...">
+    </div>
+
+    <div class="contacts-loading" *ngIf="loadingUsers">
+      <div class="sk-contact shim" *ngFor="let i of [1,2,3,4,5]"></div>
+    </div>
+
+    <div class="contacts-list" *ngIf="!loadingUsers">
+      <div class="empty-contacts" *ngIf="todosFiltered.length === 0">
+        <i class="bx bx-user-x"></i>
+        <p>Nenhum usuário encontrado.</p>
       </div>
 
-      <div *ngIf="!loadingContatos && contatos.length === 0" class="empty-list">
-        <p>Nenhum contato encontrado.</p>
-      </div>
-
-      <div 
-        class="contact-item" 
-        *ngFor="let contato of contatosFiltrados" 
-        [class.active]="contato.uid === chatAtivo?.uid"
-        (click)="selecionarChat(contato)"
-      >
-        <div class="avatar-wrapper">
-          <img 
-            [src]="contato.foto ? contato.foto : 'assets/images/user-placeholder.png'" 
-            (error)="tratarErroImagem($event)"
-            alt="Foto"
-          >
+      <div class="contact-item"
+           *ngFor="let u of todosFiltered"
+           [class.active]="chatAtivo?.uid === u.uid"
+           (click)="selecionarChat(u)">
+        <div class="contact-avatar">
+          <img *ngIf="getFoto(u)" [src]="getFoto(u)" alt="Avatar" onerror="this.style.display='none'">
+          <div *ngIf="!getFoto(u)" class="avatar-initial">{{ getInitial(u) }}</div>
         </div>
-        <div class="info">
-          <span class="name">{{ contato.nome }}</span>
-          <span class="role">{{ contato.cargo }}</span>
+        <div class="contact-info">
+          <strong>{{ getNome(u) }}</strong>
+          <span>{{ u.role === 'PROFESSOR' ? '👨‍🏫 Professor' : '🎓 Aluno' }}</span>
         </div>
       </div>
     </div>
-  </aside>
+  </div>
 
-  <main class="chat-main">
-    
-    <header class="chat-header" *ngIf="chatAtivo">
-      <div class="header-profile">
-        <img 
-          [src]="chatAtivo.foto ? chatAtivo.foto : 'assets/images/user-placeholder.png'" 
-          (error)="tratarErroImagem($event)"
-        >
+  <!-- ÁREA DE CONVERSA -->
+  <div class="chat-area">
+
+    <!-- Nenhum chat selecionado -->
+    <div class="chat-empty" *ngIf="!chatAtivo">
+      <div class="chat-empty-content">
+        <i class="bx bx-message-square-dots"></i>
+        <h3>Selecione uma conversa</h3>
+        <p>Escolha um usuário ao lado para iniciar o chat.</p>
+      </div>
+    </div>
+
+    <!-- Chat Ativo -->
+    <ng-container *ngIf="chatAtivo">
+      <div class="chat-topbar">
+        <div class="contact-avatar small">
+          <img *ngIf="getFoto(chatAtivo)" [src]="getFoto(chatAtivo)" alt="" onerror="this.style.display='none'">
+          <div *ngIf="!getFoto(chatAtivo)" class="avatar-initial">{{ getInitial(chatAtivo) }}</div>
+        </div>
         <div>
-          <h3>{{ chatAtivo.nome }}</h3>
-          <span class="email-sub">{{ chatAtivo.email }}</span>
+          <strong>{{ getNome(chatAtivo) }}</strong>
+          <span>{{ chatAtivo.role === 'PROFESSOR' ? 'Professor' : 'Aluno' }}</span>
         </div>
       </div>
-    </header>
 
-    <div class="messages-container" #scrollContainer *ngIf="chatAtivo; else emptyState">
-      
-      <div *ngIf="erroPermissao" class="error-banner">
-        <i class="bx bx-error"></i>
-        <span>Erro de conexão com o chat. Verifique suas permissões.</span>
-      </div>
-
-      <ng-container *ngIf="mensagens$ | async as mensagens">
-        
-        <div *ngIf="mensagens.length === 0" class="start-msg">
-          <div class="icon-start">👋</div>
-          <p>Inicie a conversa com {{ chatAtivo.nome }}</p>
-        </div>
-
-        <div 
-          class="msg-row" 
-          *ngFor="let msg of mensagens"
-          [ngClass]="{'msg-me': msg.senderId === currentUser.uid, 'msg-other': msg.senderId !== currentUser.uid}"
-        >
-          <div class="msg-bubble">
-            <p>{{ msg.text }}</p>
-            <span class="time">{{ formatarData(msg.timestamp) | date:'HH:mm' }}</span>
+      <div class="messages-area">
+        <ng-container *ngFor="let msg of mensagens$ | async">
+          <div class="msg-wrapper" [class.mine]="isMyMessage(msg)">
+            <div class="msg-bubble">
+              <p>{{ msg.texto }}</p>
+              <span class="msg-time">{{ formatTime(msg.timestamp) }}</span>
+            </div>
           </div>
-        </div>
-      </ng-container>
-    </div>
+        </ng-container>
+        <div #messagesEnd></div>
+      </div>
 
-    <div class="input-area" *ngIf="chatAtivo">
-      <div class="input-wrapper">
-        <input 
-          type="text" 
-          placeholder="Digite sua mensagem..." 
-          [(ngModel)]="mensagemAtual" 
-          (keyup.enter)="enviarMensagem()"
-          [disabled]="enviando"
-        >
-        <button (click)="enviarMensagem()" [disabled]="!mensagemAtual.trim()">
-          <i class="bx bx-send"></i>
+      <div class="chat-input-area">
+        <input type="text" [(ngModel)]="mensagemAtual"
+               placeholder="Escreva uma mensagem..."
+               (keyup.enter)="enviarMensagem()">
+        <button class="btn-send" (click)="enviarMensagem()" [disabled]="!mensagemAtual.trim() || enviando">
+          <i class="bx" [ngClass]="enviando ? 'bx-loader-alt bx-spin' : 'bx-send'"></i>
         </button>
       </div>
-    </div>
+    </ng-container>
 
-    <ng-template #emptyState>
-      <div class="welcome-view">
-        <div class="welcome-content">
-          <i class="bx bx-message-square-dots"></i>
-          <h2>PIM Chat</h2>
-          <p>Selecione um contato para começar.</p>
-        </div>
-      </div>
-    </ng-template>
-
-  </main>
+  </div>
 </div>

@@ -4,7 +4,6 @@
 :host {
   display: block;
   height: 100vh;
-  font-family: 'Poppins', sans-serif; /* Certifique-se de importar essa fonte no index.html */
 }
 
 .split-screen {
@@ -19,8 +18,8 @@
    LADO ESQUERDO (VERDE / BANNER)
 ========================================= */
 .banner-section {
-  flex: 1.1; /* Ligeiramente maior que o formulário */
-  background: linear-gradient(135deg, #0d4429 0%, #00ce71 100%); /* Gradiente IFAL Moderno */
+  flex: 1.2; /* Dando mais destaque ao visual */
+  background: var(--primary-color);
   position: relative;
   display: flex;
   flex-direction: column;
@@ -111,41 +110,41 @@
   display: block; font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 8px;
 }
 .input-field {
-  width: 100%; padding: 16px;
-  background-color: #f3f4f6; /* Cinza claro moderno */
-  border: 2px solid transparent;
-  border-radius: 12px;
-  font-size: 1rem; color: #1f2937;
-  transition: all 0.2s ease;
+  width: 100%; padding: 14px 0;
+  background-color: transparent;
+  border: none;
+  border-bottom: 2px solid #E2E8F0;
+  border-radius: 0;
+  font-size: 1rem; color: var(--text-main);
+  transition: all 0.3s ease;
   box-sizing: border-box;
-  font-family: inherit;
 }
 .input-field:focus {
-  outline: none; background-color: #fff;
-  border-color: #00ce71; /* Foco Verde */
-  box-shadow: 0 4px 12px rgba(0, 206, 113, 0.1);
+  outline: none;
+  border-color: var(--primary-color);
 }
-.input-field::placeholder { color: #9ca3af; }
+.input-field::placeholder { color: var(--text-light); opacity: 0.5; }
 
 .hint-text {
-  color: #6b7280; font-size: 0.75rem; margin-top: 6px; display: block;
+  color: var(--text-muted); font-size: 0.75rem; margin-top: 8px; display: block;
 }
 
 /* Botão Principal */
 .btn-primary {
   width: 100%; padding: 16px;
-  background: #0d4429; /* Verde escuro institucional */
+  background: var(--primary-color);
   color: white;
   font-size: 1rem; font-weight: 600;
   border: none; border-radius: 12px;
-  cursor: pointer; margin-top: 10px;
-  transition: transform 0.2s, background 0.2s;
+  cursor: pointer; margin-top: 20px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .btn-primary:hover:not([disabled]) {
-  background-color: #062e1b; transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(13, 68, 41, 0.3);
+  background-color: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px -5px rgba(0, 113, 61, 0.2);
 }
-.btn-primary:disabled { background-color: #ccc; cursor: not-allowed; }
+.btn-primary:disabled { background-color: #E2E8F0; color: #94A3B8; cursor: not-allowed; }
 
 /* Divider e Google */
 .divider {
@@ -170,7 +169,7 @@
   text-align: center; margin-top: 24px; color: #666; font-size: 0.9rem;
 }
 .footer-link a {
-  color: #00ce71; font-weight: 600; text-decoration: none; cursor: pointer; margin-left: 5px;
+  color: var(--primary-color); font-weight: 600; text-decoration: none; cursor: pointer; margin-left: 5px;
 }
 .footer-link a:hover { text-decoration: underline; }
 
@@ -185,18 +184,39 @@
 }
 
 /* Wizard de Gênero */
-.gender-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 24px 0; }
+.gender-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 24px 0; }
 .gender-option {
-  border: 2px solid #e5e7eb; border-radius: 12px; padding: 20px;
-  text-align: center; cursor: pointer; transition: all 0.2s; background: #fff;
+  border: 2px solid #e5e7eb; border-radius: 16px; padding: 16px 12px;
+  text-align: center; cursor: pointer; transition: all 0.2s; background: #fff; position: relative;
 }
 .gender-option:hover { border-color: #00ce71; background: #f0fdf7; }
 .gender-option.active {
   border-color: #00ce71; background: #ecfdf5;
-  box-shadow: 0 0 0 4px rgba(0, 206, 113, 0.1);
 }
-.gender-img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 12px; }
-.gender-option span { font-weight: 600; color: #333; }
+.gender-check {
+  position: absolute; top: -8px; right: -8px;
+  width: 22px; height: 22px;
+  background: #00ce71; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 13px;
+}
+.gender-img { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; margin-bottom: 8px; }
+.gender-icon-box {
+  width: 64px; height: 64px; border-radius: 50%; background: #f3f4f6;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 8px;
+  font-size: 28px; color: #9ca3af;
+}
+.gender-option span { font-weight: 600; color: #333; font-size: 13px; }
+
+/* Toggle senha */
+.input-with-icon { position: relative; }
+.input-with-icon .input-field { padding-right: 44px; }
+.eye-btn {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; color: #9ca3af; cursor: pointer; font-size: 18px;
+  display: flex; padding: 0;
+}
 
 /* Animações e Responsividade */
 .fade-in { animation: fadeIn 0.4s ease-in; }

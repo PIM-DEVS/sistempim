@@ -3,73 +3,55 @@
   <div class="banner-section">
     <div class="banner-content">
       <div class="logo-badge">
-        <i class='bx bxs-shapes'></i> </div>
-      
+        <i class='bx bxs-shapes'></i>
+      </div>
       <h1>
         <span *ngIf="isLoginMode">Bem-vindo<br>de volta!</span>
         <span *ngIf="!isLoginMode">Junte-se ao<br>PIM Online!</span>
         <span class="hand-wave">👋</span>
       </h1>
-      
-      <p>Gerencie seus exercícios, conecte-se com professores e evolua sua jornada acadêmica no IFAL.</p>
+      <p>Gerencie exercícios, conecte-se com professores e evolua sua jornada acadêmica no IFAL.</p>
     </div>
-
     <div class="circle c1"></div>
     <div class="circle c2"></div>
-    
     <div class="copyright">© 2025 PIM. Todos os direitos reservados.</div>
   </div>
 
   <div class="form-section">
     <div class="form-wrapper">
 
-      <div *ngIf="!showGenderSelect">
+      <!-- FORMULÁRIO DE LOGIN/CADASTRO -->
+      <div *ngIf="!showGenderSelect" class="fade-in">
         <div class="form-header">
           <h2>{{ isLoginMode ? 'Acesse sua conta' : 'Primeiro Acesso' }}</h2>
-          <p>
-            {{ isLoginMode ? 'Insira suas credenciais para continuar.' : 'Preencha os dados para criar seu acesso.' }}
-          </p>
+          <p>{{ isLoginMode ? 'Insira suas credenciais para continuar.' : 'Preencha os dados para criar seu acesso.' }}</p>
         </div>
 
         <div class="error-box" *ngIf="errorMessage">
-          <i class='bx bxs-error-circle'></i> <span>{{ errorMessage }}</span>
+          <i class='bx bxs-error-circle'></i>
+          <span>{{ errorMessage }}</span>
         </div>
 
         <div class="input-group" *ngIf="!isLoginMode">
           <label>Nome Completo</label>
-          <input 
-            type="text" 
-            [(ngModel)]="nome" 
-            class="input-field" 
-            placeholder="Como você quer ser chamado?"
-            autocomplete="name"
-          >
+          <input type="text" [(ngModel)]="nome" class="input-field" placeholder="Como você quer ser chamado?" autocomplete="name">
         </div>
 
         <div class="input-group">
           <label>Email Institucional</label>
-          <input 
-            type="email" 
-            [(ngModel)]="email" 
-            class="input-field" 
-            placeholder="ex: nome@aluno.ifal.edu.br" 
-            (keyup.enter)="onSubmit()"
-            autocomplete="email"
-          >
+          <input type="email" [(ngModel)]="email" class="input-field" placeholder="nome@aluno.ifal.edu.br" (keyup.enter)="onSubmit()" autocomplete="email">
         </div>
 
         <div class="input-group">
           <label>Senha</label>
-          <input 
-            type="password" 
-            [(ngModel)]="password" 
-            class="input-field" 
-            [placeholder]="isLoginMode ? 'Sua senha' : 'Crie uma senha para este site'" 
-            (keyup.enter)="onSubmit()"
-            autocomplete="current-password"
-          >
+          <div class="input-with-icon">
+            <input [type]="showPassword ? 'text' : 'password'" [(ngModel)]="password" class="input-field" [placeholder]="isLoginMode ? 'Sua senha' : 'Crie uma senha (mín. 6 caracteres)'" (keyup.enter)="onSubmit()" autocomplete="current-password">
+            <button class="eye-btn" type="button" (click)="showPassword = !showPassword">
+              <i class="bx" [ngClass]="showPassword ? 'bx-hide' : 'bx-show'"></i>
+            </button>
+          </div>
           <small class="hint-text" *ngIf="!isLoginMode">
-            <i class='bx bx-info-circle'></i> Crie uma senha exclusiva para o PIM (não precisa ser a do SIGAA).
+            <i class='bx bx-info-circle'></i> Crie uma senha exclusiva para o PIM.
           </small>
         </div>
 
@@ -80,50 +62,65 @@
 
         <div class="footer-link">
           <p>
-            {{ isLoginMode ? 'Ainda não tem senha aqui?' : 'Já possui cadastro?' }}
+            {{ isLoginMode ? 'Ainda não tem cadastro?' : 'Já possui cadastro?' }}
             <a (click)="toggleMode()">{{ isLoginMode ? 'Criar conta' : 'Fazer Login' }}</a>
           </p>
         </div>
 
-        <div class="divider">
-          <span>ou acesso rápido</span>
-        </div>
+        <div class="divider"><span>ou</span></div>
 
-        <button (click)="loginGoogle()" class="btn-google">
+        <button (click)="loginGoogle()" class="btn-google" [disabled]="loading">
           <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
-          <span>Entrar com Email Institucional</span>
+          <span>Entrar com Google Institucional</span>
         </button>
 
         <a class="footer-link link-recover" *ngIf="isLoginMode" href="#">Esqueceu a senha? <strong>Recuperar</strong></a>
       </div>
 
+      <!-- SELEÇÃO DE GÊNERO (NOVO CADASTRO) -->
       <div *ngIf="showGenderSelect" class="fade-in">
         <div class="form-header">
-          <h2>Quase lá!</h2>
-          <p>Para personalizar sua experiência, escolha um avatar.</p>
+          <h2>Quase lá! 🎉</h2>
+          <p>Para personalizar sua experiência, como você se identifica?</p>
+        </div>
+
+        <div class="error-box" *ngIf="errorMessage">
+          <i class='bx bxs-error-circle'></i>
+          <span>{{ errorMessage }}</span>
         </div>
 
         <div class="gender-grid">
           <div class="gender-option" [class.active]="selectedGender === 'Masculino'" (click)="selectGender('Masculino')">
-            <div class="avatar-preview">
-              <img src="assets/images/masculino.jpg" class="gender-img" alt="Masculino">
-            </div>
+            <div class="gender-check" *ngIf="selectedGender === 'Masculino'"><i class="bx bx-check"></i></div>
+            <img src="assets/images/masculino.jpg" class="gender-img" alt="Masculino" onerror="this.src='https://ui-avatars.com/api/?name=M&background=00CE71&color=fff'">
             <span>Masculino</span>
           </div>
 
           <div class="gender-option" [class.active]="selectedGender === 'Feminino'" (click)="selectGender('Feminino')">
-            <div class="avatar-preview">
-              <img src="assets/images/feminino.jpg" class="gender-img" alt="Feminino">
-            </div>
+            <div class="gender-check" *ngIf="selectedGender === 'Feminino'"><i class="bx bx-check"></i></div>
+            <img src="assets/images/feminino.jpg" class="gender-img" alt="Feminino" onerror="this.src='https://ui-avatars.com/api/?name=F&background=E91E8C&color=fff'">
             <span>Feminino</span>
+          </div>
+
+          <div class="gender-option gender-option-outro" [class.active]="selectedGender === 'Outro'" (click)="selectGender('Outro')">
+            <div class="gender-check" *ngIf="selectedGender === 'Outro'"><i class="bx bx-check"></i></div>
+            <div class="gender-icon-box"><i class="bx bx-smile"></i></div>
+            <span>Outro</span>
           </div>
         </div>
 
-        <button class="btn-primary" (click)="finalizarCadastro()" [disabled]="!selectedGender">
-          Concluir Cadastro <i class='bx bx-right-arrow-alt'></i>
+        <div class="input-group" *ngIf="selectedGender === 'Outro'" style="margin-top: 16px;">
+          <label>Como prefere ser chamado?</label>
+          <input type="text" [(ngModel)]="nomePersonalizado" class="input-field" placeholder="Escreva aqui...">
+        </div>
+
+        <button class="btn-primary" (click)="finalizarCadastro()" [disabled]="!selectedGender || loading">
+          <span *ngIf="!loading">Concluir Cadastro <i class='bx bx-right-arrow-alt'></i></span>
+          <span *ngIf="loading"><i class='bx bx-loader-alt bx-spin'></i> Salvando...</span>
         </button>
       </div>
 
     </div>
   </div>
+
 </div>

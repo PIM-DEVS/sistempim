@@ -1,117 +1,98 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
-
-// Serviços
+import { Router, RouterModule } from '@angular/router';
 import { TurmaService } from '../../../core/services/turma.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { DashboardService } from '../../../core/services/dashboard.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-main-content',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './main-content.component.html',
   styleUrl: './main-content.component.css',
 })
-export class MainContentComponent implements OnInit {
-  // Injeções
+export class MainContentComponent implements OnInit, OnDestroy {
   private turmaService = inject(TurmaService);
   private dashboardService = inject(DashboardService);
   private authService = inject(AuthService);
   private router = inject(Router);
-  private cdr = inject(ChangeDetectorRef); // <--- A MÁGICA: Força a tela a atualizar
+  private cdr = inject(ChangeDetectorRef);
+  private sub = new Subscription();
 
-  // Dados
   cursos: any[] = [];
   turmas: any[] = [];
-  
   loading = true;
   uid = '';
-  userName = ''; 
+  userName = '';
   isProfessor = false;
 
-  // Stats
   totalCursos = 0;
   totalTurmas = 0;
-  statusAluno = 'Carregando...';
+  statusAluno = '—';
 
   ngOnInit() {
-    this.loading = true;
-    
-    // 1. Monitorar Autenticação
-    this.authService.user$.subscribe(async (user) => {
+    const subUser = this.authService.user$.subscribe(async (user) => {
       if (user) {
         this.uid = user.uid;
+        this.userName = user.nome || user.displayName || user.name || 'Usuário';
         this.isProfessor = !user.email?.includes('@aluno');
+        this.cdr.detectChanges();
 
-        // --- A. BUSCAR NOME (Prioridade) ---
-        try {
-          const perfil = await this.authService.getDadosUsuario(this.uid);
-          this.userName = perfil?.nome || user.displayName || 'Aluno';
-        } catch (e) {
-          this.userName = user.displayName || 'Aluno';
-        }
-        
-        // FORÇA O NOME A APARECER AGORA
-        this.cdr.detectChanges(); 
-
-        // Inicia o resto dos dados
-        this.carregarDados();
+        // Carrega dados em paralelo, com timeout de segurança
+        await this.carregarDados();
       } else {
         this.loading = false;
         this.cdr.detectChanges();
       }
     });
+    this.sub.add(subUser);
+  }
+
+  ngOnDestroy() {
+    this.sub.unsubscribe();
   }
 
   async carregarDados() {
-    // --- B. BUSCAR TURMAS (Seguro) ---
+    this.loading = true;
+
+    // Timeout de segurança: nunca fica travado no loading
+    const timeout = setTimeout(() => {
+      if (this.loading) {
+        this.loading = false;
+        this.statusAluno = 'Sem vínculos';
+        this.cdr.detectChanges();
+      }
+    }, 4000);
+
     try {
-      const turmasData = await this.turmaService.getMinhasTurmas(this.uid, this.isProfessor);
+      // Busca turmas e cursos em paralelo
+      const [turmasData] = await Promise.all([
+        this.turmaService.getMinhasTurmas(this.uid, this.isProfessor).catch(() => []),
+      ]);
+
       this.turmas = turmasData || [];
       this.totalTurmas = this.turmas.length;
-    } catch (error) {
-      console.error('Erro ao buscar turmas:', error);
+      this.statusAluno = this.totalTurmas > 0 ? 'Ativo' : 'Sem vínculos';
+    } catch (e) {
+      console.warn('Erro ao carregar dados do dashboard:', e);
+      this.statusAluno = 'Sem vínculos';
+    } finally {
+      clearTimeout(timeout);
+      this.loading = false;
+      this.cdr.detectChanges();
     }
-    
-    // Atualiza a tela parcial (se as turmas chegarem antes dos cursos)
-    this.cdr.detectChanges();
 
-    // --- C. BUSCAR CURSOS (Com proteção contra erro) ---
+    // Cursos (separado, não bloqueia o render)
     this.dashboardService.getAllCursos().subscribe({
-      next: (cursos: any[]) => {
-        this.cursos = cursos.filter((c: any) => JSON.stringify(c).includes(this.uid));
-        this.totalCursos = this.cursos.length;
-        this.finalizarLoading();
+      next: (cursos) => {
+        this.cursos = cursos;
+        this.totalCursos = cursos.length;
+        this.cdr.detectChanges();
       },
-      error: (err: any) => {
-        console.warn('Erro ao buscar cursos, ignorando...', err);
-        this.finalizarLoading();
-      }
+      error: () => { this.cursos = []; }
     });
-
-    // --- D. TRAVA DE SEGURANÇA ---
-    // Se o banco de dados falhar silenciosamente, destrava em 1.5 segundos
-    setTimeout(() => {
-      if (this.loading) {
-        console.log('Timeout forçado para liberar a tela.');
-        this.finalizarLoading();
-      }
-    }, 1500);
-  }
-
-  finalizarLoading() {
-    this.loading = false;
-    
-    if (this.totalTurmas > 0 || this.totalCursos > 0) {
-      this.statusAluno = 'Ativo';
-    } else {
-      this.statusAluno = 'Sem Vínculos';
-    }
-
-    // FORÇA ATUALIZAÇÃO FINAL (Garante que o loading suma)
-    this.cdr.detectChanges();
   }
 
   acessarTurma(id: string) {
@@ -119,6 +100,6 @@ export class MainContentComponent implements OnInit {
   }
 
   getCor(turma: any): string {
-    return turma.cor || '#00ce71';
+    return turma.cor || '#00713D';
   }
 }

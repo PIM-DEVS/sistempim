@@ -1,89 +1,90 @@
 import { Injectable } from '@angular/core';
 import { Auth, GoogleAuthProvider, signInWithPopup, signOut, user } from '@angular/fire/auth';
+import {
+  Firestore,
+  doc,
+  getDoc,
+  setDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+  limit,
+  updateDoc,
+  arrayUnion,
+  arrayRemove
+} from '@angular/fire/firestore';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 
-// Interface "Blindada" (Garante que os campos principais nunca sejam undefined)
 export interface AppUser {
-  // Campos obrigatórios (resolvem os erros de "Type undefined is not assignable to string")
-  id: string; 
+  id: string;
   uid: string;
   email: string;
   name: string;
-  photoUrl: string; 
-  photoURL: string; // Alias obrigatório
-
-  // Campos opcionais
-  bio?: string;
-  jobTitle?: string;
-  skills?: string;
-  role?: string;
-
-  // Compatibilidade com legado
-  displayName?: string; 
+  photoUrl: string;
+  photoURL: string;
   nome?: string;
   foto?: string;
-  fotoPerfil?: string;
-  avatar?: string;
   genero?: string;
+  role?: string;
+  bio?: string;
+  cargo?: string;
+  competencias?: string[];
+  seguidores?: string[];
   seguindo?: string[];
-
-  // Permite acesso dinâmico
-  [key: string]: any; 
+  displayName?: string;
+  [key: string]: any;
 }
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class AuthService {
-  private apiUrl = 'http://localhost:3000'; // Backend NestJS
-  
+  private apiUrl = 'http://localhost:3000';
+
   public user$ = new BehaviorSubject<AppUser | null>(null);
 
   constructor(
-    private auth: Auth, 
+    private auth: Auth,
+    private firestore: Firestore,
     private http: HttpClient
   ) {
     user(this.auth).subscribe(async (firebaseUser) => {
       if (firebaseUser) {
         try {
-          const dbUser = await this.getDadosUsuario(firebaseUser.email || firebaseUser.uid);
-          
-          // Garante que NENHUM campo vital seja undefined
-          const safeId = dbUser.id || firebaseUser.uid || '';
-          const safeName = dbUser.name || firebaseUser.displayName || 'Usuário';
-          const safePhoto = dbUser.photoUrl || firebaseUser.photoURL || '';
+          // Busca o perfil com a estratégia inteligente (uid → email → cria novo)
+          const perfil = await this.buscarPerfilCompleto(
+            firebaseUser.uid,
+            firebaseUser.email || ''
+          );
+          const nome = perfil?.nome || perfil?.name || firebaseUser.displayName || 'Usuário';
+          const foto = perfil?.foto || perfil?.photoUrl || firebaseUser.photoURL || '';
 
-          const mergedUser: AppUser = {
-            ...dbUser,
-            email: firebaseUser.email || '',
-            
-            // Força valores string para satisfazer o TypeScript
-            uid: safeId,
-            id: safeId,
-            
-            name: safeName,
-            displayName: safeName,
-            nome: safeName,
-            
-            photoUrl: safePhoto,
-            photoURL: safePhoto,
-            foto: safePhoto,
-          };
-
-          this.user$.next(mergedUser);
-        } catch (e) {
-          // Fallback seguro
-          this.user$.next({
-            email: firebaseUser.email || '',
-            name: firebaseUser.displayName || 'Usuário',
-            displayName: firebaseUser.displayName || 'Usuário',
-            nome: firebaseUser.displayName || 'Usuário',
-            photoUrl: firebaseUser.photoURL || '',
-            photoURL: firebaseUser.photoURL || '',
+          const merged: AppUser = {
+            ...(perfil || {}),
             uid: firebaseUser.uid,
             id: firebaseUser.uid,
-            foto: firebaseUser.photoURL || ''
+            email: firebaseUser.email || '',
+            name: nome,
+            displayName: nome,
+            nome: nome,
+            photoUrl: foto,
+            photoURL: foto,
+            foto: foto,
+          };
+          this.user$.next(merged);
+        } catch (e) {
+          const nome = firebaseUser.displayName || 'Usuário';
+          const foto = firebaseUser.photoURL || '';
+          this.user$.next({
+            uid: firebaseUser.uid,
+            id: firebaseUser.uid,
+            email: firebaseUser.email || '',
+            name: nome,
+            displayName: nome,
+            nome: nome,
+            photoUrl: foto,
+            photoURL: foto,
+            foto: foto,
           });
         }
       } else {
@@ -92,75 +93,243 @@ export class AuthService {
     });
   }
 
-  // --- LOGIN ---
+  // ─── ESTRATÉGIA INTELIGENTE: busca pelo uid, depois pelo email ───────────────
+  // Isso resolve a compatibilidade com usuários antigos que tinham email como chave
+  private async buscarPerfilCompleto(uid: string, email: string): Promise<AppUser | null> {
+    // 1. Tenta pelo uid (padrão novo)
+    try {
+      const snapUid = await getDoc(doc(this.firestore, 'users', uid));
+      if (snapUid.exists()) {
+        return { ...snapUid.data(), uid, id: uid } as AppUser;
+      }
+    } catch {}
+
+    // 2. Tenta pelo email como document ID (padrão legado)
+    if (email) {
+      try {
+        const snapEmail = await getDoc(doc(this.firestore, 'users', email));
+        if (snapEmail.exists()) {
+          const data = snapEmail.data() as AppUser;
+          // Migra: cria uma cópia com uid como chave para o futuro
+          await setDoc(doc(this.firestore, 'users', uid), { ...data, uid }, { merge: true });
+          return { ...data, uid, id: uid } as AppUser;
+        }
+      } catch {}
+    }
+
+    // 3. Busca por campo email na coleção (padrão anterior de alguns sistemas)
+    if (email) {
+      try {
+        const q = query(
+          collection(this.firestore, 'users'),
+          where('email', '==', email),
+          limit(1)
+        );
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+          const d = snap.docs[0];
+          const data = d.data() as AppUser;
+          // Migra para uid como chave
+          await setDoc(doc(this.firestore, 'users', uid), { ...data, uid }, { merge: true });
+          return { ...data, uid, id: uid } as AppUser;
+        }
+      } catch {}
+    }
+
+    // 4. Tenta pelo backend NestJS
+    if (email) {
+      try {
+        const u = await firstValueFrom(
+          this.http.get<AppUser>(`${this.apiUrl}/users/${email}`)
+        );
+        if (u && (u.id || u.uid || u.email)) {
+          return this.sanitizarUsuario({ ...u, uid, id: uid });
+        }
+      } catch {}
+    }
+
+    return null;
+  }
+
+  // ─── API pública de busca de perfil ─────────────────────────────────────────
+  async getPerfilPorUid(uid: string): Promise<AppUser | null> {
+    const currentUser = this.user$.value;
+    const email = currentUser?.email || '';
+    return this.buscarPerfilCompleto(uid, email);
+  }
+
+  async getDadosUsuario(identificador: string | undefined): Promise<AppUser> {
+    if (!identificador) return {} as AppUser;
+
+    const currentUser = this.user$.value;
+    const isEmail = identificador.includes('@');
+    const uid = isEmail ? (currentUser?.uid || '') : identificador;
+    const email = isEmail ? identificador : (currentUser?.email || '');
+
+    const perfil = await this.buscarPerfilCompleto(uid, email);
+    if (perfil) return perfil;
+
+    return {} as AppUser;
+  }
+
+  // ─── SALVAR PERFIL (usa UID como document ID) ─────────────────────────────────
+  async updateProfileData(userId: string | undefined, data: any): Promise<any> {
+    if (!userId) throw new Error('userId não fornecido');
+    const currentUser = this.user$.value;
+
+    const profileData: Record<string, any> = { uid: userId };
+
+    const add = (key: string, val: any) => {
+      if (val !== undefined && val !== null && val !== '') profileData[key] = val;
+    };
+
+    const nome = data.nome || data.name || currentUser?.nome || currentUser?.displayName || '';
+    add('nome', nome);
+    add('name', nome);
+    add('email', data.email || currentUser?.email);
+    add('genero', data.genero || currentUser?.genero);
+    add('foto', data.foto || data.photoUrl || currentUser?.foto);
+    add('photoUrl', data.foto || data.photoUrl || currentUser?.foto);
+    add('bio', data.bio || currentUser?.bio);
+    add('cargo', data.cargo || data.jobTitle || currentUser?.cargo);
+    add('role', data.role || currentUser?.role);
+    if (data.competencias) add('competencias', data.competencias);
+
+    // Salva com merge:true — nunca apaga dados existentes
+    await setDoc(doc(this.firestore, 'users', userId), profileData, { merge: true });
+    console.log('✅ Perfil salvo no Firestore (uid:', userId, ')');
+
+    // Atualiza o BehaviorSubject local imediatamente (UX instantânea)
+    if (currentUser) {
+      this.user$.next({ ...currentUser, ...profileData, uid: userId, id: userId });
+    }
+
+    // Sincroniza com backend sem bloquear
+    firstValueFrom(
+      this.http.patch(`${this.apiUrl}/users/${currentUser?.email}`, profileData)
+    ).catch(() => {});
+
+    return profileData;
+  }
+
+  // ─── LOGIN GOOGLE ─────────────────────────────────────────────────────────────
   async loginGoogle() {
     const provider = new GoogleAuthProvider();
     const credential = await signInWithPopup(this.auth, provider);
-    const user = credential.user;
+    const fu = credential.user;
 
-    try {
-      await firstValueFrom(this.http.post(`${this.apiUrl}/users`, {
-        email: user.email,
-        name: user.displayName,
-        photoUrl: user.photoURL
-      }));
-    } catch (error) {
-      console.warn('Erro backend:', error);
+    // Verifica se já existe perfil (por uid ou email) antes de criar
+    const existing = await this.buscarPerfilCompleto(fu.uid, fu.email || '');
+    if (!existing) {
+      await setDoc(doc(this.firestore, 'users', fu.uid), {
+        nome: fu.displayName || '',
+        name: fu.displayName || '',
+        email: fu.email || '',
+        foto: fu.photoURL || '',
+        photoUrl: fu.photoURL || '',
+        uid: fu.uid,
+        criadoEm: new Date().toISOString(),
+      }, { merge: true });
     }
-    return user;
+
+    return fu;
   }
 
+  // ─── LOGOUT ───────────────────────────────────────────────────────────────────
   async logout() {
     await signOut(this.auth);
     this.user$.next(null);
   }
 
-  // --- DADOS ---
-  async getDadosUsuario(identificador: string | undefined): Promise<AppUser> {
-    if (!identificador) return {} as AppUser;
-
-    const endpoint = identificador.includes('@') 
-      ? `${this.apiUrl}/users/${identificador}` 
-      : `${this.apiUrl}/users/${identificador}`; 
-
+  // ─── BUSCA DE USUÁRIOS ────────────────────────────────────────────────────────
+  async buscarUsuariosPorNome(termo: string): Promise<AppUser[]> {
     try {
-      const usuario = await firstValueFrom(this.http.get<AppUser>(endpoint));
+      // Busca limitada para filtrar localmente (Resolve o problema de Maiúscula/Minúscula)
+      const q = query(collection(this.firestore, 'users'), limit(100));
+      const snapshot = await getDocs(q);
       
-      // Sanitização no retorno também
-      const safePhoto = usuario.photoUrl || '';
+      const termoNormalizado = termo.toLowerCase().trim();
+      const todos = snapshot.docs.map(d => ({ uid: d.id, id: d.id, ...d.data() } as AppUser));
       
-      return {
-        ...usuario,
-        uid: usuario.id || '',
-        id: usuario.id || '',
-        displayName: usuario.name,
-        nome: usuario.name,
-        photoURL: safePhoto,
-        photoUrl: safePhoto,
-        foto: safePhoto
-      };
-    } catch (error) {
-      return {} as AppUser;
+      // Filtra de forma inteligente usando Javascript para não quebrar caso o usuário pesquise 'joao' e o firebase tenha 'Joao'
+      return todos.filter(u => {
+        const nome = (u.nome || u.name || u.displayName || '').toLowerCase();
+        return nome.includes(termoNormalizado);
+      });
+    } catch {
+      return [];
     }
   }
 
-  async updateProfileData(userId: string | undefined, data: any) {
-    if (!userId) return;
-    const currentUser = this.user$.value;
-    if (!currentUser) return;
-
-    return firstValueFrom(this.http.patch(`${this.apiUrl}/users/${currentUser.email}`, {
-      name: data.nome || data.name,
-      bio: data.bio,
-      jobTitle: data.cargo || data.jobTitle,
-      skills: data.skills,
-      photoUrl: data.foto || data.photoUrl
-    }));
+  // ─── ROLE DETECTION ────────────────────────────────────────────────────────
+  getRoleByEmail(email: string): string {
+    if (!email) return 'ALUNO';
+    if (email.includes('aluno.ifal.edu.br')) return 'ALUNO';
+    if (email.includes('ifal.edu.br')) return 'PROFESSOR';
+    return 'ALUNO'; // Fallback para outros emails (ex: gmail durante dev)
   }
 
-  // --- SOCIAIS ---
-  async followUser(meuId: string | undefined, idAmigo: string) { return Promise.resolve(true); }
-  async unfollowUser(meuId: string | undefined, idAmigo: string) { return Promise.resolve(true); }
-  async buscarUsuariosPorNome(termo: string): Promise<AppUser[]> { return []; }
-  async carregarContatos(uid: string) { return []; }
+  // ─── FOLLOW / UNFOLLOW ────────────────────────────────────────────────────────
+  async followUser(meuId: string | undefined, idAlvo: string): Promise<boolean> {
+    if (!meuId || !idAlvo) return false;
+    try {
+      // Adiciona idAlvo em meu 'seguindo'
+      await updateDoc(doc(this.firestore, 'users', meuId), {
+        seguindo: arrayUnion(idAlvo)
+      });
+      // Adiciona meuId nos 'seguidores' do alvo
+      await updateDoc(doc(this.firestore, 'users', idAlvo), {
+        seguidores: arrayUnion(meuId)
+      });
+      // Atualiza o BehaviorSubject local
+      const current = this.user$.value;
+      if (current) {
+        const seguindo = [...(current.seguindo || []), idAlvo];
+        this.user$.next({ ...current, seguindo });
+      }
+      return true;
+    } catch (e) {
+      console.error('Erro ao seguir:', e);
+      return false;
+    }
+  }
+
+  async unfollowUser(meuId: string | undefined, idAlvo: string): Promise<boolean> {
+    if (!meuId || !idAlvo) return false;
+    try {
+      await updateDoc(doc(this.firestore, 'users', meuId), {
+        seguindo: arrayRemove(idAlvo)
+      });
+      await updateDoc(doc(this.firestore, 'users', idAlvo), {
+        seguidores: arrayRemove(meuId)
+      });
+      const current = this.user$.value;
+      if (current) {
+        const seguindo = (current.seguindo || []).filter((id: string) => id !== idAlvo);
+        this.user$.next({ ...current, seguindo });
+      }
+      return true;
+    } catch (e) {
+      console.error('Erro ao deixar de seguir:', e);
+      return false;
+    }
+  }
+
+  async carregarContatos(_uid: string) { return []; }
+
+  private sanitizarUsuario(u: any): AppUser {
+    const foto = u.photoUrl || u.foto || u.photoURL || '';
+    const nome = u.nome || u.name || u.displayName || 'Usuário';
+    return {
+      ...u,
+      uid: u.uid || u.id || '',
+      id: u.uid || u.id || '',
+      name: nome,
+      nome: nome,
+      displayName: nome,
+      photoUrl: foto,
+      photoURL: foto,
+      foto,
+    };
+  }
 }

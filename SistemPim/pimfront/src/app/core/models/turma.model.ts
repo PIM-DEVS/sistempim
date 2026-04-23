@@ -9,6 +9,7 @@ export interface Turma {
   sala?: string;
   horario?: string;
   cor?: string;
-  alunos: string[];
+  alunos: any[];
+  alunosIds: string[];
   createdAt?: any;
 }

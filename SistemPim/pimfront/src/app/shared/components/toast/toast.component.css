@@ -1,0 +1,95 @@
+.toast-container {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 320px;
+  max-width: 420px;
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid #EBEBEB;
+  padding: 14px 16px;
+  position: relative;
+  overflow: hidden;
+  pointer-events: all;
+  animation: slideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(60px) scale(0.95); }
+  to   { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+.toast-icon i {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.toast-success .toast-icon i { color: #00CE71; }
+.toast-error   .toast-icon i { color: #ef4444; }
+.toast-warning .toast-icon i { color: #f59e0b; }
+.toast-info    .toast-icon i { color: #3b82f6; }
+
+/* Left accent bar */
+.toast::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px;
+  border-radius: 16px 0 0 16px;
+}
+.toast-success::before { background: #00CE71; }
+.toast-error::before   { background: #ef4444; }
+.toast-warning::before { background: #f59e0b; }
+.toast-info::before    { background: #3b82f6; }
+
+.toast-msg {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  color: #111;
+  line-height: 1.4;
+}
+
+.toast-close {
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  font-size: 18px;
+  flex-shrink: 0;
+  border-radius: 6px;
+}
+.toast-close:hover { color: #333; background: #f5f5f5; }
+
+/* Progress bar */
+.toast-progress {
+  position: absolute;
+  bottom: 0; left: 0;
+  height: 3px;
+  width: 100%;
+  animation: progress linear forwards;
+  border-radius: 0 0 16px 16px;
+}
+.toast-success .toast-progress { background: #00CE71; }
+.toast-error   .toast-progress { background: #ef4444; }
+.toast-warning .toast-progress { background: #f59e0b; }
+.toast-info    .toast-progress { background: #3b82f6; }
+
+@keyframes progress {
+  from { transform: scaleX(1); transform-origin: left; }
+  to   { transform: scaleX(0); transform-origin: left; }
+}

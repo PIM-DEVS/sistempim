@@ -39,15 +39,29 @@ export class ChatService {
     return collectionData(q, { idField: 'id' });
   }
 
-  // Envia a mensagem para o banco
-  async enviarMensagem(chatId: string, texto: string, senderId: string) {
+  // Envia a mensagem para o banco e cria uma notificação para o destinatário
+  async enviarMensagem(chatId: string, texto: string, senderId: string, recipientId: string) {
     if (!texto.trim()) return;
 
     const messagesRef = collection(this.firestore, 'chats', chatId, 'messages');
     await addDoc(messagesRef, {
       texto: texto,
       senderId: senderId,
-      timestamp: serverTimestamp() // Usa a hora do servidor para consistência
+      timestamp: serverTimestamp()
     });
+
+    // Criar notificação para o destinatário
+    try {
+      await addDoc(collection(this.firestore, 'notificacoes'), {
+        uidDestinatario: recipientId,
+        titulo: 'Nova mensagem no chat',
+        mensagem: texto.length > 50 ? texto.substring(0, 50) + '...' : texto,
+        data: serverTimestamp(),
+        lida: false,
+        tipo: 'sistema' // Chat entra como sistema/mensagem
+      });
+    } catch (e) {
+      console.error('Erro ao enviar notificação de chat:', e);
+    }
   }
 }

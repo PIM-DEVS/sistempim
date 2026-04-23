@@ -6,7 +6,6 @@
   background-color: #f0f2f5;
   min-height: 100vh;
   padding-bottom: 50px;
-  font-family: 'Segoe UI', sans-serif;
   overflow-x: hidden;
   /* Evita scroll lateral no mobile */
 }
@@ -89,7 +88,6 @@
   /* Bem arredondado */
   font-size: 1rem;
   color: #333;
-  font-family: inherit;
   transition: all 0.3s ease;
   box-sizing: border-box;
   /* Garante que padding não quebre o layout */

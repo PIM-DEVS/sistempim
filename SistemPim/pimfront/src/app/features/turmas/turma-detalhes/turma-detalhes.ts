@@ -11,6 +11,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TurmaService, PostMural, Atividade } from '../../../core/services/turma.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { Turma } from '../../../core/models/turma.model';
 import {
   onSnapshot,
@@ -32,6 +33,7 @@ export class TurmaDetalhesComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private turmaService = inject(TurmaService);
   private authService = inject(AuthService);
+  private toastService = inject(ToastService);
   private cdr = inject(ChangeDetectorRef);
 
   turma: Turma | undefined;
@@ -49,9 +51,13 @@ export class TurmaDetalhesComponent implements OnInit, OnDestroy {
 
   novoPostTexto = '';
   formAtividade = { titulo: '', descricao: '', data: '' };
-  criandoAtividade = false;
-
+  // Controle de Atividades
+  atividadeSelecionada: Atividade | null = null;
+  respostaAtividade = '';
+  entregasAtividade: any[] = [];
+  subEntregas: Unsubscribe | null = null;
   private subs: Unsubscribe[] = [];
+  criandoAtividade = false;
 
   // Fecha menus ao clicar fora
   @HostListener('document:click')
@@ -71,7 +77,8 @@ export class TurmaDetalhesComponent implements OnInit, OnDestroy {
           nome: perfil?.nome || u.displayName,
           photoURL: perfil?.foto || u.photoURL,
         };
-        this.isProfessor = !u.email?.includes('@aluno');
+        const role = this.authService.getRoleByEmail(u.email || '');
+        this.isProfessor = role === 'PROFESSOR';
       }
     });
 
@@ -136,8 +143,9 @@ export class TurmaDetalhesComponent implements OnInit, OnDestroy {
       data: new Date(),
       tipo: 'aviso',
       photoURL: this.currentUser.photoURL,
-    });
+    }, true);
     this.novoPostTexto = '';
+    this.toastService.success('Aviso publicado no mural!');
   }
 
   async deletarPost(postId: string | undefined) {
@@ -157,13 +165,55 @@ export class TurmaDetalhesComponent implements OnInit, OnDestroy {
     });
     this.criandoAtividade = false;
     this.formAtividade = { titulo: '', descricao: '', data: '' };
+    this.toastService.success('Atividade criada com sucesso!');
   }
 
   async deletarAtividade(ativId: string | undefined) {
     if (!ativId || !this.turma?.id) return;
     if (confirm('Excluir atividade?')) {
       await this.turmaService.excluirAtividade(this.turma.id, ativId);
+      if (this.atividadeSelecionada?.id === ativId) {
+        this.voltarListaAtividades();
+      }
     }
+  }
+
+  verAtividade(ativ: Atividade) {
+    this.atividadeSelecionada = ativ;
+    if (this.turma?.id && ativ.id) {
+       const q = this.turmaService.getEntregasRef(this.turma.id, ativ.id);
+       this.subEntregas = onSnapshot(q, snap => {
+         this.entregasAtividade = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+         this.cdr.detectChanges();
+       });
+    }
+  }
+
+  voltarListaAtividades() {
+    this.atividadeSelecionada = null;
+    if (this.subEntregas) {
+      this.subEntregas();
+      this.subEntregas = null;
+    }
+    this.entregasAtividade = [];
+    this.respostaAtividade = '';
+  }
+
+  async enviarResposta() {
+    if (!this.atividadeSelecionada?.id || !this.turma?.id || !this.currentUser) return;
+    if (!this.respostaAtividade.trim()) return;
+
+    await this.turmaService.entregarAtividade(this.turma.id, this.atividadeSelecionada.id, {
+      alunoId: this.currentUser.uid,
+      nome: this.currentUser.nome,
+      conteudo: this.respostaAtividade
+    });
+    this.respostaAtividade = '';
+    this.toastService.success('Trabalho entregue com sucesso!');
+  }
+
+  minhaEntrega() {
+    return this.entregasAtividade.find(e => e.alunoId === this.currentUser?.uid);
   }
 
   async removerAluno(alunoId: string) {
@@ -194,5 +244,8 @@ export class TurmaDetalhesComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.subs.forEach((s) => s());
+    if (this.subEntregas) {
+      this.subEntregas();
+    }
   }
 }
